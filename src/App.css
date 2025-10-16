@@ -1,21 +1,21 @@
 /* Navbar */
 .navbar .gerber {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 600;
   color: rgb(229 115 69);
   margin-left: 5px;
 }
 .navbar .two {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: rgba(0, 0, 0, 0.473);
   letter-spacing: 2px;
   /* margin-left: 4px; */
 }
 .navbar .png {
-  font-size: 1.7rem;
+  font-size: 1.4rem;
   font-weight: 700;
-  color: rgb(206, 94, 49);
+  color: #ce5e31;
 }
 .navbar a {
   text-decoration: none;

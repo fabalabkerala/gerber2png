@@ -94,10 +94,12 @@ function useGerberToSvg(files, layers, svgData) {
                         'all_outline': {color: 'green', opacity: 0.5},
                         'top_silkscreen': {color: 'red', opacity: 0.5},
                         'bottom_silkscreen': {color: 'blue', opacity: 0.5},
-                        'bottom_soldermask': {color: '#757500', opacity: 0.5, display: 'none'},
+                        // 'bottom_soldermask': {color: '#757500', opacity: 0.5, display: 'none'},
+                        'bottom_soldermask': {color: '#757500', opacity: 0.5},
                         'bottom_solderpaste': {color: 'orange', opacity: 0.5},
                         'top_solderpaste': {color: '#c362c3', opacity: 0.5},
-                        'top_soldermask': {color: '#af4e5f', opacity: 0.5, display: 'none'},
+                        // 'top_soldermask': {color: '#af4e5f', opacity: 0.5, display: 'none'},
+                        'top_soldermask': {color: '#af4e5f', opacity: 0.5},
                     };
 
                     const layerstyle = layerStyle[ids[index]] || { color: 'green', opacity: 0.5 };
@@ -129,7 +131,7 @@ function modifiedSvg(props) {
         Gs.forEach((g) => {
             if (g.hasAttribute('id')) {
                 if (g.getAttribute('id').includes('soldermask')) {
-                    g.style.display = g.style.display === 'none' ? 'block' : 'none';    
+                    // g.style.display = g.style.display === 'none' ? 'block' : 'none';    
                 }
             }
         })

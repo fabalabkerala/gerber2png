@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useState, useRef } from 'react';
@@ -20,10 +21,12 @@ export default function ConfigSection(props) {
 
     return (
         <>
-        <div className="lg:w-1/5 lg:absolute left-0 top-8 " style={{ 'pointerEvents' : props.active ? 'auto' : 'none' }}>
+        <div className="lg:w-1/5 lg:absolute left-0 " style={{ 'pointerEvents' : props.active ? 'auto' : 'none' }}>
             <div className="p-5 ps-0" >
-                <QuickSetup isChecked={isChecked} pngRef={props.pngRef} />
-                <DoubleSideButton isChecked={isChecked} setIsChecked={setIsChecked}/>
+                <div className='bg-slate-50 px-2 py-4 rounded-md'>
+                    <QuickSetup isChecked={isChecked} pngRef={props.pngRef} />
+                    <DoubleSideButton isChecked={isChecked} setIsChecked={setIsChecked}/>
+                </div>
                 <LayersToggleButtons isChecked={isChecked} />
                 <CanvasBackground />
             </div>
@@ -353,8 +356,8 @@ function LayersToggleButtons({ isChecked }) {
     const { isToggled } = useGerberConfig();
 
     const layers = [
-        { type: 'toplayer', label: 'Top Layer', colors: ['#ced8cd', '#b9a323', '#348f9b'], properties: ['trace', 'pads', 'silkscreen'], ids: ['top_copper', 'top_solderpaste', 'top_silkscreen'] },
-        { type: 'bottomlayer', label: 'Bottom Layer', colors: ['#206b19', '#b9a323', '#348f9b'], properties: ['trace', 'pads', 'silkscreen'], ids: ['bottom_copper', 'bottom_solderpaste', 'bottom_silkscreen'] },
+        { type: 'toplayer', label: 'Top Layer', colors: ['#ced8cd', '#b9a323', '#348f9b', '#348f9b'], properties: ['trace', 'pads', 'silkscreen', 'soldermask'], ids: ['top_copper', 'top_solderpaste', 'top_silkscreen', 'top_soldermask'] },
+        { type: 'bottomlayer', label: 'Bottom Layer', colors: ['#206b19', '#b9a323', '#348f9b', '#348f9b'], properties: ['trace', 'pads', 'silkscreen', 'soldermask'], ids: ['bottom_copper', 'bottom_solderpaste', 'bottom_silkscreen', 'bottom_soldermask'] },
         { type: 'commonlayer', label: null, colors: ['#206b19', '#b9a323', '#348f9b'], properties: ['outline', 'drill', 'outlayer'], ids: ['outline', 'drill', 'outer'] },
     ]
 
@@ -370,7 +373,7 @@ function LayersToggleButtons({ isChecked }) {
                             <ToggleButton 
                                 key={i} 
                                 color={color} 
-                                layerType={layer.type} 
+                                layertype={layer.type} 
                                 layerProperty={layer.properties[i]}  
                                 isToggled={ isToggled[layer.type][layer.properties[i]] } 
                                 layerId={layer.ids[i]}
@@ -385,18 +388,48 @@ function LayersToggleButtons({ isChecked }) {
 }
 
 function ToggleButton(props) {
-    const { topstack, bottomstack, fullLayers, handleToggleCick, setChangeSelect } = useGerberConfig();
-    const { color, layerType, layerProperty, isToggled, layerId, isChecked } = props;
+    const { topstack, bottomstack, fullLayers, handleToggleCick, setChangeSelect, layerType, setIsToggled } = useGerberConfig();
+    const { color, layertype, layerProperty, isToggled, layerId, isChecked } = props;
 
     const handleClick = () => {
         let layerGroups = [];
 
-        if (layerType === 'toplayer') {
+        if (layertype === 'toplayer') {
             layerGroups = [topstack.svg.querySelectorAll('g'), fullLayers.querySelectorAll('g')];
-        } else if (layerType === 'bottomlayer') {
+        } else if (layertype === 'bottomlayer') {
             layerGroups = [bottomstack.svg.querySelectorAll('g'), fullLayers.querySelectorAll('g')];
         } else {
             layerGroups = [topstack.svg.querySelectorAll('g'), bottomstack.svg.querySelectorAll('g'), fullLayers.querySelectorAll('g')];
+        }
+
+        if (layerProperty === 'soldermask' && layerType !== 'originaly') {
+            handleColorChange({ color: layerType, id: topstack.id, svgs:[topstack.svg, bottomstack.svg], soldermask: isToggled });
+            setIsToggled(prev => ({
+                ...prev, 
+                [layertype]: { 
+                    trace: prev[layertype].soldermask, 
+                    pads: prev[layertype].soldermask, 
+                    silkscreen: prev[layertype].soldermask, 
+                    soldermask: isToggled 
+                },
+            }))
+
+            layerGroups.forEach(layerGroup => {
+                layerGroup.forEach(g => {
+                    if (g.hasAttribute('id')) {
+                        // console.log('g', g)
+                        const id = g.getAttribute('id');
+                        g.style.display = id.includes(layerId) ? 'block' : id.includes(topstack.id) ? 'none' : id.includes('drillMask') ? 'none' : '   ';
+                    }
+                })
+            })
+
+        } else {
+            handleColorChange({ color: layerType, id: topstack.id, svgs:[topstack.svg, bottomstack.svg] });
+            setIsToggled(prev => ({
+                ...prev, 
+                [layertype]: { ...prev[layertype], soldermask: true }
+            }))
         }
 
         layerGroups.forEach(layerGroup => {
@@ -415,7 +448,7 @@ function ToggleButton(props) {
                 }
             })
         }
-        handleToggleCick(layerType, layerProperty);
+        handleToggleCick(layertype, layerProperty);
     }
 
     return (

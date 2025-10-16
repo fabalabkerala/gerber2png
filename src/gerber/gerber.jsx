@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useEffect, useRef, useState } from "react";
 import ConfigSection from "./configSection.jsx"
 import './gerber.css'
@@ -166,7 +167,7 @@ function DropAreaComponent(props) {
 }
 
 function SvgColorComponent({active}) {
-    const { topstack, bottomstack, layerType, setLayerType, setChangeSelect } = useGerberConfig();
+    const { topstack, bottomstack, layerType, setLayerType, setChangeSelect, setIsToggled } = useGerberConfig();
     return (
         <>
             <div className="layerTypeBtnGroup" style={{pointerEvents: active ? 'auto' : 'none'}}>
@@ -174,21 +175,55 @@ function SvgColorComponent({active}) {
                     id="original" 
                     className={`button-side colorButton ${ layerType === 'original' ? 'active' : ''}`}
                     role="button"
-                    onClick={ () => { handleColorChange({ color: 'original', id: topstack.id, svgs: [topstack.svg, bottomstack.svg] }); setLayerType('original'); setChangeSelect('custom-setup') } }
+                    onClick={() => { 
+                        handleColorChange({ 
+                            color: 'original', 
+                            id: topstack.id, 
+                            svgs: [topstack.svg, bottomstack.svg] 
+                        }); 
+                        setLayerType('original'); 
+                        setChangeSelect('custom-setup');
+                    }}
                 ><span className="textnew_gerber_png">Original</span></button>
 
                 <button 
                     id="bw" 
                     className={`button-side colorButton ${ layerType === 'bw' ? 'active' : ''}`}
                     role="button"
-                    onClick={ () => { handleColorChange({ color: 'bw', id: topstack.id, svgs: [topstack.svg, bottomstack.svg] }); setLayerType('bw'); setChangeSelect('custom-setup') }}
+                    onClick={() => { 
+                        handleColorChange({ 
+                            color: 'bw', 
+                            id: topstack.id, 
+                            svgs: [topstack.svg, bottomstack.svg] 
+                        }); 
+                        setLayerType('bw'); 
+                        setChangeSelect('custom-setup');
+                        setIsToggled(prev => ({
+                            ...prev,
+                            toplayer: { ...prev.toplayer, soldermask: true },
+                            bottomlayer: { ...prev.bottomlayer, soldermask: true },
+                        }))
+                    }}
                 ><span className="text">B/W</span></button>
 
                 <button 
                     id="invert" 
                     className={`button-side colorButton ${ layerType === 'bwInvert' ? 'active' : ''}`}
                     role="button"
-                    onClick={ () => { handleColorChange({ color: 'bwInvert', id: topstack.id, svgs: [topstack.svg, bottomstack.svg] }); setLayerType('bwInvert'); setChangeSelect('custom-setup') }}
+                    onClick={() => { 
+                        handleColorChange({ 
+                            color: 'bwInvert', 
+                            id: topstack.id, 
+                            svgs: [topstack.svg, bottomstack.svg] 
+                        }); 
+                        setLayerType('bwInvert'); 
+                        setChangeSelect('custom-setup');
+                        setIsToggled(prev => ({
+                            ...prev,
+                            toplayer: { ...prev.toplayer, soldermask: true },
+                            bottomlayer: { ...prev.bottomlayer, soldermask: true },
+                        }))
+                    }}
                 ><span className="text">Invert</span></button> 
             </div>
         </>
@@ -238,7 +273,7 @@ export function handleColorChange(props) {
             ${props.id}_fr4 {color: #000000  !important;}
             .${props.id}_cu {color: #ffffff !important;}
             .${props.id}_cf {color: #ffffff !important;}
-            .${props.id}_sm {color: #ffffff; opacity: 0 !important;}
+            .${props.id}_sm {color: #ffffff; opacity: ${ props.soldermask ? 0.5 : 0 } !important;}
             .${props.id}_ss {color: #ffffff !important;}
             .${props.id}_sp {color: #ffffff !important;}
             .${props.id}_out {color: #000000 !important;}
@@ -248,7 +283,7 @@ export function handleColorChange(props) {
             .${props.id}_fr4 {color: #ffffff  !important;}
             .${props.id}_cu {color: #000000 !important;}
             .${props.id}_cf {color: #000000 !important;}
-            .${props.id}_sm {color: #ffffff; opacity: 0 !important;}
+            .${props.id}_sm {color: #000000; opacity:  ${ props.soldermask ? 0.5 : 0 } !important;}
             .${props.id}_ss {color: #000000 !important;}
             .${props.id}_sp {color: #000000 !important;}
             .${props.id}_out {color: #ffffff !important;}

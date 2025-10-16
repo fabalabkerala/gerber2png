@@ -13,8 +13,8 @@ export const GerberProvider = ({children}) => {
     const defaultChangeSelect = 'custom-setup';
     const defaultStackConfig = { vewbox: { viewboxX: 0, viewboxY: 0, viewboxW: 0, viewboxH: 0}, width: 0, height: 0 };
     const defaultIsToggled = {
-        toplayer: { trace: false, pads: false, silkscreen: false },
-        bottomlayer: { trace: false, pads: false, silkscreen: false },
+        toplayer: { trace: false, pads: false, silkscreen: false, soldermask: false },
+        bottomlayer: { trace: false, pads: false, silkscreen: false, soldermask: false },
         commonlayer: { outline: false, drill: false, outlayer: true}
     };
 
