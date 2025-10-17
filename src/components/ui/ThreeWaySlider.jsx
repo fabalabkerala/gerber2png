@@ -1,0 +1,67 @@
+import { useId, useState } from "react";
+import { motion } from "framer-motion";
+import PropTypes from "prop-types";
+import { cn } from "../../utils/cn";
+
+const ThreeWaySlider = ({ options, defaultValue, onChange, variant = 'primary' }) => {
+    const [selected, setSelected] = useState(defaultValue || options[0].id); 
+    const instanceId = useId()
+
+    const handleClick = (id) => {
+        setSelected(id)
+        if (onChange) onChange(id)
+    }
+
+    const variants = {
+        primary: {
+            pill: 'bg-[#e57345]',
+            label: 'text-white'
+        },
+        secondary: {
+            pill: 'border-2 border-[#e57345]',
+            label: 'text-[#e57345]'
+        },
+        
+    }
+
+    return (
+        <div className="relative flex bg-gray-100 rounded-full p- w-full">
+            { options.map((opt) => (
+                <button
+                    key={opt.id}
+                    onClick={() => handleClick(opt.id)}
+                    className={cn(
+                        "relative z-10 px-4 py-1.5 text-xs font-medium transition-colors duration-200 flex-1 text-nowrap",
+                        selected === opt.id ? variants[variant].label : 'text-gray-700'
+                    )}
+                >
+                    {opt.label}
+                    {selected === opt.id && (
+                        <motion.div
+                            layoutId={`highlight-${instanceId}`}
+                            className={cn(
+                                "absolute inset-0 rounded-full z-[-1]",
+                                variants[variant].pill
+                            )}
+                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        />
+                    )}
+                </button>
+            ))}
+        </div>
+    );
+};
+
+ThreeWaySlider.propTypes = {
+    options: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.string.isRequired,
+            label: PropTypes.string.isRequired
+        })
+    ).isRequired,
+    defaultValue: PropTypes.string,
+    onChange: PropTypes.func,
+    variant: PropTypes.string
+}
+
+export default ThreeWaySlider;

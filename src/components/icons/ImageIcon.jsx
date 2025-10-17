@@ -33,7 +33,7 @@ const ImageIcon = (props) => (
 ImageIcon.propTypes = {
     color: PropTypes.string
 }
-ImageIcon.propTypes = {
+ImageIcon.defaultPropTypes = {
     color: 'black'
 }
 

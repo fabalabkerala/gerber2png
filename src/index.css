@@ -71,3 +71,36 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 } */
+
+
+/* Base scrollbar styles */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent; /* Hide in Firefox */
+  transition: scrollbar-color 0.2s ease-in-out;
+}
+
+/* Chrome / Edge / Safari */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 9999px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+/* On hover or active scroll */
+.custom-scrollbar:hover::-webkit-scrollbar-thumb,
+.custom-scrollbar:active::-webkit-scrollbar-thumb {
+  background-color: #9ca3af; /* Tailwind gray-400 */
+}
+
+.custom-scrollbar:hover {
+  scrollbar-color: #9ca3af transparent; /* Firefox */
+}

@@ -3,7 +3,9 @@ import { CheckIcon, ChevronDownIcon } from '@heroicons/react/20/solid'
 import { cn } from "../../utils/cn";
 import PropTypes from 'prop-types';
 
-const Select = ({options, selected, setSelected }) => {
+const Select = ({options, selected, setSelected, variant = "bottom" }) => {
+
+    const optionsPosition = variant === "top" ?  "mb-1 bottom-full origin-bottom" :  "mt-1 top-full origin-top"
 
     return (
         <>
@@ -22,7 +24,11 @@ const Select = ({options, selected, setSelected }) => {
                         />
                     </ListboxButton>
                     <ListboxOptions
-                        className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none"  
+                        transition
+                        className={cn(
+                            "absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none",
+                            optionsPosition
+                        )} 
                     >
                         { options.map((value, id) => (
                             <ListboxOption
@@ -33,11 +39,11 @@ const Select = ({options, selected, setSelected }) => {
                                     'data-[focus]:bg-gray-100 data-[focus]:text-black data-[selected]:bg-blue-50'
                                 )}
                             >
+                                <div className="text-sm/6 ">{value}</div>
                                 <CheckIcon className={cn(
-                                    "size-4 fill-black visible",
+                                    "size-2 fill-black visible",
                                     selected === value ? 'visible' : 'invisible'
                                 )} />
-                                <div className="text-sm/6 ">{value}</div>
                             </ListboxOption>
                         ))}
                     </ListboxOptions>
@@ -50,7 +56,8 @@ const Select = ({options, selected, setSelected }) => {
 Select.propTypes = {
     options: PropTypes.arrayOf(PropTypes.string).isRequired,
     selected: PropTypes.string.isRequired,
-    setSelected: PropTypes.func.isRequired
+    setSelected: PropTypes.func.isRequired,
+    variant: PropTypes.oneOf(["top", "bottom"])
 }
 
 export default Select;

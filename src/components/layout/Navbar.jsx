@@ -31,14 +31,14 @@ export default function Navbar() {
                     <button 
                         className={cn(
                             "px-4 py-1.5 w-64 text-sm",
-                            activeTab === 'converter' ? 'bg-[#EBEBEB] text-[#ce5e31] border-t border-red-400 font-medium' : 'hover:bg-zinc-50'
+                            activeTab === 'converter' ? 'bg-zinc-50 text-[#ce5e31] border-b border-red-400 font-medium' : 'hover:bg-zinc-50'
                         )}
                         onClick={() => setActiveTab('converter')}
                     >Gerber2PNG Converter</button>
                     <button 
                         className={cn(
                             "px-4 py-1.5 w-64 text-sm",
-                            activeTab === 'generator' ? 'bg-[#EBEBEB] text-[#ce5e31] border-t border-red-400 font-medium' : 'hover:bg-zinc-50'
+                            activeTab === 'generator' ? 'bg-zinc-50 text-[#ce5e31] border-b border-red-400 font-medium' : 'hover:bg-zinc-50'
                         )}
                         onClick={() => setActiveTab('generator')}
                     >G-Code Generator</button>

@@ -6,7 +6,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/layout/Navbar.jsx';
 import { PageLayout } from './components/layout/PageLayout.jsx';
 import GitlabIcon from './components/icons/GitlabIcon.jsx';
-import GerberOptions from './components/gerber/GerberOptions.jsx';
+import GerberSidebar from './components/gerber/GerberSidebar.jsx';
+import OutputPanel from './components/gerber/OutputPanel.jsx';
+import MainView from './components/gerber/MainViewer.jsx';
 
 function App() {
 
@@ -21,9 +23,9 @@ function App() {
               path='/' 
               element={
                 <PageLayout
-                  sidebar={<GerberOptions />}
-                  main={<GitlabIcon />}
-                  right={<GitlabIcon />}
+                  sidebar={<GerberSidebar />}
+                  main={<MainView />}
+                  right={<OutputPanel />}
                 />
               }
             />
