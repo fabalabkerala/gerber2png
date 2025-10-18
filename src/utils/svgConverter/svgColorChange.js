@@ -40,7 +40,7 @@ export default function handleColorChange(props) {
     props.svgs.forEach(svg => {
         const svgId = svg.getAttribute('id');
         const outer = svg.querySelector(`#${svgId}outer`);
-        outer.setAttribute('style', `fill: ${ outerColor[props.color] }`)
+        outer.style.fill = outerColor[props.color]
 
         const stackStyle = svg.querySelector('style');
         stackStyle.innerHTML = svgColor[props.color];
