@@ -1,5 +1,5 @@
 
-export default function generateOuterSvg(width, height, toolwidth , viewbox) {
+export default function generateOuterSvg(width, height, toolwidth , viewbox, flipped = true) {
     const halfWidth = width / 2;
     const halfHeight = height / 2;
     const originX = viewbox.viewboxX;
@@ -30,10 +30,30 @@ export default function generateOuterSvg(width, height, toolwidth , viewbox) {
     L ${ originX } ${ originY + halfHeight - 2 * toolwidth }
     L ${ originX } ${ originY }
     Z`
+
+    const flippedPathlines = `
+    M ${originX + width} ${originY}
+    L ${originX + width - halfWidth - 2 * toolwidth} ${originY}
+    L ${originX + width - halfWidth - 2 * toolwidth} ${originY - toolwidth}
+    L ${originX} ${originY - toolwidth}
+    L ${originX - toolwidth} ${originY}
+    L ${originX - toolwidth} ${originY + halfHeight + 2 * toolwidth}
+    L ${originX} ${originY + halfHeight + 2 * toolwidth}
+    L ${originX} ${originY + height}
+    L ${originX + width - halfWidth + 2 * toolwidth} ${originY + height}
+    L ${originX + width - halfWidth + 2 * toolwidth} ${originY + height + toolwidth}
+    L ${originX + width} ${originY + height + toolwidth}
+    L ${originX + width + toolwidth} ${originY + height}
+    L ${originX + width + toolwidth} ${originY + halfHeight - 2 * toolwidth}
+    L ${originX + width} ${originY + halfHeight - 2 * toolwidth}
+    L ${originX + width} ${originY}
+    Z`
+
   
     let path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', pathlines);
-  
+    path.setAttribute('d', flipped ? flippedPathlines : pathlines);
+
+
     svg.appendChild(path)
   
   

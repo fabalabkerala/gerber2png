@@ -14,7 +14,7 @@ export default async function convertToSvg(
     const bottomxmlDoc = new DOMParser().parseFromString(stackup.bottom.svg, 'image/svg+xml');
     const bottomsvg = bottomxmlDoc.documentElement;
 
-    const newTopSvg = modifiedSvg({ svg: topsvg, id: 'toplayer', viewbox: stackup.top.viewBox, width: stackup.top.width, height: stackup.top.height})
+    const newTopSvg = modifiedSvg({ svg: topsvg, id: 'toplayer', viewbox: stackup.top.viewBox, width: stackup.top.width, height: stackup.top.height,})
     const newBottomSvg = modifiedSvg({ svg: bottomsvg, id: 'bottomlayer', viewbox: stackup.bottom.viewBox, width: stackup.bottom.width, height: stackup.bottom.height})
 
     const fullStackSvg = gerberFilesToSvg(files, stackup.layers, stackup.top)
@@ -144,7 +144,7 @@ function modifiedSvg(props) {
         Gs.forEach((g) => {
             if (g.hasAttribute('id')) {
                 if (g.getAttribute('id').includes('soldermask')) {
-                    // g.style.display = g.style.display === 'none' ? 'block' : 'none';    
+                    g.style.display = g.style.display === 'none' ? 'block' : 'none';    
                 }
             }
         })
@@ -167,12 +167,11 @@ function modifiedSvg(props) {
         svg.insertBefore(outlineG, svg.firstChild);
     }
 
-    const outer = generateOuterSvg(width, height, 0.8, { viewboxX: viewbox[0], viewboxY: viewbox[1]});
+    const outer = generateOuterSvg(width, height, 0.8, { viewboxX: viewbox[0], viewboxY: viewbox[1]}, id === 'bottomlayer');
 
-    outer.svg.setAttribute('style', 'fill: #86877c; opacity: 0.5');
     outer.svg.setAttribute('id', `${id}outer-svg`);
     outerG.setAttribute('id', `${id}outer`);
-    outerG.setAttribute('style', 'display: none;')
+    outerG.setAttribute('style', 'display: none; fill: #1a4c1a');
 
     newSvg.setAttribute('id', `${id}`);
     newSvg.setAttribute('width', `${outer.width}mm`);

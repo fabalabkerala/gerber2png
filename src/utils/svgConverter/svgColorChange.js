@@ -31,7 +31,17 @@ export default function handleColorChange(props) {
         `
     }
 
+    const outerColor = {
+        'bw': '#000000',
+        'bwInvert': '#ffffff',
+        'original': '#1a4c1a'
+    }
+
     props.svgs.forEach(svg => {
+        const svgId = svg.getAttribute('id');
+        const outer = svg.querySelector(`#${svgId}outer`);
+        outer.setAttribute('style', `fill: ${ outerColor[props.color] }`)
+
         const stackStyle = svg.querySelector('style');
         stackStyle.innerHTML = svgColor[props.color];
     })

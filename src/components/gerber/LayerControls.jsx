@@ -5,12 +5,27 @@ import ThreeWaySlider from "../ui/ThreeWaySlider";
 
 
 const LayerControls = () => {
-    const { topstack, bottomstack, layerType, setLayerType, setChangeSelect, setIsToggled } = useGerber();
+    const { 
+        topstack, 
+        bottomstack, 
+        fullLayers,
+        setLayerType, 
+        setChangeSelect, 
+        setMainSvg
+    } = useGerber();
+
     const viewOptions = [
-        { id: "all", label: "All Layers" },
-        { id: "top", label: "Top" },
-        { id: "bottom", label: "Bottom" },
+        { id: "all", label: "All Layers", svg: fullLayers },
+        { id: "top", label: "Top", svg: topstack.svg },
+        { id: "bottom", label: "Bottom", svg: bottomstack.svg },
     ];
+    const handleSide = (id) => {
+        setChangeSelect('custom-setup');
+        const option = viewOptions.find(opt => opt.id === id)
+        if (!option) return;
+
+        setMainSvg({ id: id, svg: option.svg })
+    }
 
     const colorOptions = [
         { id: "original", label: "Original" },
@@ -36,7 +51,7 @@ const LayerControls = () => {
                 </div>
 
                 <div className="flex flex-col gap-3 px-3 pt-4 pb-3">
-                    <ThreeWaySlider options={viewOptions} />
+                    <ThreeWaySlider options={viewOptions} onChange={handleSide} defaultValue={'top'} />
                     <ThreeWaySlider options={colorOptions} variant="secondary" onChange={handleColor} />
                 </div>
 

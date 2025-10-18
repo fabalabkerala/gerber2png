@@ -3,13 +3,18 @@ import { CheckIcon, ChevronDownIcon } from '@heroicons/react/20/solid'
 import { cn } from "../../utils/cn";
 import PropTypes from 'prop-types';
 
-const Select = ({options, selected, setSelected, variant = "bottom" }) => {
+const Select = ({ options, selected, setSelected, variant = "bottom", onSelect }) => {
 
-    const optionsPosition = variant === "top" ?  "mb-1 bottom-full origin-bottom" :  "mt-1 top-full origin-top"
+    const optionsPosition = variant === "top" ?  "mb-1 bottom-full origin-bottom" :  "mt-1 top-full origin-top";
+
+    const handleSelect = (value) => {
+        setSelected(value)
+        onSelect?.(value)
+    }
 
     return (
         <>
-            <Listbox value={selected} onChange={setSelected}>
+            <Listbox value={selected} onChange={handleSelect}>
                 <div className="relative w-full">
                     <ListboxButton
                         className={cn(                    
@@ -30,9 +35,9 @@ const Select = ({options, selected, setSelected, variant = "bottom" }) => {
                             optionsPosition
                         )} 
                     >
-                        { options.map((value, id) => (
+                        { options.map((value) => (
                             <ListboxOption
-                                key={id}
+                                key={value}
                                 value={value}
                                 className={cn(
                                     'cursor-pointer select-none px-2 py-1 text-sm flex items-center gap-2',
@@ -57,7 +62,8 @@ Select.propTypes = {
     options: PropTypes.arrayOf(PropTypes.string).isRequired,
     selected: PropTypes.string.isRequired,
     setSelected: PropTypes.func.isRequired,
-    variant: PropTypes.oneOf(["top", "bottom"])
+    variant: PropTypes.oneOf(["top", "bottom"]),
+    onSelect: PropTypes.func
 }
 
 export default Select;
