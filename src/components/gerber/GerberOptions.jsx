@@ -9,17 +9,18 @@ const toolOption = ["0.8", "0.7", "0.5"];
 
 const GerberOptions = () => {
     const [selected, setSelected] = useState(options[0]);
-    const [ toolSelected, setToolSelected ] = useState(toolOption[0])
+    const [ toolSelected, setToolSelected ] = useState(toolOption[0]);
     return (
         <>
             <div className="flex flex-col bg-white pb-3 rounded shadow">
                 {/* Heading */}
-                <div className="flex justify-between items-center bg-[#F5F5F5] px-2 py-1 rounded-tl-md rounded-tr-md">
+                <div className="flex justify-between items-center bg-[#F5F5F5] px-2 py-1 rounded-tl-md rounded-tr-md relative">
                     <p className="font-medium text-sm ps-0.5 text-gray-700">Options</p>
                     <button className="flex items-center h-fit gap-1 bg-white px-1 rounded-sm">
                         <p className="text-xs py-[1px] ps-1">Preview</p>
                         <ImageIcon width={14} height={14} strokeWidth={4} stroke={"black"} />
                     </button>
+
                 </div>
 
                 <div className="px-2">

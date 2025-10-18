@@ -1,8 +1,11 @@
+import handleColorChange from "../../utils/svgConverter/svgColorChange";
+import { useGerber } from "../context/GerberContext";
 import LayerToggle from "../ui/LayerToggle";
 import ThreeWaySlider from "../ui/ThreeWaySlider";
 
 
 const LayerControls = () => {
+    const { topstack, bottomstack, layerType, setLayerType, setChangeSelect, setIsToggled } = useGerber();
     const viewOptions = [
         { id: "all", label: "All Layers" },
         { id: "top", label: "Top" },
@@ -14,6 +17,15 @@ const LayerControls = () => {
         { id: "bw", label: "B / W" },
         { id: "bwInvert", label: "B / W Invert" },
     ];
+    const handleColor = (id) => {
+        handleColorChange({
+            id: topstack.id,
+            color: id,
+            svgs: [topstack.svg, bottomstack.svg] 
+        });
+        setLayerType(id);
+        setChangeSelect('custom-setup')
+    }
 
     return (
         <>
@@ -25,7 +37,7 @@ const LayerControls = () => {
 
                 <div className="flex flex-col gap-3 px-3 pt-4 pb-3">
                     <ThreeWaySlider options={viewOptions} />
-                    <ThreeWaySlider options={colorOptions} variant="secondary" />
+                    <ThreeWaySlider options={colorOptions} variant="secondary" onChange={handleColor} />
                 </div>
 
                 <div className="flex flex-col gap-2 px-3 py-2">
