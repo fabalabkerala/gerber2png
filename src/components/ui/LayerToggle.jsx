@@ -16,7 +16,7 @@ function LayerToggle({ layerName, enabled: controlled, onChange }) {
     return (
         <>
             <div className="flex justify-between items-center px-1 py-1 border w-full h-fit rounded">
-                <p className="text-xs px-1 font-medium text-gray-700">{ layerName }</p>
+                <p className="text-xs px-1 font-medium text-gray-700 capitalize">{ layerName }</p>
                 <motion.button 
                     className={cn(
                         "px-3 py-1 rounded",
