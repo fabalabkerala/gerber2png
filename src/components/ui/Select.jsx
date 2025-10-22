@@ -22,7 +22,7 @@ const Select = ({ options, selected, setSelected, variant = "bottom", onSelect, 
                             'focus:outline-none focus:ring-1 focus:ring-gray-400'
                         )}
                     >
-                        { selected }
+                        {options.find(option => option.id === selected)?.label || selected}
                         <ChevronDownIcon
                             className="absolute top-1/2 -translate-y-1/2 right-1 size-5 w-fit px-0.5 fill-black bg-[#F0F0F0]"
                             aria-hidden="true"
@@ -35,20 +35,20 @@ const Select = ({ options, selected, setSelected, variant = "bottom", onSelect, 
                             optionsPosition
                         )} 
                     >
-                        { options.map((value) => (
+                        { options.map(({id, label}) => (
                             <ListboxOption
-                                key={value}
-                                value={value}
+                                key={id}
+                                value={id}
                                 className={cn(
                                     'cursor-pointer select-none px-2 py-1 text-sm flex items-center gap-2',
                                     'data-[focus]:bg-gray-100 data-[focus]:text-black data-[selected]:bg-blue-50',
-                                    getOptionClass?.(value)
+                                    getOptionClass?.(id)
                                 )}
                             >
-                                <div className="text-sm/6 ">{value}</div>
+                                <div className="text-xs/6 ">{label}</div>
                                 <CheckIcon className={cn(
                                     "size-2 fill-black visible",
-                                    selected === value ? 'visible' : 'invisible'
+                                    selected === id ? 'visible' : 'invisible'
                                 )} />
                             </ListboxOption>
                         ))}

@@ -1,5 +1,5 @@
 const setUpConfig = (topstack, bottomstack) => {
-    return {
+    const config = {
         'top-trace': {
             side: 'toplayer',
             button: 'trace',
@@ -80,5 +80,6 @@ const setUpConfig = (topstack, bottomstack) => {
             canvas: 'black',
         }
     }
+    return config
 }
 export default setUpConfig;

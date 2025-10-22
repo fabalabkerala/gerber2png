@@ -11,7 +11,17 @@ import svg2png from "../../utils/svgConverter/svg2png";
 import { changeDpiBlob } from "changedpi";
 import handleColorChange from "../../utils/svgConverter/svgColorChange";
 
-const options = ["generate-all", "top-trace", "top-drill", "top-cut", "bottom-trace", "bottom-cut", "custom"];
+const SelectOptions = [
+    { id: "generate-all", label: "Generate All" },
+    { id: "generate-for-carvera", label: "Generate for Carvera" },
+    { id: "top-trace", label: "Top Trace" },
+    { id: "top-drill", label: "Top Drill" },
+    { id: "top-cut", label: "Top Cut" },
+    { id: "bottom-trace", label: "Bottom Trace" },
+    { id: "bottom-cut", label: "Bottom Cut" },
+    { id: "custom", label: "Custom" },
+];
+  
 const toolOption = ["0.8", "0.0"];
 
 const GerberOptions = () => {
@@ -33,10 +43,12 @@ const GerberOptions = () => {
         setIsToggled,
         setLoader,
         doubleSide, 
-        setDoubleSide
+        setDoubleSide,
+        changeSelect,
+        setChangeSelect
     } = useGerber();
 
-    const [ selected, setSelected ] = useState(options[0]);
+    // const [ selected, setSelected ] = useState('custom');
     const [ toolSelected, setToolSelected ] = useState(toolOption[0]);
  
     // -----------------------
@@ -91,15 +103,20 @@ const GerberOptions = () => {
     // -----------------------
     // PNG Generation Function
     // -----------------------
-    const handleSvg = (svg, option, setup) => {
+    const handleSvg = (svg, option, setup, machine = 'general') => {
+        console.log('machine : :: ",', machine)
         const [, gerberSvg] = svg.querySelectorAll('svg');
 
         gerberSvg.querySelectorAll('g').forEach(g => {
             
             if (g.hasAttribute('id')) {
-                // console.log('g', g)
                 const id = g.getAttribute('id');
-                g.style.display = id.includes(setup.layerid) ? 'block' : id.includes(setup.stack.id) ? 'none' : id.includes('drillMask') ? 'none' : '   ';
+                g.style.display = id.includes(setup.layerid) ? 'block' : id.includes(setup.stack.id) ? 'none' : id.includes('drillMask') ? 'none' : '';
+
+                if (option === 'top-cut' && machine === 'carvera') {
+                    g.style.display = id.includes('drill') ? 'block' : g.style.display;
+                }
+
             }
         })
 
@@ -145,17 +162,18 @@ const GerberOptions = () => {
     const handlePngConversion = async () => {
         // console.log('quicksetup :', selected);
         setLoader(true)
-        if (selected === 'generate-all') {
+        if (changeSelect === 'generate-all' || changeSelect === 'generate-for-carvera') {
             const newUrls = []
             for (const option in setUpConfig(topstack, bottomstack)) {
                 const setup = setUpConfig(topstack, bottomstack)[option];
 
                 if (!doubleSide && setup.stack !== topstack) continue;
-                
+                if (changeSelect === 'generate-for-carvera' && option === 'top-drill') continue;
+
                 const svg = setup.stack.svg.cloneNode(true);
-                handleSvg(svg, option, setup);
+                handleSvg(svg, option, setup, changeSelect === "generate-for-carvera" ? 'carvera' : 'general');
                 handleColorChange({ color: setup.color, id: topstack.id, svgs:[svg] });
-                // console.log('Side : ', setup)
+                console.log('Side : ', svg)
                 const newUrl = await generatePNG(svg, doubleSide, setup.id, setup.canvas);
                 // console.log( 'newURLS : ',{ name: newUrl.name, url: newUrl.url })
                 newUrls.push({ name: newUrl.name, url: newUrl.url });
@@ -235,13 +253,13 @@ const GerberOptions = () => {
 
                     <div className="flex gap-1 text-sm">
                         <Select 
-                            options={options} 
-                            setSelected={setSelected} 
-                            selected={selected} 
+                            options={SelectOptions} 
+                            setSelected={setChangeSelect} 
+                            selected={changeSelect} 
                             onSelect={(value) => {
                                 if (!doubleSide && value.startsWith("bottom")) return; // disable click
-                                if (value === 'generate-all' || value === 'custom') {
-                                    setSelected(value)
+                                if (value === 'generate-all' || value === 'custom' || value === 'generate-for-carvera') {
+                                    setChangeSelect(value)
                                 } else {
                                     handleQuickSetup(value);
                                 }
@@ -259,7 +277,6 @@ const GerberOptions = () => {
                             <p className="text-white text-xs font-medium text-nowrap">Generate PNG</p>
                         </motion.button>
                     </div>
-                    
                 </div>
 
                 <div className="w-full h-px bg-zinc-100 my-3" />

@@ -39,7 +39,8 @@ function LayerToggle({ layerName, enabled: controlled, onChange, className }) {
 LayerToggle.propTypes = {
     layerName: PropTypes.string,
     enabled: PropTypes.bool,
-    onChange: PropTypes.func
+    onChange: PropTypes.func,
+    className: PropTypes.string
 }
 
 export default LayerToggle;

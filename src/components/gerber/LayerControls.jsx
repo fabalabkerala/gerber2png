@@ -27,7 +27,7 @@ const LayerControls = () => {
         { id: "bottom", label: "Bottom", svg: bottomstack.svg },
     ];
     const handleSide = (id) => {
-        setChangeSelect('custom-setup');
+        setChangeSelect('custom');
         const option = viewOptions.find(opt => opt.id === id)
         if (!option) return;
         setMainSvg({ id: id, svg: option.svg })
@@ -45,7 +45,7 @@ const LayerControls = () => {
             svgs: [topstack.svg, bottomstack.svg] 
         });
         setLayerType(id);
-        setChangeSelect('custom-setup')
+        setChangeSelect('custom')
     }
 
     const layers = [
@@ -102,7 +102,8 @@ const LayerControls = () => {
                                         property,
                                         isToggled,
                                         layer.ids[id]
-                                    )
+                                    );
+                                    setChangeSelect('custom')
                                 }}
                                 enabled={!isToggled[layer.type][property]}
                                 className={ !doubleSide && layer.ids[id].includes('bottom') ? 'pointer-events-none opacity-40' : '' }

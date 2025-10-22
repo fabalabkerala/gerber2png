@@ -4,12 +4,12 @@ import { motion } from "motion/react";
 
 function PngCard({ name, blobUrl, handleDelete }) {
     return (
-        <div className="flex flex-col my-2 max-h-80 shadow rounded bg-white overflow-hidden">
-            <div className="flex items-center justify-center bg-white max-h-60">
+        <div className="flex flex-col my-2  shadow rounded bg-white overflow-hidden">
+            <div className="flex items-center justify-center bg-white ">
                 <img
                     src={blobUrl}
                     alt={name}
-                    className="max-h-60 max-w-full object-contain border-gray-400"
+                    className="max-w-full border border-dashed hover:border-none object-contain border-gray-400"
                 />
             </div>
     

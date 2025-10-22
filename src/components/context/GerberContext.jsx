@@ -12,7 +12,7 @@ export const GerberProvider = ({ children }) => {
     const defaultSide = null;
     const defaultCanvasBg = 'black';
     const defaultPngUrls = [];
-    const defaultChangeSelect = 'custom-setup';
+    const defaultChangeSelect = 'custom';
     const defaultStackConfig = { vewbox: { viewboxX: 0, viewboxY: 0, viewboxW: 0, viewboxH: 0}, width: 0, height: 0 };
     const defaultIsToggled = {
         toplayer: { trace: false, pads: false, silkscreen: false, soldermask: false },

@@ -62,7 +62,10 @@ const MainView = () => {
                             <div 
                                 ref={resultRef}
                                 className="flex items-center h-full justify-center p-2"
-                                style={{ filter: "drop-shadow(0px 2px 6px rgba(0,0,0,0.3))", background: canvasBg }}
+                                style={{ 
+                                    filter: "drop-shadow(0px 2px 6px rgba(0,0,0,0.3))", 
+                                    // background: canvasBg 
+                                }}
                             ></div>
                         </AnimatePresence>
                     </TransformComponent>
