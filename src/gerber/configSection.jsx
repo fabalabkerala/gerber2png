@@ -227,9 +227,7 @@ function QuickSetup(props) {
                 console.error('Error converting svg to png :', err)
                 reject(err);
             });     
-            
         })
-        
     }
 
     const handlePngConversion = async () => {

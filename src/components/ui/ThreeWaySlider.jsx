@@ -1,11 +1,13 @@
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { motion } from "framer-motion";
 import PropTypes from "prop-types";
 import { cn } from "../../utils/cn";
 
-const ThreeWaySlider = ({ options, defaultValue, onChange, variant = 'primary' }) => {
-    const [selected, setSelected] = useState(defaultValue || options[0].id); 
-    const instanceId = useId()
+const ThreeWaySlider = ({ options, valueSync, onChange, variant = 'primary' }) => {
+    const [selected, setSelected] = useState(valueSync || options[0].id); 
+    const instanceId = useId();
+
+    useEffect(() => { setSelected(valueSync) }, [valueSync])
 
     const handleClick = (id) => {
         setSelected(id)
@@ -59,7 +61,7 @@ ThreeWaySlider.propTypes = {
             label: PropTypes.string.isRequired
         })
     ).isRequired,
-    defaultValue: PropTypes.string,
+    valueSync: PropTypes.string,
     onChange: PropTypes.func,
     variant: PropTypes.string
 }

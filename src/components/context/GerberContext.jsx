@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import {createContext, useContext, useState} from "react";
+import {createContext, useContext, useEffect, useState} from "react";
 
 const GerberContext = createContext();
 
@@ -9,6 +9,7 @@ export const GerberProvider = ({ children }) => {
     const defaultBottomStack = {id: null, svg: null};
     const defaultFullLayers = null;
     const defaultLayerType = null;
+    const defaultSide = null;
     const defaultCanvasBg = 'black';
     const defaultPngUrls = [];
     const defaultChangeSelect = 'custom-setup';
@@ -24,11 +25,14 @@ export const GerberProvider = ({ children }) => {
     const [bottomstack, setBottomStack] = useState(defaultBottomStack);
     const [fullLayers, setFullLayers] = useState(defaultFullLayers);
     const [layerType, setLayerType] = useState(defaultLayerType);
+    const [side, setSide] = useState(defaultSide);
     const [canvasBg, setCanvasBg] = useState(defaultCanvasBg);
     const [pngUrls, setPngUrls] = useState(defaultPngUrls);
     const [changeSelect, setChangeSelect] = useState(defaultChangeSelect)
     const [stackConfig, setStackConfig] = useState(defaultStackConfig);
     const [isToggled, setIsToggled] = useState(defaultIsToggled);
+    const [loader, setLoader] = useState(false);
+    const [doubleSide, setDoubleSide] = useState(false);
 
     const handleReset = () => {
         setMainSvg(defaultMainSvg);
@@ -52,6 +56,14 @@ export const GerberProvider = ({ children }) => {
             }
         }));
     }
+
+    useEffect(() => {
+        if (mainSvg.svg === null) return;
+
+        if (mainSvg.svg === fullLayers) setSide('all')
+        else if (mainSvg.svg === topstack.svg) setSide('top')
+        else if (mainSvg.svg === bottomstack.svg) setSide('bottom')
+    }, [bottomstack.svg, fullLayers, mainSvg.svg, topstack.svg])
 
     return (
         <GerberContext.Provider
@@ -77,7 +89,13 @@ export const GerberProvider = ({ children }) => {
                 setPngUrls,
                 changeSelect,
                 setChangeSelect,
-                handleReset
+                handleReset,
+                side, 
+                setSide,
+                loader, 
+                setLoader,
+                doubleSide, 
+                setDoubleSide
             }}
         >
             {children}

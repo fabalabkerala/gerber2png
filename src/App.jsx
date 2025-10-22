@@ -1,17 +1,13 @@
-import pcbLogo from './assets/pcbLogo.png'
 import './App.css'
-import GerberSection from './gerber/gerber.jsx'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/layout/Navbar.jsx';
 import { PageLayout } from './components/layout/PageLayout.jsx';
-import GitlabIcon from './components/icons/GitlabIcon.jsx';
 import GerberSidebar from './components/gerber/GerberSidebar.jsx';
 import OutputPanel from './components/gerber/OutputPanel.jsx';
 import MainView from './components/gerber/MainViewer.jsx';
 import { GerberProvider } from './components/context/GerberContext.jsx';
 
 function App() {
-
   return (
     <>
       <div className="h-screen flex flex-col">

@@ -11,11 +11,14 @@ const LayerControls = () => {
         topstack, 
         bottomstack, 
         fullLayers,
+        layerType,
+        side,
         setLayerType, 
         setChangeSelect, 
         setMainSvg,
         handleToggleCick,
-        isToggled
+        isToggled,
+        doubleSide
     } = useGerber();
 
     const viewOptions = [
@@ -27,7 +30,6 @@ const LayerControls = () => {
         setChangeSelect('custom-setup');
         const option = viewOptions.find(opt => opt.id === id)
         if (!option) return;
-
         setMainSvg({ id: id, svg: option.svg })
     }
 
@@ -74,8 +76,17 @@ const LayerControls = () => {
                 </div>
 
                 <div className="flex flex-col gap-3 px-3 pt-4 pb-3">
-                    <ThreeWaySlider options={viewOptions} onChange={handleSide} defaultValue={'top'} />
-                    <ThreeWaySlider options={colorOptions} variant="secondary" onChange={handleColor} />
+                    <ThreeWaySlider 
+                        options={viewOptions} 
+                        onChange={handleSide} 
+                        valueSync={side} 
+                    />
+                    <ThreeWaySlider 
+                        options={colorOptions} 
+                        variant="secondary" 
+                        onChange={handleColor} 
+                        valueSync={layerType} 
+                    />
                 </div>
 
                 { layers.map((layer, id) => (
@@ -94,6 +105,7 @@ const LayerControls = () => {
                                     )
                                 }}
                                 enabled={!isToggled[layer.type][property]}
+                                className={ !doubleSide && layer.ids[id].includes('bottom') ? 'pointer-events-none opacity-40' : '' }
                             />
                         ))}
                     </div>

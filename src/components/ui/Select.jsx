@@ -3,7 +3,7 @@ import { CheckIcon, ChevronDownIcon } from '@heroicons/react/20/solid'
 import { cn } from "../../utils/cn";
 import PropTypes from 'prop-types';
 
-const Select = ({ options, selected, setSelected, variant = "bottom", onSelect }) => {
+const Select = ({ options, selected, setSelected, variant = "bottom", onSelect, getOptionClass }) => {
 
     const optionsPosition = variant === "top" ?  "mb-1 bottom-full origin-bottom" :  "mt-1 top-full origin-top";
 
@@ -41,7 +41,8 @@ const Select = ({ options, selected, setSelected, variant = "bottom", onSelect }
                                 value={value}
                                 className={cn(
                                     'cursor-pointer select-none px-2 py-1 text-sm flex items-center gap-2',
-                                    'data-[focus]:bg-gray-100 data-[focus]:text-black data-[selected]:bg-blue-50'
+                                    'data-[focus]:bg-gray-100 data-[focus]:text-black data-[selected]:bg-blue-50',
+                                    getOptionClass?.(value)
                                 )}
                             >
                                 <div className="text-sm/6 ">{value}</div>
@@ -63,7 +64,8 @@ Select.propTypes = {
     selected: PropTypes.string.isRequired,
     setSelected: PropTypes.func.isRequired,
     variant: PropTypes.oneOf(["top", "bottom"]),
-    onSelect: PropTypes.func
+    onSelect: PropTypes.func,
+    getOptionClass: PropTypes.func
 }
 
 export default Select;

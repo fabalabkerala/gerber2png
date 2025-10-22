@@ -4,7 +4,7 @@ import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { motion } from "motion/react";
 import { cn } from "../../utils/cn";
 
-function LayerToggle({ layerName, enabled: controlled, onChange }) {
+function LayerToggle({ layerName, enabled: controlled, onChange, className }) {
     const [ internalEnabled, setInternalEnabled ] = useState(false);
     const isControlled = controlled !== undefined;
     const enabled = isControlled ? controlled : internalEnabled;
@@ -15,7 +15,7 @@ function LayerToggle({ layerName, enabled: controlled, onChange }) {
     }
     return (
         <>
-            <div className="flex justify-between items-center px-1 py-1 border w-full h-fit rounded">
+            <div className={cn("flex justify-between items-center px-1 py-1 border w-full h-fit rounded", className)}>
                 <p className="text-xs px-1 font-medium text-gray-700 capitalize">{ layerName }</p>
                 <motion.button 
                     className={cn(

@@ -35,7 +35,7 @@ export default function FileDropZone({ onFilesSelect, accept = "*", multiple = f
             onDrop={handleFiles}
             whileTap={{ scale: 0.998 }}
             className={cn(
-                "group flex flex-col items-center justify-center h-full border border-dashed rounded-xl p-6 cursor-pointer transition-colors duration-300",
+                "group flex flex-col items-center justify-center h-full border border-dashed rounded-lg p-6 cursor-pointer transition-colors duration-300",
                 isDragging ? "border-[#e57345] bg-blue-50" : "border-white bg-zinc-100 hover:border hover:border-[#e57345] hover:bg-gray-50"
             )} 
         >

@@ -5,25 +5,39 @@ import SwitchToggle from "../ui/Switch";
 import { motion } from "motion/react";
 import { useGerber } from "../context/GerberContext";
 import generateOuterSvg from "../../utils/svgConverter/generateOuter";
-
 import { cn } from "../../utils/cn";
+import setUpConfig from "../../utils/svgConverter/quickSetup";
+import svg2png from "../../utils/svgConverter/svg2png";
+import { changeDpiBlob } from "changedpi";
+import handleColorChange from "../../utils/svgConverter/svgColorChange";
 
-const options = ["Custom", "Top Trace", "Top Drill", "Top Cut"];
+const options = ["generate-all", "top-trace", "top-drill", "top-cut", "bottom-trace", "bottom-cut", "custom"];
 const toolOption = ["0.8", "0.0"];
 
 const GerberOptions = () => {
     const { 
+        mainSvg,
+        setMainSvg,
         topstack, 
         bottomstack, 
         fullLayers, 
         handleToggleCick, 
         isToggled, 
         stackConfig, 
+        layerType,
+        setLayerType,
+        pngUrls, 
+        setPngUrls, 
+        canvasBg, 
+        setCanvasBg, 
+        setIsToggled,
+        setLoader,
+        doubleSide, 
+        setDoubleSide
     } = useGerber();
 
-    const [selected, setSelected] = useState(options[0]);
+    const [ selected, setSelected ] = useState(options[0]);
     const [ toolSelected, setToolSelected ] = useState(toolOption[0]);
-    const [ doubleSide, setDoubleSide ] = useState(false);
  
     // -----------------------
     // Double Side PCB Options
@@ -73,17 +87,146 @@ const GerberOptions = () => {
         })
     }
 
+
+    // -----------------------
+    // PNG Generation Function
+    // -----------------------
+    const handleSvg = (svg, option, setup) => {
+        const [, gerberSvg] = svg.querySelectorAll('svg');
+
+        gerberSvg.querySelectorAll('g').forEach(g => {
+            
+            if (g.hasAttribute('id')) {
+                // console.log('g', g)
+                const id = g.getAttribute('id');
+                g.style.display = id.includes(setup.layerid) ? 'block' : id.includes(setup.stack.id) ? 'none' : id.includes('drillMask') ? 'none' : '   ';
+            }
+        })
+
+        const clipPath = gerberSvg.querySelector('clipPath');
+        if (clipPath) clipPath.style.display = setup.layerid === 'outline' ? 'block' : 'none';
+
+        const outerG = svg.querySelector(`#${ setup.stack === topstack ? 'toplayer': 'bottomlayer' }outer`);
+        outerG.style.display = option === 'top-cut' ? doubleSide ? 'block' : 'none' : 'none';
+    }
+
+    const generatePNG = async (targetSvg, twoSide, name, canvasBg) => {
+        return new Promise((resolve, reject) => {
+            const [outerSvg, gerberSvg] = targetSvg.querySelectorAll('svg');
+            const svg = twoSide ? targetSvg : gerberSvg;
+
+            const drillPath = gerberSvg.querySelector('#drillMask path');
+            drillPath.setAttribute('fill', layerType === 'bw' ? '#ffffff' : '#000000');
+            outerSvg.setAttribute('style', `opacity: ${ twoSide ? 1 : 0}; fill:${ canvasBg === 'black' ? '#ffffff' : '#000000' }`);
+
+            const svgString = new XMLSerializer().serializeToString(svg);
+            const width = parseFloat(svg.getAttribute('width'));
+            const height = parseFloat(svg.getAttribute('height'));
+
+            svg2png(svgString, width, height, canvasBg).then(canvas => {
+                canvas.setAttribute('style', 'width: 100%; height: 100%;');
+                canvas.toBlob(pngBlob => {
+                    changeDpiBlob(pngBlob, 1000).then((changeBlob) => {
+                        const finalBlob = new Blob([changeBlob], { type: 'image/png' });
+                        const blobUrl = (window.URL || window.webkitURL || window).createObjectURL(finalBlob);
+
+                        resolve({ name: name, url: blobUrl });
+                    })
+                }, 'image/png');
+            }).catch(err => { 
+                console.error('Error converting svg to png :', err)
+                reject(err);
+            });     
+            
+        })
+        
+    }
+
+    const handlePngConversion = async () => {
+        // console.log('quicksetup :', selected);
+        setLoader(true)
+        if (selected === 'generate-all') {
+            const newUrls = []
+            for (const option in setUpConfig(topstack, bottomstack)) {
+                const setup = setUpConfig(topstack, bottomstack)[option];
+
+                if (!doubleSide && setup.stack !== topstack) continue;
+                
+                const svg = setup.stack.svg.cloneNode(true);
+                handleSvg(svg, option, setup);
+                handleColorChange({ color: setup.color, id: topstack.id, svgs:[svg] });
+                // console.log('Side : ', setup)
+                const newUrl = await generatePNG(svg, doubleSide, setup.id, setup.canvas);
+                // console.log( 'newURLS : ',{ name: newUrl.name, url: newUrl.url })
+                newUrls.push({ name: newUrl.name, url: newUrl.url });
+            }
+
+            // console.log('newUrls', newUrls)
+            setPngUrls([...pngUrls, ...newUrls]);
+            setLoader(false);
+            return
+        }
+
+        const targetSvg = mainSvg.svg === fullLayers ? topstack.svg.cloneNode(true) : mainSvg.svg.cloneNode(true); 
+        // console.log('TargetSVG : ', targetSvg)
+        const blob = await generatePNG(targetSvg, doubleSide, mainSvg.id, canvasBg);
+        // console.log( 'newURLS : ',{ name: blob.name, url: blob.url })
+        setPngUrls([...pngUrls, { name: blob.name, url: blob.url }]);
+        setLoader(false);
+    }
+
+    // -----------
+    // Quick Setup
+    // -----------
+    const handleQuickSetup = (option) => {
+        const setupConfig = setUpConfig(topstack, bottomstack)
+        const setup = setupConfig[option];
+        const toggleButtons = setupConfig[option].toggleButtons;
+
+        setIsToggled(prevObject => {
+            let updatedState = { ...prevObject };
+
+            // Update the state of the selected button
+            updatedState = {
+                ...updatedState,
+                [setup.side]: {
+                    ...updatedState[setup.side],
+                    [setup.button]: false,
+                }
+            }
+
+            // Update the state of the buttons to be toggled
+            toggleButtons.forEach(button => {
+                // console.log('button to hide : ', button)
+                updatedState = {
+                    ...updatedState,
+                    [button.side]: {
+                        ...updatedState[button.side],
+                        [button.button]: true,
+                    }
+                }
+            })
+
+            return updatedState;
+        });
+        
+        setCanvasBg(setup.canvas);
+        setMainSvg({id: setup.id, svg: setup.stack.svg })
+        setLayerType(setup.color);
+
+
+        setTimeout(() => {
+            handleSvg(setup.stack.svg, option, setup);
+            handleColorChange({ color: setup.color, id: topstack.id, svgs: [topstack.svg, bottomstack.svg] }); 
+        }, 300);  
+    }
+
     return (
         <>
             <div className="flex flex-col bg-white pb-3 rounded shadow">
                 {/* Heading */}
                 <div className="flex justify-between items-center bg-[#F5F5F5] px-2 py-1 rounded-tl-md rounded-tr-md relative">
                     <p className="font-medium text-sm ps-0.5 text-gray-700">Options</p>
-                    <button className="flex items-center h-fit gap-1 bg-white px-1 rounded-sm">
-                        <p className="text-xs py-[1px] ps-1">Preview</p>
-                        <ImageIcon width={14} height={14} strokeWidth={4} stroke={"black"} />
-                    </button>
-
                 </div>
 
                 <div className="px-2">
@@ -91,9 +234,27 @@ const GerberOptions = () => {
                     <p className="text-xs font-medium text-gray-700 pt-3 pb-2 px-1">Quick Setup</p>
 
                     <div className="flex gap-1 text-sm">
-                        <Select options={options} setSelected={setSelected} selected={selected} />
+                        <Select 
+                            options={options} 
+                            setSelected={setSelected} 
+                            selected={selected} 
+                            onSelect={(value) => {
+                                if (!doubleSide && value.startsWith("bottom")) return; // disable click
+                                if (value === 'generate-all' || value === 'custom') {
+                                    setSelected(value)
+                                } else {
+                                    handleQuickSetup(value);
+                                }
+                            }} 
+                            getOptionClass={(value) => !doubleSide && value.startsWith("bottom") ? "opacity-40 cursor-not-allowed pointer-events-none" : "" }
 
-                        <motion.button className="flex justify-center items-center gap-1 bg-[#EF4444] pr-2 ps-1 rounded bord" whileTap={{ scale: 0.96 }}>
+                        />
+
+                        <motion.button 
+                            className="flex justify-center items-center gap-1 bg-[#EF4444] pr-2 ps-1 rounded bord" 
+                            whileTap={{ scale: 0.96 }}
+                            onClick={handlePngConversion}
+                        >
                             <ImageIcon width={20} height={20} strokeWidth={8} stroke={"white"} />
                             <p className="text-white text-xs font-medium text-nowrap">Generate PNG</p>
                         </motion.button>
