@@ -1,10 +1,12 @@
-import { useState } from "react";
 import LayerToggle from "../ui/LayerToggle";
 import Select from "../ui/Select";
 import { useGerber } from "../context/GerberContext";
 import { getLayerGroups, toggleLayerVisibility } from "../../utils/svgConverter/layerUtils";
 
-const options = ["black", "white"];
+const options = [
+    { id: 'black', label: 'Black' }, 
+    { id: 'white', label: 'White' }, 
+];
 
 const OuterSettings = () => {
     const { 

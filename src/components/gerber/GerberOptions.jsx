@@ -22,7 +22,10 @@ const SelectOptions = [
     { id: "custom", label: "Custom" },
 ];
   
-const toolOption = ["0.8", "0.0"];
+const toolOption = [
+    {id: "0.8", label: "0.8"},
+    {id: "0.0", label: "0.0"},
+];
 
 const GerberOptions = () => {
     const { 
@@ -49,7 +52,7 @@ const GerberOptions = () => {
     } = useGerber();
 
     // const [ selected, setSelected ] = useState('custom');
-    const [ toolSelected, setToolSelected ] = useState(toolOption[0]);
+    const [ toolSelected, setToolSelected ] = useState(toolOption[0].id);
  
     // -----------------------
     // Double Side PCB Options
@@ -127,13 +130,13 @@ const GerberOptions = () => {
         outerG.style.display = option === 'top-cut' ? doubleSide ? 'block' : 'none' : 'none';
     }
 
-    const generatePNG = async (targetSvg, twoSide, name, canvasBg) => {
+    const generatePNG = async (targetSvg, twoSide, name, canvasBg, layertype) => {
         return new Promise((resolve, reject) => {
             const [outerSvg, gerberSvg] = targetSvg.querySelectorAll('svg');
             const svg = twoSide ? targetSvg : gerberSvg;
 
             const drillPath = gerberSvg.querySelector('#drillMask path');
-            drillPath.setAttribute('fill', layerType === 'bw' ? '#ffffff' : '#000000');
+            drillPath.setAttribute('fill', layertype === 'bw' ? '#ffffff' : '#000000');
             outerSvg.setAttribute('style', `opacity: ${ twoSide ? 1 : 0}; fill:${ canvasBg === 'black' ? '#ffffff' : '#000000' }`);
 
             const svgString = new XMLSerializer().serializeToString(svg);
@@ -173,8 +176,8 @@ const GerberOptions = () => {
                 const svg = setup.stack.svg.cloneNode(true);
                 handleSvg(svg, option, setup, changeSelect === "generate-for-carvera" ? 'carvera' : 'general');
                 handleColorChange({ color: setup.color, id: topstack.id, svgs:[svg] });
-                console.log('Side : ', svg)
-                const newUrl = await generatePNG(svg, doubleSide, setup.id, setup.canvas);
+                console.log('Side : ', svg, setup)
+                const newUrl = await generatePNG(svg, doubleSide, setup.id, setup.canvas, setup.color);
                 // console.log( 'newURLS : ',{ name: newUrl.name, url: newUrl.url })
                 newUrls.push({ name: newUrl.name, url: newUrl.url });
             }
@@ -187,7 +190,7 @@ const GerberOptions = () => {
 
         const targetSvg = mainSvg.svg === fullLayers ? topstack.svg.cloneNode(true) : mainSvg.svg.cloneNode(true); 
         // console.log('TargetSVG : ', targetSvg)
-        const blob = await generatePNG(targetSvg, doubleSide, mainSvg.id, canvasBg);
+        const blob = await generatePNG(targetSvg, doubleSide, mainSvg.id, canvasBg, layerType);
         // console.log( 'newURLS : ',{ name: blob.name, url: blob.url })
         setPngUrls([...pngUrls, { name: blob.name, url: blob.url }]);
         setLoader(false);
