@@ -1,15 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
-import PreviewTab from "../ui/PreviewTab";
 import FileDropZone from "../ui/FileDropZone";
 import { AnimatePresence } from "motion/react";
-import { useGerber } from "../context/GerberContext";
+import { useGerberLayer, useGerberSettings, useGerberView } from "../context/GerberContext";
 import convertToSvg from "../../utils/svgConverter/convertToSvg";
 import { motion } from "motion/react";
 
 const MainView = () => {
-    const { setTopStack, setBottomStack, setFullLayers, mainSvg, setMainSvg, setLayerType, setStackConfig, setSide, canvasBg } = useGerber();
-    // const [ preview, setPreview ] = useState(false);
+    const { setTopStack, setBottomStack, setFullLayers } = useGerberLayer();
+    const { setLayerType, setStackConfig } = useGerberSettings();
+    const { mainSvg, setMainSvg, setSide } = useGerberView();
+
     const resultRef = useRef(null);
     const dropAreaRef = useRef(null);
 
@@ -62,24 +63,12 @@ const MainView = () => {
                             <div 
                                 ref={resultRef}
                                 className="flex items-center h-full justify-center p-2"
-                                style={{ 
-                                    filter: "drop-shadow(0px 2px 6px rgba(0,0,0,0.3))", 
-                                    // background: canvasBg 
-                                }}
+                                style={{ filter: "drop-shadow(0px 2px 6px rgba(0,0,0,0.3))", }}
                             ></div>
                         </AnimatePresence>
                     </TransformComponent>
                 </TransformWrapper>
             </motion.div>
-
-            {/* { preview &&
-                <div className="absolute top-3 left-3 w-[300px] bg-white rounded-md shadow-xl border border-gray-200 z-50">
-                    <PreviewTab
-                        blobUrl="https://images.unsplash.com/photo-1594868116409-083f2a48b14c?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwcm9maWxlLXBhZ2V8NHx8fGVufDB8fHx8fA%3D%3D"
-                        closeWindow={setPreview}
-                    />
-                </div>
-            } */}
         </>
     )
 }

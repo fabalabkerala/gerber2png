@@ -1,6 +1,6 @@
 import LayerToggle from "../ui/LayerToggle";
 import Select from "../ui/Select";
-import { useGerber } from "../context/GerberContext";
+import { useGerberLayer, useGerberSettings } from "../context/GerberContext";
 import { getLayerGroups, toggleLayerVisibility } from "../../utils/svgConverter/layerUtils";
 
 const options = [
@@ -9,17 +9,8 @@ const options = [
 ];
 
 const OuterSettings = () => {
-    const { 
-        isToggled, 
-        layertype, 
-        topstack, 
-        bottomstack, 
-        fullLayers,
-        handleToggleCick,
-        canvasBg,
-        setCanvasBg,
-        doubleSide
-    } = useGerber();
+    const { topstack, bottomstack, fullLayers } = useGerberLayer();
+    const { isToggled, layertype, handleToggleCick, canvasBg, setCanvasBg, doubleSide } = useGerberSettings()
 
     const handleOuterlayer = (isVisible) => {
         const layerGroups = getLayerGroups(layertype, topstack, bottomstack, fullLayers);

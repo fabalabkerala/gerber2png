@@ -2,12 +2,12 @@ import { motion, AnimatePresence } from "motion/react";
 import { EllipsisVerticalIcon, FolderArrowDownIcon, Square3Stack3DIcon, TrashIcon } from "@heroicons/react/24/outline";
 import PngCard from "../ui/PngCard";
 import { useEffect, useRef, useState } from "react";
-import { useGerber } from "../context/GerberContext";
+import { useGerberView } from "../context/GerberContext";
 import JSZip from "jszip";
 import ImageIcon from "../icons/ImageIcon";
 
 const OutputPanel = () => {
-    const { pngUrls, setPngUrls } = useGerber();
+    const { pngUrls, setPngUrls } = useGerberView();
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef(null);
 
@@ -57,7 +57,7 @@ const OutputPanel = () => {
     return (
         <>
             { pngUrls.length > 0 ? (
-                <div className="flex flex-col gap-1 rounded">
+                <div className="flex flex-col gap-1 rounded h-full">
                     <div className="flex justify-end items-center gap-2 rounded-tl-md rounded-tr-md">
                         <motion.button
                             className="flex justify-center items-center gap-2 bg-[#e57345] px-3 py-2 rounded shadow" 
@@ -105,7 +105,7 @@ const OutputPanel = () => {
                         </div>
                     </div>
 
-                    <div className="">
+                    <div className="md:overflow-y-auto custom-scrollbar">
                         { pngUrls.slice().reverse().map((item, index) => (
                             <PngCard
                                 key={index}

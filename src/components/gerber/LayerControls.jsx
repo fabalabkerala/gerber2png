@@ -1,25 +1,20 @@
-import { useEffect } from "react";
+// import { useEffect } from "react";
 import { getLayerGroups, handleOutlineVisibility, toggleLayerVisibility } from "../../utils/svgConverter/layerUtils";
 import handleColorChange from "../../utils/svgConverter/svgColorChange";
-import { useGerber } from "../context/GerberContext";
+import { 
+    // useGerber ,
+    useGerberLayer,
+    useGerberSettings,
+    useGerberView
+} from "../context/GerberContext";
 import LayerToggle from "../ui/LayerToggle";
 import ThreeWaySlider from "../ui/ThreeWaySlider";
 
 
 const LayerControls = () => {
-    const { 
-        topstack, 
-        bottomstack, 
-        fullLayers,
-        layerType,
-        side,
-        setLayerType, 
-        setChangeSelect, 
-        setMainSvg,
-        handleToggleCick,
-        isToggled,
-        doubleSide
-    } = useGerber();
+    const { topstack, bottomstack, fullLayers } = useGerberLayer();
+    const { layerType, setLayerType, setChangeSelect, handleToggleCick, isToggled, doubleSide } = useGerberSettings();
+    const { side, setMainSvg } = useGerberView();
 
     const viewOptions = [
         { id: "all", label: "All Layers", svg: fullLayers },

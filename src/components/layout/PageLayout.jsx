@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
-import { useGerber } from '../context/GerberContext';
+import { useGerberView } from '../context/GerberContext';
 import { AnimatePresence, motion } from 'motion/react';
 
 export const  PageLayout = ({ sidebar, main, right }) => {
-    const { loader } = useGerber();
+    const { loader } = useGerberView();
     return (
         <>
             <div className="h-full relative flex flex-col md:flex-row bg-[#EBEBEB] md:overflow-hidden">
@@ -13,7 +13,7 @@ export const  PageLayout = ({ sidebar, main, right }) => {
 
                 <main className="flex-1 h-full p-3 relative">{main}</main>
 
-                <aside className="w-full md:w-1/6 h-48 md:h-full min-w-[300px] py-3 pe-3 ps-0.5 md:overflow-y-auto custom-scrollbar">
+                <aside className="w-full md:w-1/6 h-48 md:h-full min-w-[300px] py-3 pe-3 ps-0.5">
                     {right}
                 </aside>
 
