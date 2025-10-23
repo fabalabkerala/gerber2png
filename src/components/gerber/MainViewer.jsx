@@ -52,7 +52,7 @@ const MainView = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.3, ease: 'easeOut' }}
-                className="w-full h-full"
+                className="w-full h-full bg-zinc-100 rounded-md shadow"
             >
                 <TransformWrapper initialScale={1} minScale={.5} limitToBounds={ false }>
                     <TransformComponent
@@ -63,7 +63,7 @@ const MainView = () => {
                             <div 
                                 ref={resultRef}
                                 className="flex items-center h-full justify-center p-2"
-                                style={{ filter: "drop-shadow(0px 2px 6px rgba(0,0,0,0.3))", }}
+                                style={{ filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.5))", }}
                             ></div>
                         </AnimatePresence>
                     </TransformComponent>

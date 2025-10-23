@@ -5,10 +5,12 @@ import { useEffect, useRef, useState } from "react";
 import { useGerberView } from "../context/GerberContext";
 import JSZip from "jszip";
 import ImageIcon from "../icons/ImageIcon";
+import BulkLayoutPanel from "./BulkLayoutPanel";
 
 const OutputPanel = () => {
     const { pngUrls, setPngUrls } = useGerberView();
     const [menuOpen, setMenuOpen] = useState(false);
+    const [showBulkModal, setShowBulkModal] = useState(true);
     const menuRef = useRef(null);
 
     useEffect(() => {
@@ -56,8 +58,14 @@ const OutputPanel = () => {
 
     return (
         <>
+            <AnimatePresence>
             { pngUrls.length > 0 ? (
-                <div className="flex flex-col gap-1 rounded h-full">
+                <motion.div 
+                    className="flex flex-col gap-1 rounded h-full" 
+                    initial={{ opacity: 0, scale: 0.99 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.99 }}
+                >
                     <div className="flex justify-end items-center gap-2 rounded-tl-md rounded-tr-md">
                         <motion.button
                             className="flex justify-center items-center gap-2 bg-[#e57345] px-3 py-2 rounded shadow" 
@@ -87,7 +95,10 @@ const OutputPanel = () => {
                                         className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-md shadow-md z-10"
                                     >
                                         <button
-                                            onClick={() => console.log("Rename")}
+                                            onClick={() => {
+                                                setShowBulkModal(true);
+                                                setMenuOpen(false);
+                                            }}
                                             className="flex items-center gap-1 w-full text-left px-4 py-2 text-sm hover:bg-gray-50 border-b font-medium text-gray-700"
                                         >
                                             <Square3Stack3DIcon width={16} height={16} className="text-[#e57345]"/> Bulk Action
@@ -121,20 +132,23 @@ const OutputPanel = () => {
                                 }}
                             />
                         ))}
-                        {/* <PngCard
-                            key={1}
-                            blobUrl={'https://images.unsplash.com/photo-1594868116409-083f2a48b14c?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwcm9maWxlLXBhZ2V8NHx8fGVufDB8fHx8fA%3D%3D'}
-                            name={'top_trace_1000dpi.png'}
-                        /> */}
                     </div>
 
-                </div>
+                </motion.div>
             ):(
-                <div className="flex flex-col gap-1 h-full rounded justify-center items-center">
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.99 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.99 }} 
+                    className="flex flex-col gap-1 h-full rounded justify-center items-center"
+                >
                     <ImageIcon width={35} height={35} strokeWidth={6} stroke={"#374151"} />
                     <p className=" text-gray-700">No PNG images are generated</p>
-                </div>
+                </motion.div>
             )}
+            </AnimatePresence>
+
+            <BulkLayoutPanel showBulkModal={showBulkModal} setShowBulkModal={setShowBulkModal} />
         </>
     )
 }
