@@ -71,3 +71,27 @@ const generatePNG = async (targetSvg, twoSide, name, canvasBg, layertype) => {
     })
 }
 export default generatePNG;
+
+export const getPngDimensions = async (blobUrl, dpi = 1000) => {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            const widthPx = img.naturalWidth;
+            const heightPx = img.naturalHeight;
+            const widthInches = widthPx / dpi;
+            const heightInches = heightPx / dpi;
+            const widthMm = widthInches * 25.4;
+            const heightMm = heightInches * 25.4;
+
+            const round = (num) => Math.round(num * 100) / 100;
+
+            resolve({ 
+                width: round(widthMm), 
+                height: round(heightMm) 
+            });
+        };
+        img.onerror = reject;
+        img.src = blobUrl;
+    });
+};
+ 

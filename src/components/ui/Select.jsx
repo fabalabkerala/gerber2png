@@ -24,7 +24,7 @@ const Select = ({ options, selected, setSelected, variant = "bottom", onSelect, 
                     >
                         {options.find(option => option.id === selected)?.label || selected}
                         <ChevronDownIcon
-                            className="absolute top-1/2 -translate-y-1/2 right-1 size-5 w-fit px-0.5 fill-black bg-[#F0F0F0]"
+                            className="absolute top-1/2 -translate-y-1/2 right-0.5 size-5 w-fit px-0.5 fill-black bg-[#F0F0F0]"
                             aria-hidden="true"
                         />
                     </ListboxButton>
