@@ -52,7 +52,7 @@ const MainView = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.3, ease: 'easeOut' }}
-                className="w-full h-full bg-zinc-100 rounded-md shadow"
+                className="w-full h-full bg-zinc-100 border-2 border-white rounded-md shadow"
             >
                 <TransformWrapper initialScale={1} minScale={.5} limitToBounds={ false }>
                     <TransformComponent
