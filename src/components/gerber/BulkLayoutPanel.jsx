@@ -1,4 +1,4 @@
-import { XMarkIcon, CheckIcon, ChevronDownIcon, PhotoIcon, DocumentCheckIcon, DocumentDuplicateIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { CheckIcon, ChevronDownIcon, PhotoIcon, DocumentCheckIcon, DocumentDuplicateIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headlessui/react";
 import { cn } from "../../utils/cn";
 import { AnimatePresence, motion } from "motion/react"
@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import { useGerberView } from "../context/GerberContext";
 import { getPngDimensions } from "../../utils/svgConverter/svg2png";
 import Select from "../ui/Select";
+import ModalHeader from "../ui/ModalHeader";
+import ImageSelect from "../ui/ImageSelect";
 
 const options = [
     { id: 'black', label: 'Black' }, 
@@ -15,7 +17,7 @@ const options = [
 
 const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
     const { pngUrls } = useGerberView();
-    const [selected, setSelected] = useState('Choose an Image');
+    const [ selectedPng, setSelectedPng ] = useState('Choose an Image');
     const [ layoutBg, setLayoutBg ] = useState('black');
     const [ config, setConfig ] = useState({
         row: 1,
@@ -26,17 +28,17 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
     const [ dimension, setDimension ] = useState({ width: null, height: null })
 
     useEffect(() => {
-        if (!selected.url) return;
+        if (!selectedPng.url) return;
 
         const getDimension = async () => {
-            const dimension = await getPngDimensions(selected.url);
+            const dimension = await getPngDimensions(selectedPng.url);
             setDimension(dimension)
         }
         getDimension();
 
-        // return () => setSelected('Choose an Image');
+        // return () => setselectedPng('Choose an Image');
         
-    }, [selected]);
+    }, [selectedPng]);
 
     const totalSlots = config.row * config.column;
     const [visibleSlots, setVisibleSlots] = useState(
@@ -62,6 +64,11 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
             prev.map((v, i) => (i === index ? !v : v))
         );
     };
+
+    const handleClose = () => {
+        setShowBulkModal(false);
+        setSelectedPng('Choose an Image');
+    }
 
     // Update visibleSlots if totalSlots changes
     useEffect(() => {
@@ -92,70 +99,20 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                             transition={{ type: "spring", stiffness: 200, damping: 20 }}
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <div className="flex justify-between items-center bg-[#F5F5F5] rounded-tl-md rounded-tr-md">
-                                <p className="font-medium text-sm px-2 text-gray-700">Layout Setup</p>
-                                <motion.button 
-                                    whileTap={{ scale: 0.97, background: '#ef4444' }}
-                                    onClick={() => setShowBulkModal(false)}
-                                    className="py-1 px-2 rounded-tr shadow-sm border bg-red-400 border-red-300"
-                                >
-                                    <XMarkIcon width={20} height={16} strokeWidth={2} stroke="white" />
-                                </motion.button>
-                            </div>
-                            {/* <p className="text-gray-600 text-sm">Select an action to apply to all PNGs.</p> */}
+                            <ModalHeader title="Layout Setup" onClose={ handleClose } />
+                            
                             <div className="flex gap-3 p-3">
                                 <div className="flex flex-col gap-2 p-2">
-                                    <Listbox value={selected} onChange={(png) => {
-                                        console.log('selected : ', png)
-                                        setSelected(png)
-                                    }}>
-                                        <div className="relative w-full pr-2">
-                                            <ListboxButton
-                                                className={cn(                    
-                                                    'relative block w-full rounded pl-2 text-left text-xs border py-1',
-                                                    'focus:outline-none focus:ring-1 focus:ring-gray-400'
-                                                )}
-                                            >
-                                                {pngUrls.find(png => png.name === selected.name)?.name || selected}
-                                                <ChevronDownIcon
-                                                    className="absolute top-1/2 -translate-y-1/2 right-0 size-2 w-fit px-2 py-1 h-full bg-[#F0F0F0]"
-                                                    aria-hidden="true"
-                                                />
-                                            </ListboxButton>
-                                            <ListboxOptions
-                                                transition
-                                                className={cn(
-                                                    "absolute z-50 mt-1 max-h-60 w-full overflow-auto custom-scrollbar rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none",
-                                                    // optionsPosition
-                                                )} 
-                                            >
-                                                { pngUrls.map(({name, url}, index) => (
-                                                    <ListboxOption
-                                                        key={index}
-                                                        value={{name, url}}
-                                                        className={cn(
-                                                            'cursor-pointer select-none px-2 py-1 text-sm flex items-center gap-2',
-                                                            'data-[focus]:bg-gray-100 data-[focus]:text-black data-[selected]:bg-blue-50',
-                                                            selected.name === name ? 'bg-zinc-100' : ''
-                                                            // getOptionClass?.(id)
-                                                        )}
-                                                    >
-                                                        <img className="w-12 object-contain rounded " src={url} />
-                                                        <div className="text-xs/6 ">{name}</div>
-                                                        <CheckIcon className={cn(
-                                                            "size-2 fill-black visible",
-                                                            selected.name === name ? 'visible' : 'invisible'
-                                                        )} />
-                                                    </ListboxOption>
-                                                ))}
-                                            </ListboxOptions>
-                                        </div>
-                                    </Listbox>
+                                    <ImageSelect
+                                        options={pngUrls}
+                                        selected={selectedPng}
+                                        setSelected={setSelectedPng}
+                                    />
                                     <div className="pb-5 pr-6 mt-2 w-64 h-48 flex flex-col justify-center items-center">
-                                        { selected.url ? (
+                                        { selectedPng.url ? (
                                             <div className="flex h-full w-full">
                                                 <div className="relative h-full w-fit mx-auto">
-                                                    <img src={selected.url} alt="dsdfsd" className="h-full object-contain" />
+                                                    <img src={selectedPng.url} alt="dsdfsd" className="h-full object-contain" />
 
                                                     <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-full h-px bg-zinc-300 my-3" />
                                                     <p className="absolute -bottom-5 left-1/2 -translate-x-1/2 bg-white px-2 text-xs font-medium">
@@ -180,10 +137,10 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                 </div>
 
                                 <div className="bg-zinc-100 flex-1 p-3 px-5 m-2 flex flex-col">
-                                    <p className="border-b mb-3 font-medium">Layout <span className="text-xs text-gray-600">(Rows X Columns)</span></p>
+                                    <p className="border-b mb-3 font-medium text-sm">Number of PCBs <span className="text-xs text-gray-600 font-normal">(Rows X Columns)</span></p>
                                     <div className="flex gap-3">
                                         <div className="flex items-center gap-2">
-                                            <label className="text-xs w-20 font-medium text-black">Rows</label>
+                                            <label className="text-xs w-20 text-black">Rows</label>
                                             <input 
                                                 className="rounded w-36 focus:outline-none text-center text-xs py-1 border" 
                                                 type="number"
@@ -194,7 +151,7 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                             />
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <label className="text-xs w-20 font-medium text-black">Columns</label>
+                                            <label className="text-xs w-20 text-black">Columns</label>
                                             <input 
                                                 className="rounded w-36 focus:outline-none text-center text-xs py-1 border" 
                                                 type="number" 
@@ -207,7 +164,7 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                     </div>
                                     <div className="flex gap-3 mt-3">
                                         <div className="flex items-center gap-2 flex-1">
-                                            <label className="text-xs w-20 font-medium text-black">Spacing <span className="text-gray-500 font-normal">(mm)</span></label>
+                                            <label className="text-xs w-20 text-black">Spacing <span className="text-gray-500 font-normal">(mm)</span></label>
                                             <input 
                                                 className="rounded w-36 focus:outline-none text-center text-xs py-1 border" 
                                                 type="number" 
@@ -218,7 +175,7 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                             />
                                         </div>
                                         <div className="flex items-center gap-2 flex-1">
-                                            <p className="text-xs w-20 font-medium text-black text-nowrap">Layout BG</p>
+                                            <p className="text-xs w-20 text-black text-nowrap">Layout BG</p>
                                             <div className="bg-white w-36">
                                                 <Select 
                                                     options={options} 
@@ -230,13 +187,13 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                     </div>
 
                                     <div className="flex-1 flex flex-col items-end justify-end gap-3 h-fit w-fit ms-auto pb-2">
-                                        { selected.url &&
+                                        { selectedPng.url &&
                                             <div className="flex items-end justify-center gap-1 bg-white border border-white py-1 px-1 rounded">
                                                 <DocumentCheckIcon width={17} height={17} strokeWidth={2} stroke="green" />
-                                                <p className="text-xs text-gray-500">layout_{config.row}_x_{config.column}_{selected.name}.png</p>
+                                                <p className="text-xs text-gray-500">layout_{config.row}_x_{config.column}_{selectedPng.name}.png</p>
                                             </div>
                                         }
-                                        <div className={cn("flex gap-1", selected.url ? "opacity-100 pointer-events-auto" : "opacity-60 pointer-events-none")}>
+                                        <div className={cn("flex gap-1", selectedPng.url ? "opacity-100 pointer-events-auto" : "opacity-60 pointer-events-none")}>
                                             <motion.button
                                                 className="flex justify-center items-center gap-1 border bg-white rounded overflow-hidden" 
                                                 whileTap={{ scale: 0.98 }}
@@ -269,7 +226,7 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
 
                                 <div className="flex">
                                     <div className="max-w-[550px] h-[300px] flex-1 mx-auto pb-6 pr-5 my-5">
-                                        { selected.url ? (
+                                        { selectedPng.url ? (
                                             <div
                                                 className="relative grid w-fit mx-auto my-auto border"
                                                 style={{
@@ -289,7 +246,7 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                                     { visibleSlots[i] ? (
                                                         <>
                                                             <img
-                                                                src={selected.url}
+                                                                src={selectedPng.url}
                                                                 alt={`slot-${i}`}
                                                                 className="max-h-full max-w-full"
                                                             />
@@ -300,7 +257,7 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                                     ) : (
                                                         <>
                                                             <img
-                                                                src={selected.url}
+                                                                src={selectedPng.url}
                                                                 alt={`slot-${i}`}
                                                                 className="max-h-full max-w-full opacity-0"
                                                             />
@@ -312,10 +269,6 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                                             </span>
                                                         </>
                                                     )}
-
-                                                    {/* <span className="absolute bottom-1 right-1 text-[10px] text-gray-400">
-                                                        #{i + 1}
-                                                    </span> */}
                                                     </div>
                                                 ))}
 
