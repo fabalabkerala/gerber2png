@@ -35,22 +35,22 @@ const ImageSelect = ({ options, selected, setSelected, variant = "bottom", onSel
                             optionsPosition
                         )} 
                     >
-                        { options.map(({name, url}, index) => (
+                        { options.map((option, index) => (
                             <ListboxOption
                                 key={index}
-                                value={{name, url}}
+                                value={option}
                                 className={cn(
                                     'cursor-pointer select-none px-2 py-1 text-sm flex items-center gap-2',
                                     'data-[focus]:bg-gray-100 data-[focus]:text-black data-[selected]:bg-blue-50',
-                                    selected.name === name ? 'bg-zinc-100' : '',
+                                    selected.name === option.name ? 'bg-zinc-100' : '',
                                     getOptionClass?.(index)
                                 )}
                             >
-                                <img className="w-12 object-contain rounded " src={url} />
-                                <div className="text-xs/6 ">{name}</div>
+                                <img className="w-12 object-contain rounded " src={option.url} />
+                                <div className="text-xs/6 ">{option.name}</div>
                                 <CheckIcon className={cn(
                                     "size-2 fill-black visible",
-                                    selected.name === name ? 'visible' : 'invisible'
+                                    selected.name === option.name ? 'visible' : 'invisible'
                                 )} />
                             </ListboxOption>
                         ))}

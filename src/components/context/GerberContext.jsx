@@ -107,8 +107,8 @@ export const GerberProvider = ({ children }) => {
     // ------------------------
     const [mainSvg, setMainSvg] = useState({id: null, svg: null});
     const [pngUrls, setPngUrls] = useState([
-        { name: 'top_url2.png', url: 'https://shorthand.com/the-craft/raster-images/assets/5kVrMqC0wp/sh-unsplash_5qt09yibrok-4096x2731.jpeg'},
-        { name: 'top_url.png', url: 'https://shorthand.com/the-craft/raster-images/assets/5kVrMqC0wp/sh-unsplash_5qt09yibrok-4096x2731.jpeg'},
+        { name: 'top_url2.png', url: 'https://shorthand.com/the-craft/raster-images/assets/5kVrMqC0wp/sh-unsplash_5qt09yibrok-4096x2731.jpeg', width: 100, height: 60 },
+        { name: 'top_url.png', url: 'https://shorthand.com/the-craft/raster-images/assets/5kVrMqC0wp/sh-unsplash_5qt09yibrok-4096x2731.jpeg', width: 100, height: 60 },
     ]);
     const [side, setSide] = useState(null);
     const [loader, setLoader] = useState(false);
