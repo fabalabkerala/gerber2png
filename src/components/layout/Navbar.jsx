@@ -10,9 +10,9 @@ export default function Navbar() {
     return (
         <>
             <nav className='w-full flex flex-col'>
-                <div className="flex justify-between items-center navbar h-14 px-5">
+                <div className="flex justify-between items-center navbar h-16 px-5 py-6">
                     <div className='flex items-center'>
-                        <img className="w-7" src={ pcbLogo } alt="" />
+                        <img className="h-full w-6" src={ pcbLogo } alt="" />
                         <div>
                         <span className='gerber'>Gerber</span><span className='two'>2</span><span className='png'>PNG</span>
                         </div>
@@ -27,7 +27,7 @@ export default function Navbar() {
                     </div>
                 </div>
 
-                <div className="flex">
+                {/* <div className="flex">
                     <button 
                         className={cn(
                             "px-4 py-1.5 w-64 text-sm",
@@ -42,7 +42,7 @@ export default function Navbar() {
                         )}
                         onClick={() => setActiveTab('generator')}
                     >G-Code Generator</button>
-                </div>
+                </div> */}
             </nav>
         </>
     )
