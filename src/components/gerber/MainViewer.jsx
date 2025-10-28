@@ -5,6 +5,7 @@ import { AnimatePresence } from "motion/react";
 import { useGerberLayer, useGerberSettings, useGerberView } from "../context/GerberContext";
 import convertToSvg from "../../utils/svgConverter/convertToSvg";
 import { motion } from "motion/react";
+import { cn } from "../../utils/cn";
 
 const MainView = () => {
     const { setTopStack, setBottomStack, setFullLayers } = useGerberLayer();
@@ -24,6 +25,7 @@ const MainView = () => {
     }
 
     useEffect(() => {
+        console.log(mainSvg)
         if (resultRef.current && mainSvg.svg) {  
             resultRef.current.innerHTML = '';
             resultRef.current.appendChild(mainSvg.svg);
@@ -49,10 +51,12 @@ const MainView = () => {
             <motion.div
                 key={'converted'}
                 initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
+                animate={{ opacity: mainSvg.svg ? 1 : 0, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.3, ease: 'easeOut' }}
-                className="w-full h-full bg-zinc-100 border-2 border-white rounded-md shadow"
+                className={cn(
+                    "w-full h-full bg-zinc-100 border-2 border-white rounded-md shadow",
+                )}
             >
                 <TransformWrapper initialScale={1} minScale={.5} limitToBounds={ false }>
                     <TransformComponent

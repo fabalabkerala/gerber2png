@@ -34,7 +34,8 @@ const ThreeWaySlider = ({ options, valueSync, onChange, variant = 'primary' }) =
                     onClick={() => handleClick(opt.id)}
                     className={cn(
                         "relative z-10 px-4 py-1.5 text-xs font-medium transition-colors duration-200 flex-1 text-nowrap",
-                        selected === opt.id ? variants[variant].label : 'text-gray-700'
+                        selected === opt.id ? variants[variant].label : 'text-gray-700', 
+                        opt.class
                     )}
                 >
                     {opt.label}

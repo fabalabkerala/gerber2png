@@ -40,8 +40,15 @@ export default function handleColorChange(props) {
     props.svgs.forEach(svg => {
         const svgId = svg.getAttribute('id');
         const outer = svg.querySelector(`#${svgId}outer`);
-        outer.style.fill = outerColor[props.color]
+        outer.style.fill = outerColor[props.color];
 
+        const drillMask = svg.querySelector(`#drillMask`);
+        if (drillMask) {
+            const innerPath = drillMask.querySelector('path');
+            innerPath.setAttribute(
+                'fill', props.color === 'bwInvert' ? '#000000' : '#ffffff')
+        }
+        
         const stackStyle = svg.querySelector('style');
         stackStyle.innerHTML = svgColor[props.color];
     })

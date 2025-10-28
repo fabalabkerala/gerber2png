@@ -19,7 +19,7 @@ const LayerControls = () => {
     const viewOptions = [
         { id: "all", label: "All Layers", svg: fullLayers },
         { id: "top", label: "Top", svg: topstack.svg },
-        { id: "bottom", label: "Bottom", svg: bottomstack.svg },
+        { id: "bottom", label: "Bottom", svg: bottomstack.svg, class: doubleSide ? 'pointer-events-auto opacity-100': 'pointer-events-none opacity-50' },
     ];
     const handleSide = (id) => {
         setChangeSelect('custom');
