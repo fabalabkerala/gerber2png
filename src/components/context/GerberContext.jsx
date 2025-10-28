@@ -65,6 +65,16 @@ export const GerberProvider = ({ children }) => {
                 }
             }
 
+            if (doubleSide) {
+                updatedState = {
+                    ...updatedState,
+                    commonlayer: {
+                        ...updatedState.commonlayer,
+                        outlayer: option === 'top-cut' ? false : true
+                    }
+                }
+            }
+
             // Update the state of the buttons to be toggled
             toggleButtons.forEach(button => {
                 updatedState = {
@@ -107,8 +117,8 @@ export const GerberProvider = ({ children }) => {
     // ------------------------
     const [mainSvg, setMainSvg] = useState({id: null, svg: null});
     const [pngUrls, setPngUrls] = useState([
-        { name: 'top_url2.png', url: 'https://shorthand.com/the-craft/raster-images/assets/5kVrMqC0wp/sh-unsplash_5qt09yibrok-4096x2731.jpeg', width: 100, height: 60 },
-        { name: 'top_url.png', url: 'https://shorthand.com/the-craft/raster-images/assets/5kVrMqC0wp/sh-unsplash_5qt09yibrok-4096x2731.jpeg', width: 100, height: 60 },
+        // { name: 'top_url2.png', url: 'https://shorthand.com/the-craft/raster-images/assets/5kVrMqC0wp/sh-unsplash_5qt09yibrok-4096x2731.jpeg', width: 20, height: 20 },
+        // { name: 'top_url.png', url: 'https://shorthand.com/the-craft/raster-images/assets/5kVrMqC0wp/sh-unsplash_5qt09yibrok-4096x2731.jpeg', width: 100, height: 60 },
     ]);
     const [side, setSide] = useState(null);
     const [loader, setLoader] = useState(false);
@@ -149,14 +159,14 @@ export const GerberProvider = ({ children }) => {
                     handleColorChange({ color: setup.color, id: topstack.id, svgs:[svg] });
 
                     const newUrl = await generatePNG(svg, isDoubleside, setup.id, setup.canvas, setup.color);
-                    newUrls.push({ name: newUrl.name, url: newUrl.url });
+                    newUrls.push({ name: newUrl.name, url: newUrl.url, width: newUrl.width, height: newUrl.height });
                 }
                 setPngUrls(prev => [ ...prev, ...newUrls ]);
                 return;
             }
             const targetSvg = mainSvg.svg === fullLayers ? topstack.svg.cloneNode(true) : mainSvg.svg.cloneNode(true); 
             const blob = await generatePNG(targetSvg, isDoubleside, mainSvg.id, canvasBg, layerType);
-            setPngUrls(prev => [ ...prev, { name: blob.name, url: blob.url }])
+            setPngUrls(prev => [ ...prev, { name: blob.name, url: blob.url, width: blob.width, height: blob.height }])
         } catch (error) {
             console.error('Failed PNG Conversion ++++++', error)
         } finally {

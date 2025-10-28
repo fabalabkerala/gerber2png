@@ -31,7 +31,7 @@ const Select = ({ options, selected, setSelected, variant = "bottom", onSelect, 
                     <ListboxOptions
                         transition
                         className={cn(
-                            "absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none",
+                            "absolute z-50 mt-1 max-h-60 w-full overflow-auto custom-scrollbar rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none",
                             optionsPosition
                         )} 
                     >

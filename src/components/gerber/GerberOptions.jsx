@@ -50,13 +50,13 @@ const GerberOptions = () => {
 
                     <p className="text-xs font-medium text-gray-700 pt-3 pb-2 px-1">Quick Setup</p>
 
-                    <div className="flex gap-1 text-sm">
+                    <div className="flex gap-3 text-sm">
                         <Select 
                             options={SelectOptions} 
                             setSelected={setChangeSelect} 
                             selected={changeSelect} 
                             onSelect={(value) => {
-                                if (!doubleSide && value.startsWith("bottom")) return; // disable click
+                                if (!doubleSide && value.startsWith("bottom")) return;
                                 if (value === 'generate-all' || value === 'custom' || value === 'generate-for-carvera') {
                                     setChangeSelect(value)
                                 } else {
@@ -68,12 +68,12 @@ const GerberOptions = () => {
                         />
 
                         <motion.button 
-                            className="flex justify-center items-center gap-1 bg-[#EF4444] pr-2 ps-1 rounded bord" 
+                            className="flex justify-center items-center gap-1 bg-[#ef4444] pr-2 ps-1 rounded bord" 
                             whileTap={{ scale: 0.96 }}
                             onClick={() => handlePngConversion(changeSelect, doubleSide)}
                         >
-                            <ImageIcon width={20} height={20} strokeWidth={8} stroke={"white"} />
-                            <p className="text-white text-xs font-medium text-nowrap">Generate PNG</p>
+                            <ImageIcon width={20} height={20} strokeWidth={6} stroke={"white"} />
+                            <p className="text-white text-xs text-nowrap">Generate PNG</p>
                         </motion.button>
                     </div>
                 </div>

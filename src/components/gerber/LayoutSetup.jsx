@@ -12,14 +12,17 @@ const options = [
     { id: 'white', label: 'White' }, 
 ];
 
-const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, autoLayout}) => {
+const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine}) => {
     const [ layoutBg, setLayoutBg ] = useState('black');
 
     const handleInput = (name, value) => {
         let val;
+        const wThreshold = Math.floor(machine.width / selectedPng.width);
+        const hThreshold = Math.floor(machine.height / selectedPng.height);
 
         if (name === 'spacing') val = value > 5 ? 5 : value
-        else val = value > 10 ? 10 : value
+        else if (name === 'row') val = value > wThreshold ? wThreshold : value > 20 ? 20 : value;
+        else if (name === 'column') val = value > hThreshold ? hThreshold : value > 20 ? 20 : value;
         
         setConfig(prev => ({ 
             ...prev, 
@@ -29,6 +32,7 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, autoLayout})
     }
 
     const handleGeneration =  async (url) => {
+        console.log(visibleSlots)
         const newURL = await generatePngLayout(url, config.row, config.column, config.spacing, layoutBg, visibleSlots);
         console.log(newURL);
     }
@@ -102,7 +106,7 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, autoLayout})
                     <motion.button
                         className="flex justify-center items-center gap-1 border bg-white rounded overflow-hidden" 
                         whileTap={{ scale: 0.98 }}
-                        onClick={autoLayout}
+                        // onClick={autoLayout}
                     >
                         <div className="bg-gray-100 h-full flex items-center justify-center px-2 py-1.5 rounded-s border-2 border-white">
                             <DocumentDuplicateIcon width={12} height={12} strokeWidth={2} stroke="#e57345" />
@@ -135,6 +139,13 @@ LayoutSetup.propTypes = {
     selectedPng: PropTypes.shape({ 
         name: PropTypes.string.isRequired,
         url: PropTypes.string.isRequired,
+        width: PropTypes.number.isRequired,
+        height: PropTypes.number.isRequired
+    }),
+    machine: PropTypes.shape({ 
+        machine: PropTypes.string.isRequired,
+        width: PropTypes.number.isRequired,
+        height: PropTypes.number.isRequired
     }),
     visibleSlots: PropTypes.array,
     autoLayout: PropTypes.func,

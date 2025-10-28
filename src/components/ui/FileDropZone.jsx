@@ -36,12 +36,12 @@ export default function FileDropZone({ onFilesSelect, accept = "*", multiple = f
             whileTap={{ scale: 0.998 }}
             className={cn(
                 "group flex flex-col items-center justify-center h-full border border-dashed rounded-lg p-6 cursor-pointer transition-colors duration-300",
-                isDragging ? "border-[#e57345] bg-blue-50" : "border-white bg-zinc-100 hover:border hover:border-[#e57345] hover:bg-gray-50"
+                isDragging ? "border-[#e57345] bg-[#f1e4e023]" : "border-white bg-zinc-100 hover:border hover:border-[#e57345] hover:bg-gray-50"
             )} 
         >
             <CloudArrowUpIcon
                 className={`w-12 h-12 mb-2 transition-colors ${
-                isDragging ? "text-blue-500" : "text-gray-500 group-hover:text-[#e57345]"
+                isDragging ? "text-[#e57345]" : "text-gray-500 group-hover:text-[#e57345]"
                 }`}
             />
 

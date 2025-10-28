@@ -3,19 +3,16 @@ import { AnimatePresence, motion } from "motion/react"
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { useGerberView } from "../context/GerberContext";
-import { getPngDimensions } from "../../utils/svgConverter/svg2png";
 import ModalHeader from "../ui/ModalHeader";
 import ImageSelect from "../ui/ImageSelect";
 import ImageLayout from "../ui/ImageLayout";
 import LayoutConfiguration from "./LayoutConfiguration";
 import LayoutSetup from "./LayoutSetup";
 
-
 const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
     const { pngUrls } = useGerberView();
     const [ selectedPng, setSelectedPng ] = useState('Choose an Image');
     const [ layoutBg, setLayoutBg ] = useState('black');
-    // const [ dimension, setDimension ] = useState({ width: null, height: null })
     const [ config, setConfig ] = useState({
         row: 1,
         column: 1,
@@ -25,21 +22,9 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
     });
     const [ machine, setMachine ] = useState({
         machine: null,
-        width: null,
-        height: null
+        width: 100,
+        height: 100
     })
-
-    useEffect(() => {
-        if (!selectedPng.url) return;
-
-        const getDimension = async () => {
-            const dimension = await getPngDimensions(selectedPng.url);
-            console.log('dimension : ", ', dimension, selectedPng)
-            // setDimension(dimension)
-        }
-        getDimension();
-        
-    }, [selectedPng]);
 
     const totalSlots = config.row * config.column;
     const [visibleSlots, setVisibleSlots] = useState(
@@ -68,23 +53,24 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
         });
     }, [totalSlots]);
 
-    // const autoLayout = () => {
-    //     // const placements = useSmartLayout(
-    //     //     { width: machine.width, height: machine.height },
-    //     //     { width: dimension.width, height: dimension.height },
-    //     //     config.spacing
-    //     // );
-    //     const placements = useSmartLayout(
-    //         { width: 33, height: 41 },
-    //         { width: 10, height: 30 },
-    //         1
-    //     );
+    useEffect(() => {
+        if (selectedPng.url) {
+            console.log('sected L : ', selectedPng)
+            if (isNaN(selectedPng.height) || isNaN(selectedPng.width)) return;
 
-    //     console.log(placements);
-    // }
+            const maxCol = Math.floor((machine.width + config.spacing)  / (selectedPng.width + config.spacing));
+            const maxRow = Math.floor((machine.height + config.spacing) / (selectedPng.height + config.spacing));
+
+            setConfig(prev => ({
+                ...prev,
+                row: maxRow,
+                column: maxCol,
+                pcb: maxRow * maxCol
+            }));
+        }
+    }, [config.spacing, machine, selectedPng])
 
     
-
     return (
         <>
             <AnimatePresence>
@@ -156,7 +142,8 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                         config={config}
                                         setConfig={setConfig}
                                         selectedPng={selectedPng}
-                                        // autoLayout={autoLayout}
+                                        machine={machine}
+                                        visibleSlots={visibleSlots}
                                     />
                                 </div>
                             </div>
@@ -175,7 +162,6 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                             column={config.column}
                                             spacing={config.spacing}
                                             background={layoutBg}
-                                            // dimension={{ width: dimension.width, height: dimension.height }}
                                             dimension={{ width: selectedPng.width, height: selectedPng.height }}
                                             selected={selectedPng}
                                             visibleSlots={visibleSlots}
