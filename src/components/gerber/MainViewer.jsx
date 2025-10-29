@@ -71,14 +71,14 @@ const MainView = () => {
                             >
                             </div>
                             <div className="absolute top-0 -right-7 w-px h-full bg-zinc-300 mx-3" />
-                            <p className=" absolute top-1/2 -translate-y-1/2 -right-[3rem] bg-zinc-100 px-2 text-sm -rotate-90 font-medium rounded">
+                            <p className=" absolute top-1/2 -translate-y-1/2 -right-[3rem] bg-zinc-100 px-2 text-xs -rotate-90 font-medium rounded">
                                 {/* {dimension.height} */}
                                 {stackConfig.height}
                                 <span className="text-gray-500 font-normal"> mm</span>
                             </p>
 
                             <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 w-full h-px bg-zinc-300 my-3" />
-                            <p className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-zinc-100 px-2 text-sm font-medium rounded">
+                            <p className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-zinc-100 px-2 text-xs font-medium rounded">
                                 {/* {dimension.width} */}
                                 {stackConfig.width}
                                 <span className="text-gray-500 font-normal"> mm</span>
