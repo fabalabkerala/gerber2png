@@ -12,7 +12,7 @@ import LayoutSetup from "./LayoutSetup";
 const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
     const { pngUrls } = useGerberView();
     const [ selectedPng, setSelectedPng ] = useState('Choose an Image');
-    const [ layoutBg, setLayoutBg ] = useState('black');
+    const [ generating, setGenerating ] = useState(false);
     const [ config, setConfig ] = useState({
         row: 1,
         column: 1,
@@ -55,7 +55,6 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
 
     useEffect(() => {
         if (selectedPng.url) {
-            console.log('sected L : ', selectedPng)
             if (isNaN(selectedPng.height) || isNaN(selectedPng.width)) return;
 
             const maxCol = Math.floor((machine.width + config.spacing)  / (selectedPng.width + config.spacing));
@@ -68,7 +67,8 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                 pcb: maxRow * maxCol
             }));
         }
-    }, [config.spacing, machine, selectedPng])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [machine, selectedPng])
 
     
     return (
@@ -82,7 +82,7 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                         exit={{ opacity: 0 }}
                     >
                         <motion.div
-                            className="bg-white rounded shadow-xl flex flex-col"
+                            className="bg-white rounded shadow-xl flex flex-col overflow-hidden relative"
                             initial={{ y: -30, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ y: -30, opacity: 0 }}
@@ -99,11 +99,11 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                         setSelected={setSelectedPng}
                                         onSelect={(value) => {
                                             if (value.name.includes('drill')) {
-                                                setLayoutBg('white')
+                                                setConfig(prev => ({ ...prev, background: 'white'}))
                                             }
                                         }}
                                     />
-                                    <div className="pb-5 pr-6 mt-2 w-64 h-48 flex flex-col justify-center items-center">
+                                    <div className="py-2 mt-2 w-64 h-48 flex flex-col justify-center items-center">
                                         { selectedPng.url ? (
                                             <div className="flex h-full w-full">
                                                 <div className="relative h-full w-fit mx-auto">
@@ -131,6 +131,10 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                             </>
                                         )}
                                     </div>
+
+                                    <div className="mt-auto flex flex-col justify-center items-center bg-neutral-100 py-1.5 rounded">
+                                        <p className="text-sm font-medium">{ config.pcb }<span className="text-[11px] font-normal text-gray-500"> PCBs</span></p>
+                                    </div>
                                 </div>
 
                                 <div>
@@ -144,6 +148,8 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                         selectedPng={selectedPng}
                                         machine={machine}
                                         visibleSlots={visibleSlots}
+                                        generating={generating}
+                                        setGenerating={setGenerating}
                                     />
                                 </div>
                             </div>
@@ -154,30 +160,69 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                     <p className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-white px-2 text-sm text-gray-700">Preview</p>
                                 </div>
 
-                                <div className="flex">
-                                    { selectedPng.url ? (
-                                        <ImageLayout 
-                                            count={totalSlots}
-                                            row={config.row}
-                                            column={config.column}
-                                            spacing={config.spacing}
-                                            background={layoutBg}
-                                            dimension={{ width: selectedPng.width, height: selectedPng.height }}
-                                            selected={selectedPng}
-                                            visibleSlots={visibleSlots}
-                                            onToggleSlot={(id) => toggleSlot(id)}
-                                        />
-                                    ): (
-                                        <div className="max-w-[550px] h-[300px] flex-1 mx-auto pb-6 pr-5 my-5">
-                                            <div className="relative w-full h-full flex flex-col justify-center items-center">
-                                                <PhotoIcon width={25} height={25} strokeWidth={2} stroke="gray" />
+                                { selectedPng.url && config.row > 0 && config.column > 0 ? (
+                                    <ImageLayout 
+                                        count={totalSlots}
+                                        row={config.row}
+                                        column={config.column}
+                                        spacing={config.spacing}
+                                        background={config.background}
+                                        dimension={{ width: selectedPng.width, height: selectedPng.height }}
+                                        selected={selectedPng}
+                                        visibleSlots={visibleSlots}
+                                        onToggleSlot={(id) => toggleSlot(id)}
+                                    />
+                                ): (
+                                    <div className="max-w-[550px] h-[300px] mx-auto pb-6 pr-5 my-5">
+                                        <div className="relative w-full h-full flex flex-col justify-center items-center">
+                                            <PhotoIcon width={25} height={25} strokeWidth={2} stroke={ config.row <= 0 && config.column <= 0 ? "red" : "gray"} />
+                                            { config.row <= 0 || config.column <= 0 ? (
+                                                <p className="text-red-500">Image Will Not Fit In the Bed</p>
+                                            ): (
                                                 <p>No Image Selected</p>
-                                            </div>
+                                            )}
                                         </div>
-                                    )} 
-                                </div>
+                                    </div>
+                                )} 
                             </div>
+
+                            <AnimatePresence>
+                                { generating && (
+                                    <motion.div
+                                        key="loader"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        transition={{ duration: 0.25, ease: "easeOut" }}
+                                        className="absolute inset-0 bg-white/40 backdrop-blur- flex items-center justify-center z-[9999]"
+                                    >
+                                        <motion.div
+                                            className="w-12 h-12 border-4 border-[#e57345] border-t-transparent rounded-full"
+                                            animate={{
+                                                rotate: [0, 360],
+                                                scale: [1, 1.1, 1],
+                                            }}
+                                            transition={{
+                                                rotate: {
+                                                repeat: Infinity,
+                                                duration: 1,
+                                                ease: "linear",
+                                                },
+                                                scale: {
+                                                repeat: Infinity,
+                                                duration: 1.2,
+                                                ease: "easeInOut",
+                                                },
+                                            }}
+                                        />
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </motion.div>
+
+
+                        
+
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -190,23 +235,3 @@ BulkLayoutPanel.propTypes = {
     setShowBulkModal: PropTypes.func
 }
 export default BulkLayoutPanel;
-
-
-
-import { MaxRectsPacker } from "maxrects-packer";
-
-export const useSmartLayout = (bed, pcb, spacing) => {
-  const packer = new MaxRectsPacker(bed.width, bed.height, spacing, {
-    smart: true,
-    pot: false,
-    allowRotation: true,
-  });
-  const items = Array(200).fill().map((_, i) => ({
-    width: pcb.width,
-    height: pcb.height,
-    id: `pcb_${i}`,
-  }));
-  packer.addArray(items);
-  return packer.bins[0].rects;
-};
-

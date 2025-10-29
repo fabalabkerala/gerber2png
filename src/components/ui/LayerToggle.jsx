@@ -15,12 +15,12 @@ function LayerToggle({ layerName, enabled: controlled, onChange, className }) {
     }
     return (
         <>
-            <div className={cn("flex justify-between items-center px-1 py-1 border w-full h-fit rounded", className)}>
-                <p className="text-xs px-1 text-gray-700 capitalize">{ layerName }</p>
+            <div className={cn("flex justify-between items-center border w-full h-fit rounded", className)}>
+                <p className="text-xs px-2 py-1 text-gray-700 capitalize">{ layerName }</p>
                 <motion.button 
                     className={cn(
-                        "px-3 py-1 rounded",
-                        enabled ? "bg-zinc-200" : "bg-zinc-100"
+                        "px-3 py-1.5 rounded-e ",
+                        enabled ? "bg-zinc-100" : "bg-zinc-50 text-orange-400"
                     )}
                     whileTap={{ scale: 0.95 }}
                     onClick={ handleToggle }

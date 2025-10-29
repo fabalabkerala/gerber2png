@@ -8,12 +8,13 @@ import {
     useGerberView
 } from "../context/GerberContext";
 import LayerToggle from "../ui/LayerToggle";
+import Select from "../ui/Select";
 import ThreeWaySlider from "../ui/ThreeWaySlider";
 
 
 const LayerControls = () => {
     const { topstack, bottomstack, fullLayers } = useGerberLayer();
-    const { layerType, setLayerType, setChangeSelect, handleToggleCick, isToggled, doubleSide } = useGerberSettings();
+    const { layerType, setLayerType, setChangeSelect, handleToggleCick, isToggled, doubleSide, canvasBg, setCanvasBg } = useGerberSettings();
     const { side, setMainSvg } = useGerberView();
 
     const viewOptions = [
@@ -25,7 +26,7 @@ const LayerControls = () => {
         setChangeSelect('custom');
         const option = viewOptions.find(opt => opt.id === id)
         if (!option) return;
-        setMainSvg({ id: id, svg: option.svg })
+        setMainSvg(prev => ({ id: id, svg: option.svg, ...prev }))
     }
 
     const colorOptions = [
@@ -62,15 +63,21 @@ const LayerControls = () => {
         handleToggleCick(layertype, layerProperty);
     }
 
+    const options = [
+        { id: 'black', label: 'Black' }, 
+        { id: 'white', label: 'White' }, 
+    ];
+
+
     return (
         <>
-            <div className="flex flex-col bg-white pb-3 rounded shadow">
+            <div className="flex flex-col h-full bg-white pb-3 rounded shadow">
                 {/* Heading */}
                 <div className="flex justify-between items-center bg-[#F5F5F5] px-2 py-1 rounded-tl-md rounded-tr-md">
                     <p className="font-medium text-sm ps-0.5 text-gray-700">Layers</p>
                 </div>
 
-                <div className="flex flex-col gap-3 px-3 pt-4 pb-3">
+                <div className="flex flex-col gap-3 px-3 pt-5 pb-4">
                     <ThreeWaySlider 
                         options={viewOptions} 
                         onChange={handleSide} 
@@ -106,6 +113,26 @@ const LayerControls = () => {
                         ))}
                     </div>
                 ))}
+
+                <div className="flex flex-col gap-3 px-3 pt-4">
+                    <LayerToggle 
+                        layerName={'Double side outerlayer'} 
+                        enabled={!isToggled.commonlayer.outlayer} 
+                        onChange={(isToggled) => {
+                            handleToggle('commonlayer', 'outlayer', isToggled, 'outer')
+                        }}
+                        className={ doubleSide ? '' : 'opacity-60 pointer-events-none'}
+                    />
+                    <div className="flex justify-between items-center gap-4">
+                        <p className="font-medium text-xs ps-1.5 text-nowrap">Canvas Background</p>
+                        <Select 
+                            options={options} 
+                            selected={canvasBg} 
+                            setSelected={setCanvasBg} 
+                            variant="top" 
+                        />
+                    </div>
+                </div>
             </div>
         </>
     )

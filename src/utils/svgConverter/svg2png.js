@@ -61,7 +61,6 @@ const generatePNG = async (targetSvg, twoSide, name, canvasBg, layertype) => {
                     const finalBlob = new Blob([changeBlob], { type: 'image/png' });
                     const blobUrl = (window.URL || window.webkitURL || window).createObjectURL(finalBlob);
                     getPngDimensions(blobUrl, 1000).then((dimensions) => {
-                        console.log('dimensitnosnio nosi n: ', dimensions)
                         resolve({ 
                             name: name, 
                             url: blobUrl, 
@@ -143,7 +142,7 @@ export const generatePngLayout = async (url, rows, columns, spacing, background,
                     const finalBlob = new Blob([changeBlob], { type: 'image/png' });
                     const blobUrl = (window.URL || window.webkitURL || window).createObjectURL(finalBlob);
 
-                    resolve({ url: blobUrl });
+                    resolve({ url: blobUrl, blob: finalBlob });
                 })
             }, 'image/png');
         }

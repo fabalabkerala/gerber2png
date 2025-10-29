@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Select from "../ui/Select";
 import PropTypes from "prop-types";
 import { DocumentDuplicateIcon, PhotoIcon } from "@heroicons/react/24/outline";
@@ -6,14 +6,18 @@ import { motion } from "motion/react";
 import { cn } from "../../utils/cn";
 import { generatePngLayout } from "../../utils/svgConverter/svg2png";
 import { DocumentCheckIcon } from "@heroicons/react/24/outline";
+import { useGerberView } from "../context/GerberContext";
+import JSZip from "jszip";
 
 const options = [
     { id: 'black', label: 'Black' }, 
     { id: 'white', label: 'White' }, 
 ];
 
-const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine}) => {
+const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, generating, setGenerating}) => {
     const [ layoutBg, setLayoutBg ] = useState('black');
+    const { pngUrls } = useGerberView();
+
 
     const handleInput = (name, value) => {
         let val;
@@ -27,15 +31,81 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine}) =>
         setConfig(prev => ({ 
             ...prev, 
             [name]: value === "" ? "" : parseInt(val, 10) ,
-            pcb: config.row * config.column
         }));
     }
 
+    useEffect(() => setConfig(prev => ({ ...prev, pcb: prev.column * prev.row })), [config, setConfig])
+
     const handleGeneration =  async (url) => {
-        console.log(visibleSlots)
-        const newURL = await generatePngLayout(url, config.row, config.column, config.spacing, layoutBg, visibleSlots);
-        console.log(newURL);
+        try {
+            setGenerating(true);
+            const blobUrl = await generatePngLayout(
+                url, 
+                config.row, 
+                config.column, 
+                config.spacing, 
+                layoutBg, 
+                visibleSlots
+            );
+
+            const link = document.createElement("a");
+            link.href = blobUrl.url;
+            link.download = `layout_${config.row}x${config.column}_${selectedPng.name}.png`;
+            document.body.appendChild(link);
+            link.click()
+
+            document.body.removeChild(link);
+            URL.revokeObjectURL(blobUrl)
+
+        } catch (error) {
+            console.log('ERROR : Generating layout : ', error)
+        } finally {
+            setGenerating(false);
+        }
     }
+
+    const handleGenerateAll =  async () => {
+        try {
+            setGenerating(true);
+
+            const zip = new JSZip();
+
+            const blobPromises = pngUrls.map(async (png) => {
+                const { blob } = await generatePngLayout(
+                    png.url, 
+                    config.row, 
+                    config.column, 
+                    config.spacing, 
+                    layoutBg, 
+                    visibleSlots
+                );
+
+                const filename = `layout_${png.name}_${config.row}x${config.column}.png`;
+
+                zip.file(filename, blob);
+            });
+
+            await Promise.all(blobPromises);
+
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+
+            const url = window.URL.createObjectURL(zipBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `layout_g2p_files_${pngUrls.length}.zip`);
+            document.body.appendChild(link);
+            link.click();
+
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+        } catch (error) {
+            console.log('ERROR : Generating layout : ', error)
+        } finally {
+            setGenerating(false);
+        }
+    }
+
 
 
     return (
@@ -86,8 +156,7 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine}) =>
                                 selected={layoutBg} 
                                 setSelected={setLayoutBg} 
                                 onSelect={(value) => {
-                                    console.log('value : ', value)
-                                    handleInput('background', value)
+                                    setConfig(prev => ({ ...prev, background: value }))
                                 }}
                             />
                         </div>
@@ -106,7 +175,7 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine}) =>
                     <motion.button
                         className="flex justify-center items-center gap-1 border bg-white rounded overflow-hidden" 
                         whileTap={{ scale: 0.98 }}
-                        // onClick={autoLayout}
+                        onClick={handleGenerateAll}
                     >
                         <div className="bg-gray-100 h-full flex items-center justify-center px-2 py-1.5 rounded-s border-2 border-white">
                             <DocumentDuplicateIcon width={12} height={12} strokeWidth={2} stroke="#e57345" />
@@ -120,7 +189,7 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine}) =>
                     >
                         
                         <PhotoIcon width={18} height={18} strokeWidth={2} stroke="white" />
-                        <p className="font-medium text-xs ps-0.5 text-white tracking-wider">Download PNG</p>
+                        <p className="font-medium text-xs ps-0.5 text-white tracking-wider">{ generating ? 'Generating..' : 'Download PNG' }</p>
                     </motion.button>
                 </div>
             </div>
@@ -149,6 +218,8 @@ LayoutSetup.propTypes = {
     }),
     visibleSlots: PropTypes.array,
     autoLayout: PropTypes.func,
+    generating: PropTypes.bool, 
+    setGenerating:PropTypes.func
 }
 
 export default LayoutSetup

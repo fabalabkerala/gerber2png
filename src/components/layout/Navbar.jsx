@@ -1,11 +1,11 @@
 import pcbLogo from '../../assets/pcbLogo.png'
 import GitlabIcon from '../icons/GitlabIcon'
 import WikiIcon from '../icons/WikiIcon'
-import { cn } from '../../utils/cn'
-import { useState } from 'react'
+// import { cn } from '../../utils/cn'
+// import { useState } from 'react'
 
 export default function Navbar() {
-    const [activeTab, setActiveTab] = useState('converter');
+    // const [activeTab, setActiveTab] = useState('converter');
 
     return (
         <>

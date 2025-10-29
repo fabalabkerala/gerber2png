@@ -7,7 +7,7 @@ export const  PageLayout = ({ sidebar, main, right }) => {
     return (
         <>
             <div className="h-full relative flex flex-col md:flex-row bg-[#EBEBEB] md:overflow-hidden">
-                <aside className="w-full md:w-1/6 h-48 md:h-full min-w-[300px] py-3 ps-3 md:overflow-y-auto custom-scrollbar">
+                <aside className="w-full md:w-1/6 md:h-full min-w-[325px] py-3 px-3 md:px-0 md:ps-3 md:overflow-y-auto custom-scrollbar">
                     {sidebar}
                 </aside>
 

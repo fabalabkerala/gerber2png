@@ -27,8 +27,8 @@ export default async function convertToSvg(
             viewboxW: stackup.top.viewBox[2], 
             viewboxH: stackup.top.viewBox[3] 
         }, 
-        width: stackup.top.width, 
-        height: stackup.top.height})
+        width: Math.round(stackup.top.width * 100) / 100, 
+        height: Math.round(stackup.top.height * 100) / 100})
 
     setFullLayers(newFullStackSvg)
     setTopStack({id: stackup.id, svg: newTopSvg})
@@ -159,8 +159,8 @@ function modifiedSvg(props) {
         path.setAttribute('d', d);
         path.setAttribute('fill', 'none');
         outlineG.setAttribute('id', 'drillMask');
-        const topLayerTransform = `translate(${ viewbox[0] + 440 } ${ viewbox[1] + viewbox[3] -500 }) scale(0.98, -0.98) translate(${ -viewbox[0] } ${ -viewbox[1]})`
-        const bottomLayerTransform = `translate(${ viewbox[0] + viewbox[2] - 440 } ${ viewbox[1] + viewbox[3] - 500 }) scale(-0.98, -0.98) translate(${ -viewbox[0] } ${ -viewbox[1]})`
+        const topLayerTransform = `translate(${ viewbox[0] + 440 } ${ viewbox[1] + viewbox[3] -500 }) scale(0.995, -0.995) translate(${ -viewbox[0] } ${ -viewbox[1]})`
+        const bottomLayerTransform = `translate(${ viewbox[0] + viewbox[2] - 440 } ${ viewbox[1] + viewbox[3] - 500 }) scale(-0.995, -0.995) translate(${ -viewbox[0] } ${ -viewbox[1]})`
         outlineG.setAttribute('transform', `${ id === 'toplayer' ? topLayerTransform : bottomLayerTransform }`);
         outlineG.appendChild(path);
 

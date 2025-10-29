@@ -14,22 +14,23 @@ const ImageLayout = ({
 }) => {
     return (
         <>
-            <div className="max-w-[550px] h-[300px] flex-1 mx-auto pb-6 pr-5 my-5 overflow-y-auto custom-scrollbar">
+            <div className="max-w-[550px] h-[300px] mx-auto pb-6 pr-5 my-5">
                 <div
-                    className="relative grid w-fit mx-auto my-auto border"
+                    className="relative grid my-auto border w-fit"
                     style={{
                         gridTemplateColumns: `repeat(${column}, auto)`,
                         gridTemplateRows: `repeat(${row}, auto)`,
                         gap: `${spacing}px`,
                         background: background,
-                        height: row >= column ? '100%' : 'auto', // 👈 key fix
+                        height: row >=  column ? '100%' : 'inherit',
+                        maxHeight: '100%',
                     }}
                 >
                     { Array.from({ length: count }).map((_, i) => (
                         <div
-                        key={i}
-                        className="relative flex items-center justify-center cursor-pointer overflow-hidden group"
-                        onClick={() => onToggleSlot(i)}
+                            key={i}
+                            className="relative flex items-center justify-center cursor-pointer overflow-hidden group"
+                            onClick={() => onToggleSlot(i)}
                         >
                         { visibleSlots[i] ? (
                             <>
@@ -73,6 +74,8 @@ const ImageLayout = ({
                         </p>
                 </div>
             </div>
+            
+
         </>
     )
 }

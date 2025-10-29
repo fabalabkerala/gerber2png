@@ -90,7 +90,7 @@ export const GerberProvider = ({ children }) => {
         });
         
         setCanvasBg(setup.canvas);
-        setMainSvg({id: setup.id, svg: setup.stack.svg })
+        setMainSvg(prev => ({ id: setup.id, svg: setup.stack.svg, ...prev }))
         setLayerType(setup.color);
 
 
@@ -117,7 +117,7 @@ export const GerberProvider = ({ children }) => {
     // ------------------------
     const [mainSvg, setMainSvg] = useState({id: null, svg: null});
     const [pngUrls, setPngUrls] = useState([
-        // { name: 'top_url2.png', url: 'https://shorthand.com/the-craft/raster-images/assets/5kVrMqC0wp/sh-unsplash_5qt09yibrok-4096x2731.jpeg', width: 20, height: 20 },
+        // { name: 'topdfjsdfasdasdfasd_url2.png', url: 'https://shorthand.com/the-craft/raster-images/assets/5kVrMqC0wp/sh-unsplash_5qt09yibrok-4096x2731.jpeg', width: 20, height: 20 },
         // { name: 'top_url.png', url: 'https://shorthand.com/the-craft/raster-images/assets/5kVrMqC0wp/sh-unsplash_5qt09yibrok-4096x2731.jpeg', width: 100, height: 60 },
     ]);
     const [side, setSide] = useState(null);
