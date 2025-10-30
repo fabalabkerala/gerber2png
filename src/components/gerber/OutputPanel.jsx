@@ -13,7 +13,7 @@ import BulkLayoutPanel from "./BulkLayoutPanel";
 
 const OutputPanel = () => {
     const { pngUrls, setPngUrls } = useGerberView();
-    const [showBulkModal, setShowBulkModal] = useState(false);
+    const [showBulkModal, setShowBulkModal] = useState(true);
     const menuRef = useRef(null);
 
 

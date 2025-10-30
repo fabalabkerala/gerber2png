@@ -142,6 +142,8 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                         <LayoutConfiguration 
                                             machine={machine}
                                             setMachine={setMachine}
+                                            config={config}
+                                            setConfig={setConfig}
                                         />
                                         <LayoutSetup 
                                             config={config}

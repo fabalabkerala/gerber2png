@@ -40,7 +40,7 @@ const Select = ({ options, selected, setSelected, variant = "bottom", onSelect, 
                                 key={id}
                                 value={id}
                                 className={cn(
-                                    'cursor-pointer select-none px-2 py-1 text-sm flex items-center gap-2',
+                                    'cursor-pointer select-none px-2 py-1 text-xs flex items-center gap-2',
                                     'data-[focus]:bg-gray-100 data-[focus]:text-black data-[selected]:bg-blue-50',
                                     getOptionClass?.(id)
                                 )}

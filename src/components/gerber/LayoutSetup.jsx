@@ -112,11 +112,11 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, gen
         <>
             <p className="px-3 font-medium text-xs mt-5">Number of PCBs <span className="text-[10px] text-gray-600 font-normal">(Rows X Columns)</span></p>
             <div className="bg-zinc-100 flex-1 p-4 px-4 mx-2 my-1 flex flex-col rounded">
-                <div className="flex gap-3 justify-between">
+                <div className="flex gap-4 justify-between">
                     <div className="flex items-center gap-2">
-                        <label className="text-xs w-20 text-black">Rows</label>
+                        <label className="text-xs w-24 text-black">Rows</label>
                         <input 
-                            className="rounded w-36 focus:outline-none text-center text-xs py-1 border" 
+                            className="rounded w-32 focus:outline-none text-center text-xs py-1 border" 
                             type="number"
                             value={config.row}
                             onInput={(e) => {
@@ -125,9 +125,9 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, gen
                         />
                     </div>
                     <div className="flex items-center gap-2">
-                        <label className="text-xs w-20 text-black">Columns</label>
+                        <label className="text-xs w-24 text-black">Columns</label>
                         <input 
-                            className="rounded w-36 focus:outline-none text-center text-xs py-1 border" 
+                            className="rounded w-32 focus:outline-none text-center text-xs py-1 border" 
                             type="number" 
                             value={config.column}
                             onInput={(e) => {
@@ -136,11 +136,11 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, gen
                         />
                     </div>
                 </div>
-                <div className="flex gap-3 justify-between mt-3">
+                <div className="flex gap-4 justify-between mt-3">
                     <div className="flex items-center gap-2 flex-1">
-                        <label className="text-xs w-20 text-black">Spacing <span className="text-gray-500 font-normal">(mm)</span></label>
+                        <label className="text-xs w-24 text-black">Spacing <span className="text-gray-500 font-normal">(mm)</span></label>
                         <input 
-                            className="rounded w-36 focus:outline-none text-center text-xs py-1 border" 
+                            className="rounded w-32 focus:outline-none text-center text-xs py-1 border" 
                             type="number" 
                             value={config.spacing}
                             onInput={(e) => {
@@ -149,8 +149,8 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, gen
                         />
                     </div>
                     <div className="flex items-center justify-between gap-2 flex-1">
-                        <p className="text-xs w-20 text-black text-nowrap">Layout BG</p>
-                        <div className="bg-white w-36">
+                        <p className="text-xs w-24 text-black text-nowrap">Layout BG</p>
+                        <div className="bg-white w-32">
                             <Select 
                                 options={options} 
                                 selected={layoutBg} 
