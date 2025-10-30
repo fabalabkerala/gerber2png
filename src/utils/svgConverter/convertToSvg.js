@@ -150,6 +150,8 @@ function modifiedSvg(props) {
         })
     }
 
+    svg.style.setProperty('shape-rendering', 'crispEdges');
+
     const clipPath = svg.querySelector('clipPath');
     if (clipPath) {
         const d = clipPath.querySelector('path').getAttribute('d');
@@ -158,10 +160,20 @@ function modifiedSvg(props) {
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         path.setAttribute('d', d);
         path.setAttribute('fill', 'none');
+        path.setAttribute('shape-rendering', 'crispEdges');
+        path.setAttribute('stroke', '#ffffff');
+        path.setAttribute('stroke-width', '10rem');
         outlineG.setAttribute('id', 'drillMask');
-        const topLayerTransform = `translate(${ viewbox[0] + 440 } ${ viewbox[1] + viewbox[3] -500 }) scale(0.995, -0.995) translate(${ -viewbox[0] } ${ -viewbox[1]})`
-        const bottomLayerTransform = `translate(${ viewbox[0] + viewbox[2] - 440 } ${ viewbox[1] + viewbox[3] - 500 }) scale(-0.995, -0.995) translate(${ -viewbox[0] } ${ -viewbox[1]})`
-        outlineG.setAttribute('transform', `${ id === 'toplayer' ? topLayerTransform : bottomLayerTransform }`);
+
+        // const topLayerTransform = `translate(${ viewbox[0] + 440 } ${ viewbox[1] + viewbox[3] -500 }) scale(0.995, -0.995) translate(${ -viewbox[0] } ${ -viewbox[1]})`
+        // const bottomLayerTransform = `translate(${ viewbox[0] + viewbox[2] - 440 } ${ viewbox[1] + viewbox[3] - 500 }) scale(-0.995, -0.995) translate(${ -viewbox[0] } ${ -viewbox[1]})`
+        // const topLayerTransform = `translate(${ viewbox[0] + 440 } ${ viewbox[1] + viewbox[3] -500 }) scale(0.995, -0.995) translate(${ -viewbox[0] } ${ -viewbox[1]})`
+        // const bottomLayerTransform = `translate(${ viewbox[0] + viewbox[2] - 440 } ${ viewbox[1] + viewbox[3] - 500 }) scale(-0.995, -0.995) translate(${ -viewbox[0] } ${ -viewbox[1]})`
+        // outlineG.setAttribute('transform', `${ id === 'toplayer' ? topLayerTransform : bottomLayerTransform }`);
+
+        const flipY = `translate(${viewbox[0]} ${viewbox[1] + viewbox[3]}) scale(1, -1) translate(${-viewbox[0]} ${-viewbox[1]})`;
+        outlineG.setAttribute('transform', flipY);
+
         outlineG.appendChild(path);
 
         svg.insertBefore(outlineG, svg.firstChild);

@@ -7,7 +7,12 @@ export default function GerberSidebar() {
     const { mainSvg } = useGerberView()
     return (
         <>
-            <div className={cn("h-full flex flex-col gap-4 transition-all duration-300", !mainSvg.svg ? "pointer-events-none opacity-50" : "" )}>
+            <div 
+                className={cn(
+                    "h-full flex flex-col gap-4 transition-all duration-300", 
+                    !mainSvg.svg ? "pointer-events-none opacity-50" : "" 
+                    )}
+            >
                 <GerberOptions />
                 <LayerControls />
             </div>

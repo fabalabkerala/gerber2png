@@ -48,7 +48,7 @@ const GerberOptions = () => {
 
                 <div className="px-2">
 
-                    <p className="text-xs font-medium text-gray-700 pt-3 pb-2 px-1">Quick Setup</p>
+                    <p className="text-xs text-gray-700 pt-3 pb-1 px-1">Quick Setup</p>
 
                     <div className="flex gap-3 text-sm">
                         <Select 
@@ -83,7 +83,7 @@ const GerberOptions = () => {
                 <div className="px-3">
                     <div className="flex gap-4 text-sm">
                         <div className="flex items-center justify-between gap-1">
-                            <p className="text-xs font-medium">Double Side PCB</p>
+                            <p className="text-xs">Double Side PCB</p>
                             <SwitchToggle onChange={(enabled) => toggleDoubleSide(enabled, isToggled)} enabled={doubleSide} />
                         </div>
 

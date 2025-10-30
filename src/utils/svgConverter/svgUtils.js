@@ -31,7 +31,7 @@ export const updateSvg = (svg, option, setup, machine = 'general', topstack, dou
     })
 
     const clipPath = gerberSvg.querySelector('clipPath');
-    if (clipPath) clipPath.style.display = setup.layerid === 'outline' ? 'block' : 'none';
+    if (clipPath) clipPath.style.display = setup.layerid === 'outline' ? option === 'top-cut' && doubleSide ? 'none' : 'block' : 'none';
 
     const outerG = svg.querySelector(`#${ setup.stack === topstack ? 'toplayer': 'bottomlayer' }outer`);
     outerG.style.display = option === 'top-cut' ? doubleSide ? 'block' : 'none' : 'none';

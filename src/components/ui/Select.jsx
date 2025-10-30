@@ -60,7 +60,7 @@ const Select = ({ options, selected, setSelected, variant = "bottom", onSelect, 
 }
 
 Select.propTypes = {
-    options: PropTypes.arrayOf(PropTypes.string).isRequired,
+    options: PropTypes.array.isRequired,
     selected: PropTypes.string.isRequired,
     setSelected: PropTypes.func.isRequired,
     variant: PropTypes.oneOf(["top", "bottom"]),

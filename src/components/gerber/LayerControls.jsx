@@ -7,9 +7,11 @@ import {
     useGerberSettings,
     useGerberView
 } from "../context/GerberContext";
-import LayerToggle from "../ui/LayerToggle";
 import Select from "../ui/Select";
 import ThreeWaySlider from "../ui/ThreeWaySlider";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { motion } from "motion/react";
+import { cn } from "../../utils/cn";
 
 
 const LayerControls = () => {
@@ -26,7 +28,7 @@ const LayerControls = () => {
         setChangeSelect('custom');
         const option = viewOptions.find(opt => opt.id === id)
         if (!option) return;
-        setMainSvg(prev => ({ id: id, svg: option.svg, ...prev }))
+        setMainSvg({ id: id, svg: option.svg })
     }
 
     const colorOptions = [
@@ -45,10 +47,31 @@ const LayerControls = () => {
     }
 
     const layers = [
-        { type: 'toplayer', label: 'Top Layer', colors: ['#ced8cd', '#b9a323', '#348f9b'], properties: ['trace', 'pads', 'silkscreen'], ids: ['top_copper', 'top_solderpaste', 'top_silkscreen'] },
-        { type: 'bottomlayer', label: 'Bottom Layer', colors: ['#206b19', '#b9a323', '#348f9b'], properties: ['trace', 'pads', 'silkscreen'], ids: ['bottom_copper', 'bottom_solderpaste', 'bottom_silkscreen'] },
-        { type: 'commonlayer', label: null, colors: ['#206b19', '#b9a323'], properties: ['outline', 'drill'], ids: ['outline', 'drill'] },
+        { 
+            type: 'trace', 
+            properties : [
+                { layer: 'toplayer', id: 'top_copper' },
+                { layer: 'bottomlayer', id: 'bottom_copper' },
+            ]
+        },
+        { 
+            type: 'pads', 
+            properties : [
+                { layer: 'toplayer', id: 'top_solderpaste' },
+                { layer: 'bottomlayer', id: 'bottom_solderpaste' },
+            ]
+        },
+        { 
+            type: 'silkscreen', 
+            properties : [
+                { layer: 'toplayer', id: 'top_silkscreen' },
+                { layer: 'bottomlayer', id: 'bottom_silkscreen' },
+            ]
+        }
     ]
+
+    const commonLayers = ['drill', 'outline']
+
     const handleToggle = (layertype, layerProperty, isToggled, layerId) => {
         const layerGroups = getLayerGroups(
             layertype, 
@@ -91,45 +114,105 @@ const LayerControls = () => {
                     />
                 </div>
 
-                { layers.map((layer, id) => (
-                    <div key={id} className="flex flex-col gap-2 px-3 py-2">
-                        <p className="font-medium text-sm px-1">{ layer.label }</p>
-                        { layer.properties.map((property, id) => (
-                            <LayerToggle 
-                                key={id} 
-                                layerName={property} 
-                                onChange={(isToggled) => {
-                                    handleToggle(
-                                        layer.type,
-                                        property,
-                                        isToggled,
-                                        layer.ids[id]
-                                    );
-                                    setChangeSelect('custom')
-                                }}
-                                enabled={!isToggled[layer.type][property]}
-                                className={ !doubleSide && layer.ids[id].includes('bottom') ? 'pointer-events-none opacity-40' : '' }
-                            />
-                        ))}
+                <div className="w-full px-3 mt-3">
+                    <div className="grid grid-cols-[1fr_auto_auto] gap-3 mb-2">
+                        <p className="text-xs font-semibold text-gray-500 px-2">Layers</p>
+                        <p className="text-xs text-gray-500 text-center w-14">Top</p>
+                        <p className="text-xs text-gray-500 text-center w-14">Bottom</p>
                     </div>
-                ))}
+                    { layers.map((layer) => (
+                        <div key={layer.type} className="grid grid-cols-[1fr_auto_auto] gap-3 items-center mb-2">
+                            <div className={cn("flex justify-between items-center border w-full h-fit rounded")}>
+                                <p className="text-xs px-2 py-1 text-gray-700 capitalize">{layer.type}</p>
+                            </div>
 
-                <div className="flex flex-col gap-3 px-3 pt-4">
-                    <LayerToggle 
-                        layerName={'Double side outerlayer'} 
-                        enabled={!isToggled.commonlayer.outlayer} 
-                        onChange={(isToggled) => {
-                            handleToggle('commonlayer', 'outlayer', isToggled, 'outer')
-                        }}
-                        className={ doubleSide ? '' : 'opacity-60 pointer-events-none'}
-                    />
-                    <div className="flex justify-between items-center gap-4">
-                        <p className="font-medium text-xs ps-1.5 text-nowrap">Canvas Background</p>
+                            { layer.properties.map((property) => (
+                                <motion.button
+                                    key={property}
+                                    className={cn(
+                                        "px-3 py-1.5 rounded border w-14 text-center",
+                                        !isToggled[property.layer][layer.type] ? "bg-zinc-100" : "bg-zinc-50 text-orange-400",
+                                        !doubleSide && property.layer.includes('bottom') ? 'pointer-events-none opacity-40' : ''
+                                    )}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => {
+                                        handleToggle(
+                                            property.layer,
+                                            layer.type,
+                                            isToggled[property.layer][layer.type],
+                                            property.id
+                                        );
+                                        setChangeSelect('custom');
+                                    }}
+                                >
+                                    {!isToggled[property.layer][layer.type] ? (
+                                        <EyeIcon width={18} height={12} className="mx-auto" />
+                                    ) : (
+                                        <EyeSlashIcon width={18} height={12} className="mx-auto" />
+                                    )}
+                                </motion.button>
+                            ))}
+                        </div>
+                    ))}
+                </div>
+
+                <div className="flex flex-col gap-3 px-3 pt-2 mt-4">
+                    { commonLayers.map((layer, id) => (
+                        <div key={id} className="flex gap-3 items-center justify-between">
+                            <div className={cn("flex justify-between items-center border w-full h-fit rounded flex-1")}>
+                                <p className="text-xs px-2 py-1 text-gray-700 capitalize">{ layer }</p>
+                            </div>
+
+                            <motion.button
+                                className={cn(
+                                    "px-3 py-1.5 rounded border w-14 text-center",
+                                    !isToggled['commonlayer'][layer] ?  "bg-zinc-100" : "bg-zinc-50 text-orange-400",
+                                )}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => {
+                                    handleToggle('commonlayer', layer, isToggled['commonlayer'][layer], layer);
+                                    setChangeSelect('custom');
+                                }}
+                            >
+                                {!isToggled['commonlayer'][layer] ? (
+                                    <EyeIcon width={18} height={12} className="mx-auto" />
+                                ) : (
+                                    <EyeSlashIcon width={18} height={12} className="mx-auto" />
+                                )}
+                            </motion.button>
+                        </div>
+                    ))}
+                    <div className={cn("flex gap-3 items-center justify-between", doubleSide ? '' : 'opacity-60 pointer-events-none')}>
+                        <div className={cn("flex justify-between items-center border w-full h-fit rounded flex-1")}>
+                            <p className="text-xs px-2 py-1 text-gray-700 capitalize">Double side outerlayer</p>
+                        </div>
+
+                        <motion.button
+                            className={cn(
+                                "px-3 py-1.5 rounded border w-14 text-center",
+                                !isToggled.commonlayer.outlayer ?  "bg-zinc-100" : "bg-zinc-50 text-orange-400",
+                            )}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => {
+                                handleToggle('commonlayer', 'outlayer', isToggled['commonlayer']['outlayer'], 'outer');
+                                setChangeSelect('custom');
+                            }}
+                        >
+                            {!isToggled.commonlayer.outlayer ? (
+                                <EyeIcon width={18} height={12} className="mx-auto" />
+                            ) : (
+                                <EyeSlashIcon width={18} height={12} className="mx-auto" />
+                            )}
+                        </motion.button>
+                    </div>
+                    <div className="flex justify-between items-center gap-4 mt-2">
+                        <p className="text-xs ps-1.5 text-nowrap">Canvas Background</p>
                         <Select 
                             options={options} 
                             selected={canvasBg} 
                             setSelected={setCanvasBg} 
                             variant="top" 
+                            onSelect={() => setChangeSelect('custom')}
                         />
                     </div>
                 </div>

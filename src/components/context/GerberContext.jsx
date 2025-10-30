@@ -90,7 +90,7 @@ export const GerberProvider = ({ children }) => {
         });
         
         setCanvasBg(setup.canvas);
-        setMainSvg(prev => ({ id: setup.id, svg: setup.stack.svg, ...prev }))
+        setMainSvg({ id: setup.id, svg: setup.stack.svg });
         setLayerType(setup.color);
 
 

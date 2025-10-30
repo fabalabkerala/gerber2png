@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import FileDropZone from "../ui/FileDropZone";
-import { AnimatePresence } from "motion/react";
 import { useGerberLayer, useGerberSettings, useGerberView } from "../context/GerberContext";
 import convertToSvg from "../../utils/svgConverter/convertToSvg";
 import { motion } from "motion/react";
@@ -63,27 +62,24 @@ const MainView = () => {
                         contentStyle={{  margin:'auto', transition: 'transform 0.3s ease', position: 'relative' }} 
                         wrapperStyle={{ width: '100%', height: '100%', overflow:'hidden', display:'flex'}} 
                     >
-                        <AnimatePresence mode="wait">
-                            <div 
-                                ref={resultRef}
-                                className="flex items-center h-full justify-center  relative"
-                                style={{ filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.5))", }}
-                            >
-                            </div>
-                            <div className="absolute top-0 -right-7 w-px h-full bg-zinc-300 mx-3" />
-                            <p className=" absolute top-1/2 -translate-y-1/2 -right-[3rem] bg-zinc-100 px-2 text-xs -rotate-90 font-medium rounded">
-                                {/* {dimension.height} */}
-                                {stackConfig.height}
-                                <span className="text-gray-500 font-normal"> mm</span>
-                            </p>
+                        <div 
+                            ref={resultRef}
+                            className="flex items-center h-full justify-center  relative"
+                            style={{ filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.5))", }}
+                        >
+                        </div>
+                        <div className="absolute top-0 -right-7 w-px h-full bg-zinc-300 mx-3" />
+                        <p className=" absolute top-1/2 -translate-y-1/2 -right-[2.7rem] bg-zinc-100 px-2 text-[9px] -rotate-90 font-medium rounded text-nowrap">
+                            {stackConfig.height}
+                            <span className="text-gray-500 font-normal"> mm</span>
+                        </p>
 
-                            <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 w-full h-px bg-zinc-300 my-3" />
-                            <p className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-zinc-100 px-2 text-xs font-medium rounded">
-                                {/* {dimension.width} */}
-                                {stackConfig.width}
-                                <span className="text-gray-500 font-normal"> mm</span>
-                            </p>
-                        </AnimatePresence>
+
+                        <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 w-full h-px bg-zinc-300 my-3" />
+                        <p className="absolute -bottom-[1.5rem] left-1/2 -translate-x-1/2 bg-zinc-100 px-2 text-[9px] font-medium rounded text-nowrap">
+                            {stackConfig.width}
+                            <span className="text-gray-500 font-normal"> mm</span>
+                        </p>
                     </TransformComponent>
                 </TransformWrapper>
             </motion.div>

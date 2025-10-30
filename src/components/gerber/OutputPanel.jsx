@@ -69,14 +69,14 @@ const OutputPanel = () => {
                             <div className="h-full bg-neutral-100 px-1.5 py-1.5">
                                 <Squares2X2Icon width={16} height={16} strokeWidth={1.5} stroke="#e57345" />
                             </div>
-                            <p className="text-xs pe-0.5 text-[#e57345] tracking-wider">Multiple Layout</p>
+                            <p className="text-[0.72rem] ps-0.5 pe-0.5 text-[#e57345] tracking-wider text-nowrap">Multi Layout</p>
                         </motion.button>
                         <motion.button
-                            className="flex justify-center items-center gap-2 border border-[#e57345] bg-[#e57345] px-2 py-1.5 rounded shadow" 
+                            className="flex justify-center items-center gap-2   bg-[#e57345] px-2 py-1.5 rounded shadow" 
                             whileTap={{ scale: 0.98 }}
                             onClick={downloadZip}
                         >
-                            <p className="text-xs ps-0.5 text-white tracking-wider">Download All</p>
+                            <p className="text-[0.72rem] ps-0.5 text-white tracking-wider">Download All</p>
                             <FolderArrowDownIcon width={16} height={16} strokeWidth={1.5} stroke="white" />
                         </motion.button>
 
