@@ -6,29 +6,29 @@ import {
     useRef, 
     useState 
 } from "react";
-import { useGerberView } from "../context/GerberContext";
 import JSZip from "jszip";
 import ImageIcon from "../icons/ImageIcon";
 import BulkLayoutPanel from "./BulkLayoutPanel";
+import { useApp } from "../context/AppContext";
 
 const OutputPanel = () => {
-    const { pngUrls, setPngUrls } = useGerberView();
+    const { pngFiles, setPngFiles } = useApp()
     const [showBulkModal, setShowBulkModal] = useState(false);
     const menuRef = useRef(null);
 
 
     const handleDeleteAll = () => {
-        pngUrls.forEach((item) => {
+        pngFiles.forEach((item) => {
             URL.revokeObjectURL(item.url);
         });
 
-        setPngUrls([]);
+        setPngFiles([]);
     }
 
     const downloadZip = () => {
         const zip = new JSZip();
         Promise.all(
-            pngUrls.map((pngBlob, index) => {
+            pngFiles.map((pngBlob, index) => {
                 return new Promise((resolve) => {
                     fetch(pngBlob.url).then(response => response.blob()).then(blob => {
                         zip.file(`${pngBlob.name}_${index}.png`, blob);
@@ -41,7 +41,7 @@ const OutputPanel = () => {
                 const url = window.URL.createObjectURL(zipBlob);
                 const link = document.createElement('a');
                 link.href = url;
-                link.setAttribute('download', `gerber_files_${pngUrls.length}.zip`);
+                link.setAttribute('download', `gerber_files_${pngFiles.length}.zip`);
                 document.body.appendChild(link);
                 link.click();
             }).catch(err => { console.log('Error Generating Zip File :', err) })
@@ -51,7 +51,7 @@ const OutputPanel = () => {
     return (
         <>
             <AnimatePresence>
-            { pngUrls.length > 0 ? (
+            { pngFiles.length > 0 ? (
                 <motion.div 
                     className="flex flex-col gap-1 rounded h-full" 
                     initial={{ opacity: 0, scale: 0.99 }}
@@ -96,15 +96,15 @@ const OutputPanel = () => {
                     </div>
 
                     <div className="md:overflow-y-auto custom-scrollbar">
-                        { pngUrls.slice().reverse().map((item, index) => (
+                        { pngFiles.slice().reverse().map((item, index) => (
                             <PngCard
                                 key={index}
                                 blobUrl={item.url}
                                 name={ `${ item.name }_1000dpi.png` }
                                 handleDelete={() => {
-                                    setPngUrls((prevState) => {
+                                    setPngFiles((prevState) => {
                                         const newState = [...prevState];
-                                        newState.splice(pngUrls.length - 1 - index, 1);
+                                        newState.splice(pngFiles.length - 1 - index, 1);
                                         return newState
                                     });
                                     URL.revokeObjectURL(item.url);

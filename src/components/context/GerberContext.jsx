@@ -5,12 +5,14 @@ import { updateSvg } from "../../utils/svgConverter/svgUtils";
 import setUpConfig from "../../utils/svgConverter/quickSetup";
 import handleColorChange from "../../utils/svgConverter/svgColorChange";
 import generatePNG from "../../utils/svgConverter/svg2png";
+import { useApp } from "./AppContext";
 
 const GerberLayersContext = createContext();
 const GerberSettingsContext = createContext();
 const GerberViewContext = createContext();
 
 export const GerberProvider = ({ children }) => {
+    const { setPngFiles } = useApp();
     // ------------------------
     // Layers
     // ------------------------
@@ -116,10 +118,10 @@ export const GerberProvider = ({ children }) => {
     // View / UI
     // ------------------------
     const [mainSvg, setMainSvg] = useState({id: null, svg: null});
-    const [pngUrls, setPngUrls] = useState([
-        // { name: 'topdfjsdfasdasdfasd_url2.png', url: 'https://shorthand.com/the-craft/raster-images/assets/5kVrMqC0wp/sh-unsplash_5qt09yibrok-4096x2731.jpeg', width: 20, height: 20 },
-        // { name: 'top_url.png', url: 'https://shorthand.com/the-craft/raster-images/assets/5kVrMqC0wp/sh-unsplash_5qt09yibrok-4096x2731.jpeg', width: 100, height: 60 },
-    ]);
+    // const [pngUrls, setPngUrls] = useState([
+    //     // { name: 'topdfjsdfasdasdfasd_url2.png', url: 'https://shorthand.com/the-craft/raster-images/assets/5kVrMqC0wp/sh-unsplash_5qt09yibrok-4096x2731.jpeg', width: 20, height: 20 },
+    //     // { name: 'top_url.png', url: 'https://shorthand.com/the-craft/raster-images/assets/5kVrMqC0wp/sh-unsplash_5qt09yibrok-4096x2731.jpeg', width: 100, height: 60 },
+    // ]);
     const [side, setSide] = useState(null);
     const [loader, setLoader] = useState(false);
 
@@ -159,30 +161,56 @@ export const GerberProvider = ({ children }) => {
                     handleColorChange({ color: setup.color, id: topstack.id, svgs:[svg] });
 
                     const newUrl = await generatePNG(svg, isDoubleside, setup.id, setup.canvas, setup.color);
-                    newUrls.push({ name: newUrl.name, url: newUrl.url, width: newUrl.width, height: newUrl.height });
+                    const directory = option.includes('top') ? 'toplayer' : option.includes('bottom') ? 'bottomlayer' : 'others';
+                    newUrls.push({ 
+                        name: newUrl.name, 
+                        url: newUrl.url, 
+                        width: newUrl.width, 
+                        height: newUrl.height,
+                        directory: directory,
+                        job: setup.button
+                    });
                 }
-                setPngUrls(prev => [ ...prev, ...newUrls ]);
+                // setPngUrls(prev => [ ...prev, ...newUrls ]);
+                setPngFiles(prev => [ ...prev, ...newUrls ]);
                 return;
             }
             const targetSvg = mainSvg.svg === fullLayers ? topstack.svg.cloneNode(true) : mainSvg.svg.cloneNode(true); 
             const blob = await generatePNG(targetSvg, isDoubleside, mainSvg.id, canvasBg, layerType);
-            setPngUrls(prev => [ ...prev, { name: blob.name, url: blob.url, width: blob.width, height: blob.height }])
+
+            const directory = method.includes('top') ? 'toplayer' : method.includes('bottom') ? 'bottomlayer' : 'others';
+            const jobs = ['trace', 'drill', 'cut'];
+            const job = jobs.find(job => method.includes(job)) || 'custom';
+
+            // setPngUrls(prev => [ ...prev, { name: blob.name, url: blob.url, width: blob.width, height: blob.height }])
+            setPngFiles(prev => [ 
+                ...prev, 
+                { 
+                    name: blob.name, 
+                    url: blob.url, 
+                    width: blob.width, 
+                    height: blob.height,
+                    directory: directory,
+                    job: job
+                }
+            ])
         } catch (error) {
             console.error('Failed PNG Conversion ++++++', error)
         } finally {
             setLoader(false);
         }
 
-    }, [bottomstack, canvasBg, fullLayers, layerType, mainSvg, topstack])
+    }, [bottomstack, canvasBg, fullLayers, layerType, mainSvg.id, mainSvg.svg, setPngFiles, topstack])
+
+
 
     const viewValues = useMemo(() => ({
         mainSvg, setMainSvg,
-        pngUrls, setPngUrls,
         side, setSide,
         loader, setLoader,
         toggleDoubleSide,
         handlePngConversion
-    }), [handlePngConversion, loader, mainSvg, pngUrls, side, toggleDoubleSide])
+    }), [handlePngConversion, loader, mainSvg, side, toggleDoubleSide])
 
     // const handleReset = () => {
     //     setMainSvg({id: null, svg: null});

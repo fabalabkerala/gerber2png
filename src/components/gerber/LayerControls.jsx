@@ -126,9 +126,9 @@ const LayerControls = () => {
                                 <p className="text-xs px-2 py-1 text-gray-700 capitalize">{layer.type}</p>
                             </div>
 
-                            { layer.properties.map((property) => (
+                            { layer.properties.map((property, id) => (
                                 <motion.button
-                                    key={property}
+                                key={`${property}_${id}`}
                                     className={cn(
                                         "px-3 py-1.5 rounded border w-14 text-center",
                                         !isToggled[property.layer][layer.type] ? "bg-zinc-100" : "bg-zinc-50 text-orange-400",

@@ -1,8 +1,6 @@
 import { useState } from "react";
 import Select from "../ui/Select";
 import PropTypes from "prop-types";
-import { ArrowPathRoundedSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { motion } from "motion/react";
 
 const machineOption = [
     { id: 'mdx', label: 'Rolland MDX Mill', width: 300, height: 300 }, 
@@ -10,7 +8,12 @@ const machineOption = [
     { id: 'custom', label: 'Custom', width: null, height: null }, 
 ]
 
-const LayoutConfiguration = ({machine, setMachine, config, setConfig}) => {
+const LayoutConfiguration = ({
+    machine, 
+    setMachine, 
+    // config, 
+    // setConfig
+}) => {
     const [ selectedMachine, setSelectedMachine ] = useState('Choose Machine');
 
     const handleInput = (name, value) => {

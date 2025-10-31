@@ -6,54 +6,48 @@ import GerberSidebar from './components/gerber/GerberSidebar.jsx';
 import OutputPanel from './components/gerber/OutputPanel.jsx';
 import MainView from './components/gerber/MainViewer.jsx';
 import { GerberProvider } from './components/context/GerberContext.jsx';
+import LeftPanel from './components/gcode/LeftPanel.jsx';
+import MainPanel from './components/gcode/MainPanel.jsx';
+import RightPanel from './components/gcode/RightPanel.jsx';
+import { AppProvider } from './components/context/AppContext.jsx';
 
 function App() {
   return (
     <>
-      <div className="h-screen flex flex-col">
-        <Navbar />
+      <AppProvider>
+        <div className="h-screen flex flex-col">
+          <Navbar />
 
-        <GerberProvider>
-          <Router>
-            <Routes>
-              <Route 
-                path='/' 
-                element={
-                  <PageLayout
-                    sidebar={<GerberSidebar />}
-                    main={<MainView />}
-                    right={<OutputPanel />}
-                  />
-                }
-              />
-            </Routes>
-          </Router>
-        </GerberProvider>
-        
-      </div>
-
-      {/* <div className='px-10 py-6 h-lvh'>
-        <nav className="w-full flex justify-between items-center mb-5 navbar h-[6%]">
-          <div className='flex items-center ps-5'>
-            <img className="w-9" src={ pcbLogo } alt="" />
-            <div>
-              <span className='gerber'>Gerber</span><span className='two'>2</span><span className='png'>PNG</span>
-            </div>
-          </div>
-          <div className='flex gap-4'>
-            <a href="https://git.fablabkerala.in/midlaj/gerber2png/-/wikis/home" target='_blank'>
-              <WikiIcon />
-            </a>
-            <a href="https://git.fablabkerala.in/midlaj/gerber2png" target='_blank'>
-              <GitlabIcon />
-            </a>
-          </div>
-        </nav>
-
-        <GerberProvider>
-          <GerberSection />
-        </GerberProvider>
-      </div> */}
+          <GerberProvider>
+            <Router>
+              <Routes>
+                <Route 
+                  path='/' 
+                  // path='/gerber' 
+                  element={
+                    <PageLayout
+                      sidebar={<GerberSidebar />}
+                      main={<MainView />}
+                      right={<OutputPanel />}
+                    />
+                  }
+                />
+                <Route 
+                  // path='/' 
+                  path='/gcode' 
+                  element={
+                    <PageLayout
+                      sidebar={<LeftPanel />}
+                      main={<MainPanel />}
+                      right={<RightPanel />}
+                    />
+                  }
+                />
+              </Routes>
+            </Router>
+          </GerberProvider>
+        </div>
+      </AppProvider>
     </>
   )
 }
