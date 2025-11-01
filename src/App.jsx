@@ -22,8 +22,8 @@ function App() {
             <Router>
               <Routes>
                 <Route 
-                  path='/' 
-                  // path='/gerber' 
+                  // path='/' 
+                  path='/gerber' 
                   element={
                     <PageLayout
                       sidebar={<GerberSidebar />}
@@ -33,8 +33,8 @@ function App() {
                   }
                 />
                 <Route 
-                  // path='/' 
-                  path='/gcode' 
+                  path='/' 
+                  // path='/gcode' 
                   element={
                     <PageLayout
                       sidebar={<LeftPanel />}

@@ -2,15 +2,15 @@ import { PhotoIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "motion/react"
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
-import { useGerberView } from "../context/GerberContext";
 import ModalHeader from "../ui/ModalHeader";
 import ImageSelect from "../ui/ImageSelect";
 import ImageLayout from "../ui/ImageLayout";
 import LayoutConfiguration from "./LayoutConfiguration";
 import LayoutSetup from "./LayoutSetup";
+import { useApp } from "../context/AppContext";
 
 const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
-    const { pngUrls } = useGerberView();
+    const { pngFiles } = useApp()
     const [ selectedPng, setSelectedPng ] = useState('Choose an Image');
     const [ generating, setGenerating ] = useState(false);
     const [ config, setConfig ] = useState({
@@ -95,7 +95,7 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                 <div className="flex gap-3 p-3">
                                     <div className="flex flex-col gap-2 p-2">
                                         <ImageSelect
-                                            options={pngUrls}
+                                            options={pngFiles}
                                             selected={selectedPng}
                                             setSelected={setSelectedPng}
                                             onSelect={(value) => {

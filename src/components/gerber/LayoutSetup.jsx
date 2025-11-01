@@ -6,8 +6,8 @@ import { motion } from "motion/react";
 import { cn } from "../../utils/cn";
 import { generatePngLayout } from "../../utils/svgConverter/svg2png";
 import { DocumentCheckIcon } from "@heroicons/react/24/outline";
-import { useGerberView } from "../context/GerberContext";
 import JSZip from "jszip";
+import { useApp } from "../context/AppContext";
 
 const options = [
     { id: 'black', label: 'Black' }, 
@@ -16,7 +16,7 @@ const options = [
 
 const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, generating, setGenerating}) => {
     const [ layoutBg, setLayoutBg ] = useState('black');
-    const { pngUrls } = useGerberView();
+    const { pngFiles } = useApp()
 
 
     const handleInput = (name, value) => {
@@ -70,7 +70,7 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, gen
 
             const zip = new JSZip();
 
-            const blobPromises = pngUrls.map(async (png) => {
+            const blobPromises = pngFiles.map(async (png) => {
                 const { blob } = await generatePngLayout(
                     png.url, 
                     config.row, 
@@ -92,7 +92,7 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, gen
             const url = window.URL.createObjectURL(zipBlob);
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `layout_g2p_files_${pngUrls.length}.zip`);
+            link.setAttribute('download', `layout_g2p_files_${pngFiles.length}.zip`);
             document.body.appendChild(link);
             link.click();
 

@@ -12,10 +12,7 @@ const ImageSelect = ({ options, selected, setSelected, variant = "bottom", onSel
         setSelected(value)
         onSelect?.(value)
     }
-    useEffect(() => {
-        console.log('consodnf : ', options)
-    }, [])
-
+    
     return (
         <>
             <Listbox value={selected} onChange={handleSelect}>
@@ -23,7 +20,7 @@ const ImageSelect = ({ options, selected, setSelected, variant = "bottom", onSel
                     <ListboxButton
                         className={cn(                    
                             'relative block w-full rounded pl-2 text-left text-xs border py-1',
-                            'focus:outline-none focus:ring-1 focus:ring-gray-400'
+                            'focus:outline-none focus:ring-1 focus:ring-gray-400 capitalize'
                         )}
                     >
                         {options.find(png => png.name === selected.name)?.name || selected}
@@ -51,7 +48,7 @@ const ImageSelect = ({ options, selected, setSelected, variant = "bottom", onSel
                                 )}
                             >
                                 <img className="w-12 object-contain rounded " src={option.url} />
-                                <div className="text-xs/6 ">{option.name}</div>
+                                <div className="text-xs/6 capitalize">{option.name}</div>
                                 <CheckIcon className={cn(
                                     "size-2 fill-black visible",
                                     selected.name === option.name ? 'visible' : 'invisible'
