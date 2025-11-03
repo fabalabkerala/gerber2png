@@ -2,7 +2,6 @@ import { Listbox, ListboxButton, ListboxOption, ListboxOptions } from "@headless
 import { CheckIcon, ChevronDownIcon } from '@heroicons/react/20/solid'
 import { cn } from "../../utils/cn";
 import PropTypes from 'prop-types';
-import { useEffect } from "react";
 
 const ImageSelect = ({ options, selected, setSelected, variant = "bottom", onSelect, getOptionClass }) => {
 

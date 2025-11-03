@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { cn } from "../../utils/cn";
 import { ViewfinderCircleIcon } from "@heroicons/react/24/outline";
-import InitialSetup from "./Setup";
+import Setup from "./setup/Setup";
 
 const MainPanel = () => {
     const [ showSetup, setShowSetup ] = useState(true);
@@ -59,7 +59,7 @@ const MainPanel = () => {
                 </div>
             </div>
 
-            <InitialSetup showSetup={showSetup}  setShowSetup={setShowSetup} />
+            <Setup showSetup={showSetup}  setShowSetup={setShowSetup} />
         </>
     );
 };

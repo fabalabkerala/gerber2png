@@ -27,7 +27,7 @@ export const AppProvider = ({ children }) => {
       height: 250
     }, 
   ]);
-  const [ selectedMachine, setSelectedMachine ] = useState('Choose Your Machine')
+  const [ selectedMachine, setSelectedMachine ] = useState('Choose Your Machine');
 
   const value = useMemo(() => ({
     pngFiles, 
