@@ -7,27 +7,15 @@ const AppContext = createContext();
 export const AppProvider = ({ children }) => {
   const [pngFiles, setPngFiles] = useState([]);
   const [activeTab, setActiveTab] = useState("gerber");
-  const [ machineConf, setMachineConf ] = useState([
-    {
-      machine: 'carvera',
-      image: 'https://www.makera.com/cdn/shop/files/Makera_Carvera_1.jpg',
-      width: 300,
-      height: 250
-    },
-    {
-      machine: 'Roland MDX-20',
-      image: 'https://image.rolanddga.com/-/media/roland/images/support/product_shots/mdx20.jpg',
-      width: 300,
-      height: 300
-    },
-    {
-      machine: 'LPKF ProtoMat',
-      image: 'https://www.lpkfusa.com/fileadmin/mediafiles/_processed_/c/5/csm_Produkt_ProtoMat_S104_schraeg_e9179d0b21.png',
-      width: 300,
-      height: 250
-    }, 
-  ]);
-  const [ selectedMachine, setSelectedMachine ] = useState('Choose Your Machine');
+  const [ machineConf, setMachineConf ] = useState('Choose Your Machine');
+  const [ pcbConf, setPCBConf ] = useState({
+    type: 'single',
+    length: { value: 100, maxValue: 400 },
+    width: { value: 100, maxValue: 400 },
+    thickness: { value: 2, maxValue: 4 },
+    copperThickness: { value: 0.03, maxValue: 0.1 },
+    cutOffset: { value: 0.5, maxValue: 1 },
+  });
 
   const value = useMemo(() => ({
     pngFiles, 
@@ -35,9 +23,10 @@ export const AppProvider = ({ children }) => {
     activeTab,
     setActiveTab,
     machineConf,
-    selectedMachine,
-    setSelectedMachine
-  }), [pngFiles, activeTab, machineConf, selectedMachine]);
+    setMachineConf,
+    pcbConf, 
+    setPCBConf
+  }), [pngFiles, activeTab, machineConf, pcbConf]);
 
   return (
     <AppContext.Provider value={value}>
@@ -49,5 +38,5 @@ export const AppProvider = ({ children }) => {
 export const useApp = () => useContext(AppContext);
 
 AppProvider.propTypes = {
-    children: PropTypes.node.isRequired
+  children: PropTypes.node.isRequired
 }

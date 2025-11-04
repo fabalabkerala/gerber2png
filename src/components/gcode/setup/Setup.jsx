@@ -14,7 +14,7 @@ const tabs = [
 
 ]
 const Setup = ({ showSetup, setShowSetup }) => {
-    const [ selectedTab, setSelectedTab ] = useState(tabs[0]);
+    const [ selectedTab, setSelectedTab ] = useState(tabs[1]);
 
     const handleNext = () => {
         const currentIndex = tabs.findIndex(t => t.id === selectedTab.id);

@@ -1,82 +1,161 @@
-import { PhotoIcon } from "@heroicons/react/24/outline";
 import { useApp } from "../../context/AppContext"
 import PCB from "./PCB";
-// import ImageSelect from "../../ui/ImageSelect"
+import { useState } from "react";
+import Select from "../../ui/Select";
+import PropTypes from "prop-types";
+
+const options = [
+    { id: '4x6', label: '4in X 6in', width: 101.6, length: 152.4 }, 
+    { id: '5x8', label: '5in X 8in', width: 127, length: 203.2 }, 
+    { id: '6x8', label: '6in X 8in', width: 152.4, length: 203.2 }, 
+];
+
+const sideOption = [
+    { id: 'single' , label : 'Single Side' },
+    { id: 'double' , label : 'Double Side' },
+]
+
+const labels = {
+    type: "Doubleside",
+    length: "Length",
+    width: "Width",
+    thickness: "Thickness",
+    copperThickness: "Copper Thickness",
+    cutOffset: "Additional Cut Offset"
+};
+  
 
 const PcbConfiguration = () => {
-    const { machineConf, selectedMachine } = useApp();
-    // const machineOptions = machineConf.map(item => ({ name: item.machine, url: item.image, ...item }));
+    const { pcbConf, setPCBConf } = useApp();
+    const [ preset, setPreset ] = useState('Choose Preset');
+    const [ pcbSide, setPCBSide ] = useState(sideOption[0].id);
+
+    const handleInput = (name, value, maxValue) => {
+        if (value === '') {
+            setPCBConf(prev => ({ ...prev, [name]: { ...prev[name], value: '' }}));
+            return;
+        }
+
+        let num = parseFloat(value);
+        if (num > maxValue) num = maxValue;
+
+        num = Math.round(num * 100) / 100;
+
+        setPCBConf(prev => ({
+            ...prev,
+            [name]: { ...prev[name], value: num }
+        }));
+    }
 
     return (
         <>
             <div className="flex gap-3 p-3 h-full">
                 <div className="flex-1 py-3 px-2">
-                    <div className="bg-zinc-100 flex-1 p-4 mx-2 my-1 flex flex-col gap-3 rounded h-full">
-                        <div className="flex justify-between items-center gap-2">
-                            <label className="text-xs text-black">Length <span className="text-gray-500 font-normal text-[10px]">(mm)</span></label>
-                            <input 
-                                className="rounded w-32 focus:outline-none text-center text-xs py-1 border" 
-                                type="number"
-                            />
-                        </div>
-                        <div className="flex justify-between items-center gap-2">
-                            <label className="text-xs text-black">Width <span className="text-gray-500 font-normal text-[10px]">(mm)</span></label>
-                            <input 
-                                className="rounded w-32 focus:outline-none text-center text-xs py-1 border" 
-                                type="number"
-                            />
-                        </div>
-                        <div className="flex justify-between items-center gap-2">
-                            <label className="text-xs text-black">Thickness <span className="text-gray-500 font-normal text-[10px]">(mm)</span></label>
-                            <input 
-                                className="rounded w-32 focus:outline-none text-center text-xs py-1 border" 
-                                type="number"
-                            />
-                        </div>
-                        <div className="flex justify-between items-center gap-2">
-                            <label className="text-xs text-black">Copper Thickness <span className="text-gray-500 font-normal text-[10px]">(mm)</span></label>
-                            <input 
-                                className="rounded w-32 focus:outline-none text-center text-xs py-1 border" 
-                                type="number"
-                            />
-                        </div>
-                        <div className="flex justify-between items-center gap-2">
-                            <label className="text-xs text-black">Additional Cut Offset <span className="text-gray-500 font-normal text-[10px]">(mm)</span></label>
-                            <input 
-                                className="rounded w-32 focus:outline-none text-center text-xs py-1 border" 
-                                type="number"
-                            />
-                        </div>
+                    <div className=" bg-zinc-50 flex-1 p-4 mx-2 my-1 flex flex-col gap-3 rounded h-full">
+                        <div className="flex items-center gap-6">
+                            <p className="text-xs text-black text-nowrap font-medium tracking-wide">Copper Sheet</p>
+                            <div className="bg-white w-32">
+                                <Select 
+                                    options={options} 
+                                    selected={preset} 
+                                    setSelected={setPreset} 
+                                    onSelect={(value) => {
+                                        const val = options.find(option => option.id === value);
 
+                                        setPCBConf(prev => ({
+                                            ...prev,
+                                            length: { ...prev.length, value: val.length },
+                                            width: { ...prev.width, value: val.width },
+                                        }));
+                                    }}
+                                />
+                            </div>
+                        </div>
+                        <div className="flex justify-between items-center gap-2 mt-3">
+                            <p className="text-xs text-black text-nowrap tracking-wide">Type</p>
+                            <div className="bg-white w-32">
+                                <Select 
+                                    options={sideOption} 
+                                    selected={pcbSide} 
+                                    setSelected={setPCBSide} 
+                                    onSelect={(value) => {
+                                        setPCBConf(prev => ({ ...prev, type: value }))
+                                    }}
+                                />
+                            </div>
+                        </div>
+                        <InputField 
+                            name={'length'} 
+                            label={'Length'} 
+                            value={pcbConf.length.value}
+                            maxValue={pcbConf.length.maxValue} 
+                            handleInput={handleInput}
+                        />
+                        <InputField 
+                            name={'width'} 
+                            label={'Width'} 
+                            value={pcbConf.width.value} 
+                            maxValue={pcbConf.width.maxValue} 
+                            handleInput={handleInput}
+                        />
+                        <InputField 
+                            name={'thickness'} 
+                            label={'Thickness'} 
+                            value={pcbConf.thickness.value} 
+                            maxValue={pcbConf.thickness.maxValue} 
+                            defaultValue={2} 
+                            handleInput={handleInput}
+                        />
+                        <InputField 
+                            name={'copperThickness'} 
+                            label={'Copper Thickness'} 
+                            value={pcbConf.copperThickness.value} 
+                            maxValue={pcbConf.copperThickness.maxValue}
+                            defaultValue={0.035} 
+                            handleInput={handleInput}
+                        />
+                        <InputField 
+                            name={'cutOffset'} 
+                            label={'Additional Cut Offset'} 
+                            value={pcbConf.cutOffset.value} 
+                            maxValue={pcbConf.cutOffset.maxValue} 
+                            defaultValue={0.3}
+                            handleInput={handleInput}
+                        />
                     </div>
                 </div>
                 <div className="flex-1 p-3">
-                    <PCB className={'w-full p-4 h-auto'} />
-                    <div className="flex flex-col gap-2 p-3">
-                        <div className="flex gap-3">
-                            <p className="text-xs w-32">Doubleside </p>
-                            <p className="text-xs font-medium">Yes</p>
+                    <div className="flex-1 h-44 w-86">
+                        <PCB 
+                            className={'w-full h-full p-4'} 
+                            doubleSide={ pcbSide === 'single' ? false : true } 
+                            cutOffsetRatio={ pcbConf.cutOffset.value / pcbConf.thickness.value } 
+                            copperRatio={ pcbConf.copperThickness.value / pcbConf.thickness.value } 
+                        />
+                    </div>
+                    <div className="flex flex-1 flex-col gap-2 p-3">
+                        <div className="flex flex-col gap-2">
+                            {Object.entries(labels).map(([key, label]) => (
+                                <div key={key} className="flex gap-3 py-1">
+                                    <p className="text-xs w-32">{label}</p>
+                                    <p className="text-xs font-medium">
+                                        {key === "type"
+                                        ? pcbConf[key] === "double" ? "Yes" : "No"
+                                        : pcbConf[key].value}
+                                        {key !== "type" && (
+                                        <span className="text-gray-500 font-normal text-[10px]">mm</span>
+                                        )}
+                                    </p>
+                                </div>
+                            ))}
+                            <div className="flex gap-3 py-1">
+                                <p className="text-xs w-32">Cut Depth</p>
+                                <p className="text-xs font-medium">
+                                    { pcbConf.copperThickness.value + pcbConf.cutOffset.value }<span className="text-gray-500 font-normal text-[10px]">mm</span>
+                                </p>
+                            </div>
                         </div>
-                        <div className="flex gap-3">
-                            <p className="text-xs w-32">Length </p>
-                            <p className="text-xs font-medium">234  <span className="text-gray-500 font-normal text-[10px]">mm</span></p>
-                        </div>
-                        <div className="flex gap-3">
-                            <p className="text-xs w-32">Width </p>
-                            <p className="text-xs font-medium">123  <span className="text-gray-500 font-normal text-[10px]">mm</span></p>
-                        </div>
-                        <div className="flex gap-3">
-                            <p className="text-xs w-32">Thickness </p>
-                            <p className="text-xs font-medium">3  <span className="text-gray-500 font-normal text-[10px]">mm</span></p>
-                        </div>
-                        <div className="flex gap-3">
-                            <p className="text-xs w-32">Copper Thickness </p>
-                            <p className="text-xs font-medium">1  <span className="text-gray-500 font-normal text-[10px]">mm</span></p>
-                        </div>
-                        <div className="flex gap-3">
-                            <p className="text-xs w-32">Additional Cut Offset </p>
-                            <p className="text-xs font-medium">1  <span className="text-gray-500 font-normal text-[10px]">mm</span></p>
-                        </div>
+
                     </div>
                 </div>
             </div>
@@ -84,3 +163,38 @@ const PcbConfiguration = () => {
     )
 }
 export default PcbConfiguration;
+
+const InputField = ({name, label, value, maxValue, handleInput, defaultValue = 0}) => {
+    return (
+        <>
+            <div className="flex justify-between items-center gap-2">
+                <label className="text-xs text-black">{ label } <span className="text-gray-500 font-normal text-[10px]">(mm)</span></label>
+                <input 
+                    value={value}
+                    className="rounded w-32 focus:outline-none text-center text-xs py-1 border" 
+                    type="number"
+                    min={0}
+                    step={0.1}
+                    onInput={(e) => {
+                        let value = e.target.value;
+                        if (value < 0) value = 0;  
+                        handleInput(name, value, maxValue)
+                    }}
+                    onBlur={(e) => {
+                        if (e.target.value === '' || isNaN(e.target.value)) {
+                            handleInput(name, defaultValue, maxValue);
+                        }
+                    }}  
+                />
+            </div>
+        </>
+    )
+}
+InputField.propTypes = {
+    name: PropTypes.string.isRequired,
+    label: PropTypes.string,
+    value: PropTypes.number.isRequired,
+    maxValue: PropTypes.number,
+    handleInput: PropTypes.func.isRequired,
+    defaultValue: PropTypes.number
+}
