@@ -82,7 +82,7 @@ const Setup = ({ showSetup, setShowSetup }) => {
                                 { selectedTab.id === 'tool' && <ToolLibrary />}
                             </div>
 
-                            <div className="absolute w-full bg-white bottom-0 flex gap-2 justify-between p-3">
+                            <div className="w-full bg-white bottom-0 flex gap-2 justify-between p-3">
                                 
                                 <div>
                                     { selectedTab.id !== 'machine' &&
