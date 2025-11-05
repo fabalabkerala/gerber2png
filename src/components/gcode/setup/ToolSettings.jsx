@@ -12,9 +12,8 @@ const options = [
     { id: 'normal', label: 'Normal Bit' }, 
 ];
 
-const ToolSettings = ({ tool, setTool }) => {
-    const { toolLib, setToolLib } = useApp();
-    const [ toolType, setToolType ] = useState(options.find(opt => opt.id === tool.type).id || 'Choose Bit');
+const ToolSettings = ({ tool, index, setToolLib }) => {
+    const [ toolType, setToolType ] = useState(tool.type || 'Choose Bit');
     
     return (
         <>
@@ -57,8 +56,9 @@ const ToolSettings = ({ tool, setTool }) => {
                                 setSelected={setToolType} 
                                 onSelect={(value) => {
                                     console.log(value)
+                                    // setTool(prev => ({ ...prev, type: value }))
                                     setToolLib(prev => 
-                                        prev.map(t => t === tool ? { ...t, type: value } : t)
+                                        prev.map((t, id) => id === index ? { ...t, type: value } : t)
                                     )
                                     // setConfig(prev => ({ ...prev, background: value }))
                                 }}
@@ -220,5 +220,7 @@ ToolSettings.propTypes = {
         maxCutDepth: PropTypes.number,
         offsetStepOver: PropTypes.number,
         offsetNum: PropTypes.number
-    })
+    }),
+    index: PropTypes.number.isRequired,
+    setToolLib: PropTypes.func
 }

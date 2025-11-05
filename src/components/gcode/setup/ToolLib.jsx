@@ -15,27 +15,11 @@ const options = [
 ];
 
 const ToolLibrary = () => {
-    const { pcbConf, setPCBConf, toolLib } = useApp();
-    const [ selectedTool , setSelectedTool ] = useState(null);
+    const { pcbConf, setPCBConf, toolLib, setToolLib } = useApp();
+    const [ selectedToolID , setSelectedToolID ] = useState(null);
     const [ toolType, setToolType ] = useState('Select Bit');
     const [fillEnabled, setFillEnabled] = useState(false);
 
-    const handleInput = (name, value, maxValue) => {
-        if (value === '') {
-            setPCBConf(prev => ({ ...prev, [name]: { ...prev[name], value: '' }}));
-            return;
-        }
-
-        let num = parseFloat(value);
-        if (num > maxValue) num = maxValue;
-
-        num = Math.round(num * 100) / 100;
-
-        setPCBConf(prev => ({
-            ...prev,
-            [name]: { ...prev[name], value: num }
-        }));
-    }
 
     useEffect(() => {
         console.log('udpate  :', toolType)
@@ -52,9 +36,9 @@ const ToolLibrary = () => {
                                 key={index} 
                                 className={cn(
                                     "flex gap-2 items-center border-l-2  px-2 py-2.5 transition-all  cursor-pointer rounded",
-                                    selectedTool === tool ? 'bg-zinc-100 border-orange-500 hover:bg-zinc-100' : 'hover:bg-zinc-100'
+                                    selectedToolID === index ? 'bg-zinc-100 border-orange-500 hover:bg-zinc-100' : 'hover:bg-zinc-100'
                                 )}
-                                onClick={() => setSelectedTool(tool)}
+                                onClick={() => setSelectedToolID(index)}
                             >
                                 <p className="text-xs text-zinc-900 leading-none">{index + 1} </p>
                                 { tool.type === 'normal' ? (
@@ -69,9 +53,9 @@ const ToolLibrary = () => {
                     </div>
                 </div>
                 <div className="flex-1 p-3 overflow-y-auto custom-scrollbar">
-                    { selectedTool ? (
+                    { selectedToolID !== null ? (
                         <>
-                            <ToolSettings tool={selectedTool} />
+                            <ToolSettings tool={toolLib[selectedToolID]} index={selectedToolID} setToolLib={setToolLib} />
                             {/* <div className="flex-1 h-44 flex items-center justify-center">
                                 { selectedTool.type === 'normal' ? (
                                     <NormalBitIcon className={'w-auto h-28'} />
