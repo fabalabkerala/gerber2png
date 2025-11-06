@@ -1,24 +1,24 @@
 const NormalBitIcon = (props) => (
   <svg
-    width={57}
-    height={66}
-    viewBox="0 0 57 66"
+    width={104}
+    height={69}
+    viewBox="0 0 104 69"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     xmlnsXlink="http://www.w3.org/1999/xlink"
     {...props}
   >
     <mask id="path-1-inside-1_181_131" fill="white">
-      <path d="M0 54.1426H57V65.1426H0V54.1426Z" />
+      <path d="M0 58H104V69H0V58Z" />
     </mask>
-    <path d="M0 54.1426H57V65.1426H0V54.1426Z" fill="url(#pattern0_181_131)" />
+    <path d="M0 58H104V69H0V58Z" fill="url(#pattern0_181_131)" />
     <path
-      d="M0 54.1426V56.1426H57V54.1426V52.1426H0V54.1426Z"
-      fill="black"
+      d="M0 58V60H104V58V56H0V58Z"
+      fill="#E6A0A0"
       mask="url(#path-1-inside-1_181_131)"
     />
     <path
-      d="M24.625 57.1699L24.625 31.4902L24.1475 31.0449L15.5 22.9902V1.50098H41.5L41.5 22.9902L32.8525 31.0449L32.375 31.4902V57.1699H24.625Z"
+      d="M48.625 61.0273V35.3477L48.1475 34.9023L39.5 26.8477V5.3584H65.5V26.8477L56.8525 34.9023L56.375 35.3477V61.0273H48.625Z"
       fill="#5A6E84"
       stroke="#5A6E84"
       strokeWidth={3}
@@ -27,7 +27,7 @@ const NormalBitIcon = (props) => (
       <pattern
         id="pattern0_181_131"
         patternUnits="userSpaceOnUse"
-        patternTransform="matrix(12.7633 0 0 25.5266 -0.410078 53.7323)"
+        patternTransform="matrix(12.7633 0 0 25.5266 -0.410078 57.5897)"
         preserveAspectRatio="none"
         viewBox="-0.707031 -0.707388 22.0057 44.0114"
         width={1}
@@ -83,7 +83,7 @@ const NormalBitIcon = (props) => (
             y1={43.6578}
             x2={43.6578}
             y2={-0.353553}
-            stroke="black"
+            stroke="#E6A0A0"
           />
         </g>
         <use

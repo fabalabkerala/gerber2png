@@ -42,9 +42,9 @@ const ToolLibrary = () => {
                             >
                                 <p className="text-xs text-zinc-900 leading-none">{index + 1} </p>
                                 { tool.type === 'normal' ? (
-                                    <NormalBitIcon className={'w-4 h-4 mr-2'} />
+                                    <NormalBitIcon className={'w-4 h-4 mr-2'}  />
                                 ):(
-                                    <VBitIcon className={'w-4 h-4 mr-2'} />
+                                    <VBitIcon className={'w-4 h-4 mr-2'} angle={tool.angle} />
                                 )}
                                 <p className="text-[10px] px-2 py-1 bg-zinc-100 rounded leading-none border"> T-{tool.toolNo}</p>
                                 <p className="text-sm px-2 leading-none"> {tool.name}</p>

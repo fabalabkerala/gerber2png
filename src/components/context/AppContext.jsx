@@ -60,7 +60,7 @@ export const AppProvider = ({ children }) => {
       name: 'V-Bit 15deg',
       toolNo: 4,
       type: 'vbit',
-      angle: 15,
+      angle: 60,
       diameter: 0.1,
       feedRate: 4,
       plungeRate: 4,
