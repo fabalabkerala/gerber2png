@@ -7,7 +7,12 @@ const AppContext = createContext();
 export const AppProvider = ({ children }) => {
   const [pngFiles, setPngFiles] = useState([]);
   const [activeTab, setActiveTab] = useState("gerber");
-  const [ machineConf, setMachineConf ] = useState('Choose Your Machine');
+  const [ machineConf, setMachineConf ] = useState({
+    name: 'carvera',
+    url: 'https://www.makera.com/cdn/shop/files/Makera_Carvera_1.jpg',
+    width: 300,
+    height: 250
+  });
   const [ pcbConf, setPCBConf ] = useState({
     type: 'single',
     length: { value: 100, maxValue: 400 },

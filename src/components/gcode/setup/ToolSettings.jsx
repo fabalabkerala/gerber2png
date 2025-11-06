@@ -19,7 +19,7 @@ const angles = [
 ];
 
 const ToolSettings = ({ tool, index, setToolLib }) => {
-    const [ toolType, setToolType ] = useState(tool.type || 'Choose Bit');
+    const [ , setToolType ] = useState(tool.type || 'Choose Bit');
     const [ , setToolAngle ] = useState(tool.angle || 'Choose Angle');
 
     const handleInput = (field, value) => {
@@ -103,7 +103,7 @@ const ToolSettings = ({ tool, index, setToolLib }) => {
                 </div>
 
                 <AnimatePresence>
-                    { toolType === 'vbit' && (
+                    { tool.type === 'vbit' && (
                         <motion.div 
                             className="flex items-center justify-between gap-2" 
                             initial={{ opacity: 0, height: 0 }}
@@ -169,8 +169,8 @@ const ToolSettings = ({ tool, index, setToolLib }) => {
                     />
                 </div>
 
-                <Input field={'feedRate'} label={'Feed Rate'} value={tool.feedRate} defaultVal={1} min={0.2} handleInput={handleInput} cleanInput={cleanInput}  />
-                <Input field={'plungeRate'} label={'Plunge Rate'} value={tool.plungeRate} defaultVal={1} min={0.2} handleInput={handleInput} cleanInput={cleanInput}  />
+                <Input field={'feedRate'} label={'Feed Rate'} value={tool.feedRate} defaultVal={1} min={0.2} handleInput={handleInput} cleanInput={cleanInput} suffix={'mm/s'}  />
+                <Input field={'plungeRate'} label={'Plunge Rate'} value={tool.plungeRate} defaultVal={1} min={0.2} handleInput={handleInput} cleanInput={cleanInput} suffix={'mm/s'}  />
                 <Input field={'rpm'} label={'RPM'} value={tool.rpm} defaultVal={600} min={100} handleInput={handleInput} cleanInput={cleanInput} suffix={'mm/s'}  />
             </div>
         </>

@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { cn } from "../../utils/cn";
 import { ViewfinderCircleIcon } from "@heroicons/react/24/outline";
-import Setup from "./setup/Setup";
 
 const MainPanel = () => {
-    const [ showSetup, setShowSetup ] = useState(true);
     const [activeTab, setActiveTab] = useState("image");
 
     return (
@@ -52,14 +50,11 @@ const MainPanel = () => {
                         />
                     ) : (
                         <div className="relative w-full h-full flex justify-center items-center">
-                            {/* Replace this div with your GCode canvas component */}
                             <p className="text-gray-600 text-sm">GCode Preview goes here</p>
                         </div>
                     )}
                 </div>
             </div>
-
-            <Setup showSetup={showSetup}  setShowSetup={setShowSetup} />
         </>
     );
 };

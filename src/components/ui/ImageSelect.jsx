@@ -62,7 +62,7 @@ const ImageSelect = ({ options, selected, setSelected, variant = "bottom", onSel
 }
 
 ImageSelect.propTypes = {
-    options: PropTypes.arrayOf(PropTypes.string).isRequired,
+    options: PropTypes.array.isRequired,
     selected: PropTypes.shape({ 
         name: PropTypes.string, 
         url: PropTypes.string 

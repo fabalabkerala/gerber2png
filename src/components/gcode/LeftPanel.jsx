@@ -1,5 +1,9 @@
 import { useState } from "react";
 import JobDirectory from "../ui/JobDirectory";
+import { Cog6ToothIcon } from "@heroicons/react/24/outline";
+import { motion } from "motion/react";
+import Setup from "./setup/Setup";
+import { cn } from "../../utils/cn";
 
 const jobsData = [
     {
@@ -22,7 +26,8 @@ const jobsData = [
 
 const LeftPanel = () => {
     const [openJobs, setOpenJobs] = useState(jobsData.map((j) => j.name));
-    const [ selectedFile, setSelectedFile ] = useState(null)
+    const [ selectedFile, setSelectedFile ] = useState(null);
+    const [ showSetup, setShowSetup ] = useState(false);
 
     const toggleJob = (name) => {
         setOpenJobs((prev) =>
@@ -37,8 +42,19 @@ const LeftPanel = () => {
     return (
         <div className="flex flex-col h-full bg-white pb-3 rounded-md shadow overflow-y-auto">
             {/* Heading */}
-            <div className="flex items-center bg-gray-100 px-3 py-2 rounded-t-md border-b">
+            <div className="flex items-center justify-between bg-gray-100 pl-3 pr-1 py-1 rounded-t-md border-b">
                 <p className="font-medium text-sm text-gray-700">All Jobs</p>
+                <motion.button
+                    className={cn(
+                        "flex text-xs gap-1 py-1 pl-1 pr-1 rounded transition-all duration-300 group",
+                        showSetup ? 'bg-white text-orange-600' : 'hover:bg-white hover:text-orange-600'
+                    )}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setShowSetup(true)}
+                >
+                    Setup
+                    <Cog6ToothIcon className="w-4 h-4 g" />
+                </motion.button>
             </div>
 
             {/* Job List */}
@@ -54,6 +70,8 @@ const LeftPanel = () => {
                     />
                 ))}
             </div>
+
+            <Setup showSetup={showSetup}  setShowSetup={setShowSetup} />
         </div>
     );
 };

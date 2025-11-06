@@ -11,10 +11,10 @@ const tabs = [
     { id: 'machine', label: 'Machine' },
     { id: 'pcb', label: 'PCB Configuration' },
     { id: 'tool', label: 'Tool Library' },
-
 ]
+
 const Setup = ({ showSetup, setShowSetup }) => {
-    const [ selectedTab, setSelectedTab ] = useState(tabs[2]);
+    const [ selectedTab, setSelectedTab ] = useState(tabs[0]);
 
     const handleNext = () => {
         const currentIndex = tabs.findIndex(t => t.id === selectedTab.id);
@@ -50,11 +50,11 @@ const Setup = ({ showSetup, setShowSetup }) => {
                         >
                             
                             <div className="flex justify-between items-center bg-neutral-100 rounded-tl-md rounded-tr-md border-b">
-                                <p className="text-xs px-2 text-gray-700">Initial Setup</p>
+                                <p className="text-sm px-3 text-gray-900">Setup</p>
                                 <motion.button 
                                     whileTap={{ scale: 0.97, background: '#ef4444' }}
                                     onClick={ () => setShowSetup(false) }
-                                    className="py-1.5 px-1 rounded-tr shadow-sm border bg-red-400 border-red-300"
+                                    className="py-2 px-2 rounded-tr shadow-sm border bg-red-400 border-red-300"
                                 >
                                     <XMarkIcon width={20} height={14} strokeWidth={2} className="text-white" />
                                 </motion.button>
@@ -83,7 +83,6 @@ const Setup = ({ showSetup, setShowSetup }) => {
                             </div>
 
                             <div className="w-full bg-white bottom-0 flex gap-2 justify-between p-3">
-                                
                                 <div>
                                     { selectedTab.id !== 'machine' &&
                                         <motion.button

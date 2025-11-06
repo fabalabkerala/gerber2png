@@ -5,28 +5,28 @@ import ImageSelect from "../../ui/ImageSelect"
 const options = [
     {
         machine: 'carvera',
-        image: 'https://www.makera.com/cdn/shop/files/Makera_Carvera_1.jpg',
+        url: 'https://www.makera.com/cdn/shop/files/Makera_Carvera_1.jpg',
         width: 300,
         height: 250
     },
     {
         machine: 'Roland MDX-20',
-        image: 'https://image.rolanddga.com/-/media/roland/images/support/product_shots/mdx20.jpg',
+        url: 'https://image.rolanddga.com/-/media/roland/images/support/product_shots/mdx20.jpg',
         width: 300,
         height: 300
     },
-    {
-        machine: 'LPKF ProtoMat',
-        image: 'https://www.lpkfusa.com/fileadmin/mediafiles/_processed_/c/5/csm_Produkt_ProtoMat_S104_schraeg_e9179d0b21.png',
-        width: 300,
-        height: 250
-    }, 
+    // {
+    //     machine: 'LPKF ProtoMat',
+    //     url: 'https://www.lpkfusa.com/fileadmin/mediafiles/_processed_/c/5/csm_Produkt_ProtoMat_S104_schraeg_e9179d0b21.png',
+    //     width: 300,
+    //     height: 250
+    // }, 
 ]
 
 const Machine = () => {
     const { machineConf, setMachineConf } = useApp();
 
-    const machineOptions = options.map(item => ({ name: item.machine, url: item.image, ...item }));
+    const machineOptions = options.map(item => ({ name: item.machine, ...item }));
 
     return (
         <>
