@@ -6,6 +6,7 @@ import Machine from "./Machine";
 import ToolLibrary from "./ToolLib";
 import PcbConfiguration from "./PcbConf";
 import { cn } from "../../../utils/cn";
+import { useApp } from "../../context/AppContext";
 
 const tabs = [
     { id: 'machine', label: 'Machine' },
@@ -14,7 +15,9 @@ const tabs = [
 ]
 
 const Setup = ({ showSetup, setShowSetup }) => {
+    const { setupCompleted, markSetupComplete } = useApp();
     const [ selectedTab, setSelectedTab ] = useState(tabs[0]);
+    const isFirstTime = !setupCompleted
 
     const handleNext = () => {
         const currentIndex = tabs.findIndex(t => t.id === selectedTab.id);
@@ -28,6 +31,12 @@ const Setup = ({ showSetup, setShowSetup }) => {
         if (currentIndex > 0) {
             setSelectedTab(tabs[currentIndex - 1]);
         }
+    };
+
+    const handleFinish = () => {
+        markSetupComplete();
+        setShowSetup(false);
+        setSelectedTab(tabs[0])
     };
 
     return (
@@ -50,14 +59,16 @@ const Setup = ({ showSetup, setShowSetup }) => {
                         >
                             
                             <div className="flex justify-between items-center bg-neutral-100 rounded-tl-md rounded-tr-md border-b">
-                                <p className="text-sm px-3 text-gray-900">Setup</p>
-                                <motion.button 
-                                    whileTap={{ scale: 0.97, background: '#ef4444' }}
-                                    onClick={ () => setShowSetup(false) }
-                                    className="py-2 px-2 rounded-tr shadow-sm border bg-red-400 border-red-300"
-                                >
-                                    <XMarkIcon width={20} height={14} strokeWidth={2} className="text-white" />
-                                </motion.button>
+                                <p className="text-sm px-3 py-1 text-gray-900">Setup</p>
+                                { !isFirstTime && 
+                                    <motion.button 
+                                        whileTap={{ scale: 0.97, background: '#ef4444' }}
+                                        onClick={ () => setShowSetup(false) }
+                                        className="py-2 px-2 rounded-tr shadow-sm border bg-red-400 border-red-300"
+                                    >
+                                        <XMarkIcon width={20} height={14} strokeWidth={2} className="text-white" />
+                                    </motion.button>
+                                }
                             </div>
                             <div className="flex items-center bg-neutral-50 rounded-tl-md rounded-tr-md">
                                 { tabs.map((tab, index)=> (
@@ -82,41 +93,43 @@ const Setup = ({ showSetup, setShowSetup }) => {
                                 { selectedTab.id === 'tool' && <ToolLibrary />}
                             </div>
 
-                            <div className="w-full bg-white bottom-0 flex gap-2 justify-between p-3">
-                                <div>
-                                    { selectedTab.id !== 'machine' &&
-                                        <motion.button
-                                            className="flex justify-center items-center gap-1  px-2 py-1.5 rounded" 
-                                            whileTap={{ scale: 0.98 }}
-                                            onClick={handleBack}
-                                        >
-                                            <PlayIcon width={16} height={16} strokeWidth={2} className="rotate-180 text-gray-700" />
-                                            <p className="text-xs text-gray-700 font-medium ">Back</p>
-                                        </motion.button>
-                                    }
+                            { isFirstTime &&
+                                <div className="w-full bg-white bottom-0 flex gap-2 justify-between p-3">
+                                    <div>
+                                        { selectedTab.id !== 'machine' &&
+                                            <motion.button
+                                                className="flex justify-center items-center gap-1  px-2 py-1.5 rounded" 
+                                                whileTap={{ scale: 0.98 }}
+                                                onClick={handleBack}
+                                            >
+                                                <PlayIcon width={16} height={16} strokeWidth={2} className="rotate-180 text-gray-700" />
+                                                <p className="text-xs text-gray-700 font-medium ">Back</p>
+                                            </motion.button>
+                                        }
+                                    </div>
+                                    <div>
+                                        { selectedTab.id === 'tool' ? (
+                                            <motion.button
+                                                className="flex justify-center items-center gap-1 bg-sky-500 px-3 py-1.5 rounded shadow" 
+                                                whileTap={{ scale: 0.98 }}
+                                                onClick={handleFinish}
+                                            >
+                                                <p className="text-xs ps-0.5 text-white tracking-wider">Finish</p>
+                                                <CheckBadgeIcon width={16} height={16} strokeWidth={2} stroke="white" />
+                                            </motion.button>
+                                        ):(
+                                            <motion.button
+                                                className="flex justify-center items-center gap-1 bg-[#e57345] px-3 py-1.5 rounded shadow" 
+                                                whileTap={{ scale: 0.98 }}
+                                                onClick={handleNext}
+                                            >
+                                                <p className="text-xs ps-0.5 text-white tracking-wider">Next</p>
+                                                <ArrowRightEndOnRectangleIcon width={16} height={16} strokeWidth={2} stroke="white" />
+                                            </motion.button>
+                                        )}
+                                    </div>
                                 </div>
-                                <div>
-                                    { selectedTab.id === 'tool' ? (
-                                        <motion.button
-                                            className="flex justify-center items-center gap-1 bg-sky-500 px-3 py-1.5 rounded shadow" 
-                                            whileTap={{ scale: 0.98 }}
-                                            // onClick={() => handleGeneration(selectedPng.url)}
-                                        >
-                                            <p className="text-xs ps-0.5 text-white tracking-wider">Finish</p>
-                                            <CheckBadgeIcon width={16} height={16} strokeWidth={2} stroke="white" />
-                                        </motion.button>
-                                    ):(
-                                        <motion.button
-                                            className="flex justify-center items-center gap-1 bg-[#e57345] px-3 py-1.5 rounded shadow" 
-                                            whileTap={{ scale: 0.98 }}
-                                            onClick={handleNext}
-                                        >
-                                            <p className="text-xs ps-0.5 text-white tracking-wider">Next</p>
-                                            <ArrowRightEndOnRectangleIcon width={16} height={16} strokeWidth={2} stroke="white" />
-                                        </motion.button>
-                                    )}
-                                </div>
-                            </div>
+                            }
                         </motion.div>
                     </motion.div>
                 )}

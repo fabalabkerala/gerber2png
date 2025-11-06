@@ -20,7 +20,7 @@ const angles = [
 
 const ToolSettings = ({ tool, index, setToolLib }) => {
     const [ , setToolType ] = useState(tool.type || 'Choose Bit');
-    const [ , setToolAngle ] = useState(tool.angle || 'Choose Angle');
+    const [ toolAngle, setToolAngle ] = useState(tool.angle || 'Choose Angle');
 
     const handleInput = (field, value) => {
         setToolLib(prev => 
@@ -115,7 +115,7 @@ const ToolSettings = ({ tool, index, setToolLib }) => {
                                 <div className="bg-white w-36">
                                     <Select 
                                         options={angles} 
-                                        selected={tool.angle} 
+                                        selected={toolAngle} 
                                         setSelected={setToolAngle} 
                                         onSelect={(value) => {
                                             setToolLib(prev => 

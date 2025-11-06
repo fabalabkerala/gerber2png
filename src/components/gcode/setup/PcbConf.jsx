@@ -24,11 +24,20 @@ const labels = {
     cutOffset: "Additional Cut Offset"
 };
   
-
 const PcbConfiguration = () => {
     const { pcbConf, setPCBConf } = useApp();
-    const [ preset, setPreset ] = useState('Choose Preset');
-    const [ pcbSide, setPCBSide ] = useState(sideOption[0].id);
+    const [ preset, setPreset ] = useState(() => {
+        const w = pcbConf.width.value;
+        const h = pcbConf.length.value;
+
+        const option = options.find(opt => opt.width === w && opt.length === h) || null;
+        if (option === null) return 'Choose Preset';
+        else return option.id
+    });
+    const [ pcbSide, setPCBSide ] = useState(() => {
+        if (pcbConf.type === 'double') return 'double';
+        else return 'single';
+    });
 
     const handleInput = (name, value, maxValue) => {
         if (value === '') {

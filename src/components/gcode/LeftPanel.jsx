@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import JobDirectory from "../ui/JobDirectory";
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import { motion } from "motion/react";
 import Setup from "./setup/Setup";
 import { cn } from "../../utils/cn";
+import { useApp } from "../context/AppContext";
 
 const jobsData = [
     {
@@ -25,7 +26,8 @@ const jobsData = [
 ];
 
 const LeftPanel = () => {
-    const [openJobs, setOpenJobs] = useState(jobsData.map((j) => j.name));
+    const { setupCompleted } = useApp();
+    const [ openJobs, setOpenJobs ] = useState(jobsData.map((j) => j.name));
     const [ selectedFile, setSelectedFile ] = useState(null);
     const [ showSetup, setShowSetup ] = useState(false);
 
@@ -38,6 +40,10 @@ const LeftPanel = () => {
     const handleSelectFile = (file) => {
         setSelectedFile(file.id);
     };
+
+    useEffect(() => {
+        if (!setupCompleted) setShowSetup(true)
+    }, [setupCompleted])
 
     return (
         <div className="flex flex-col h-full bg-white pb-3 rounded-md shadow overflow-y-auto">
