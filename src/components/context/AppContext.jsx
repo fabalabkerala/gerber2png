@@ -1,6 +1,12 @@
 /* eslint-disable react-refresh/only-export-components */
 import PropTypes from "prop-types";
-import { createContext, useState, useMemo, useContext, useEffect } from "react";
+import { 
+  createContext, 
+  useState, 
+  useMemo, 
+  useContext, 
+  // useEffect 
+} from "react";
 import { DEFAULT_TOOL_LIB, DEFAULT_MACHINE_CONF, DEFAULT_PCB_CONF } from "../../config/defaults";
 const AppContext = createContext();
 
@@ -30,25 +36,6 @@ export const AppProvider = ({ children }) => {
     // localStorage.removeItem("gcodeSetupCompleted");
   };
   
-
-  const value = useMemo(() => ({
-    pngFiles, 
-    setPngFiles,
-    activeTab,
-    setActiveTab,
-    machineConf,
-    setMachineConf,
-    pcbConf, 
-    setPCBConf,
-    toolLib, 
-    setToolLib,
-    markSetupComplete,
-    setupCompleted,
-    resetSetup
-  }), [pngFiles, activeTab, machineConf, pcbConf, toolLib, setupCompleted]);
-
-  
-
   // useEffect(() => {
   //   // Load stored data
   //   const storedMachine = localStorage.getItem("machineConf");
@@ -72,6 +59,22 @@ export const AppProvider = ({ children }) => {
   // useEffect(() => {
   //   localStorage.setItem("toolLib", JSON.stringify(toolLib));
   // }, [toolLib]);
+
+  const value = useMemo(() => ({
+    pngFiles, 
+    setPngFiles,
+    activeTab,
+    setActiveTab,
+    machineConf,
+    setMachineConf,
+    pcbConf, 
+    setPCBConf,
+    toolLib, 
+    setToolLib,
+    markSetupComplete,
+    setupCompleted,
+    resetSetup
+  }), [pngFiles, activeTab, machineConf, pcbConf, toolLib, setupCompleted]);
 
   return (
     <AppContext.Provider value={value}>

@@ -38,7 +38,7 @@ export default function Navbar() {
                     </div>
                 </div>
 
-                <div className="flex">
+                <div className="flex bg-zinc-50">
                     <Link
                         className={cn(
                             "px-4 py-1.5 w-64 text-sm text-center hover:text-[#e06636] transition-all duration-200",
