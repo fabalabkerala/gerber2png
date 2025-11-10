@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { cn } from "../../utils/cn";
 import { ViewfinderCircleIcon } from "@heroicons/react/24/outline";
+import { useGcode } from "../context/GCodeContext";
 
 const MainPanel = () => {
+    const { currentPngFile } = useGcode()
     const [activeTab, setActiveTab] = useState("image");
 
     return (
@@ -43,11 +45,11 @@ const MainPanel = () => {
                 {/* Content Area */}
                 <div className="flex-1 overflow-auto bg-white flex justify-center items-center">
                     {activeTab === "image" ? (
-                        <img
-                            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYyxRDrJKhWSGOwCDdHS5K_6EOY20t0fsUFg&s"
-                            alt="PCB Preview"
-                            className="max-w-full max-h-full object-contain"
-                        />
+                        <>
+                            { currentPngFile?.url && (
+                                <img src={currentPngFile.url} className="max-h-full p-6" />
+                            )}
+                        </>
                     ) : (
                         <div className="relative w-full h-full flex justify-center items-center">
                             <p className="text-gray-600 text-sm">GCode Preview goes here</p>

@@ -110,6 +110,14 @@ const Setup = ({ showSetup, setShowSetup }) => {
                                         }
                                     </div>
                                     <div className="flex gap-2">
+                                        <motion.button
+                                            className="flex justify-center items-center gap-1 border border-[#e57345] bg-zinc-50 px-3 py-1.5 rounded shadow" 
+                                            whileTap={{ scale: 0.98 }}
+                                            onClick={() => navigate("/")}
+                                        >
+                                            <p className="text-xs ps-0.5 text-[#e57345] tracking-wider">Cancel</p>
+                                            {/* <ArrowRightEndOnRectangleIcon width={16} height={16} strokeWidth={2} stroke="white" /> */}
+                                        </motion.button>
                                         { selectedTab.id === 'tool' ? (
                                             <motion.button
                                                 className="flex justify-center items-center gap-1 bg-sky-500 px-3 py-1.5 rounded shadow" 
@@ -121,14 +129,6 @@ const Setup = ({ showSetup, setShowSetup }) => {
                                             </motion.button>
                                         ):(
                                             <>
-                                                <motion.button
-                                                    className="flex justify-center items-center gap-1 border border-[#e57345] bg-zinc-50 px-3 py-1.5 rounded shadow" 
-                                                    whileTap={{ scale: 0.98 }}
-                                                    onClick={() => navigate("/")}
-                                                >
-                                                    <p className="text-xs ps-0.5 text-[#e57345] tracking-wider">Cancel</p>
-                                                    {/* <ArrowRightEndOnRectangleIcon width={16} height={16} strokeWidth={2} stroke="white" /> */}
-                                                </motion.button>
                                                 <motion.button
                                                     className="flex justify-center items-center gap-1 bg-[#e57345] px-3 py-1.5 rounded shadow" 
                                                     whileTap={{ scale: 0.98 }}

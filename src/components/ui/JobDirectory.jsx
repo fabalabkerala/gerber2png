@@ -36,17 +36,17 @@ const JobDirectory = ({job, isOpen,  onToggle, selectedFile, onSelectFile }) => 
                                 const isSelected = selectedFile === file.id;
                                 return (
                                     <button
-                                    key={file.id}
-                                    onClick={() => onSelectFile(file)}
-                                    className={cn(
-                                        "flex items-center gap-2 px-2 py-1.5 w-full text-left rounded-md transition",
-                                        isSelected ? "bg-orange-50 text-orange-500" : "hover:bg-gray-50 text-gray-700"
-                                    )}
+                                        key={file.id}
+                                        onClick={() => onSelectFile(file)}
+                                        className={cn(
+                                            "flex items-center gap-2 px-2 py-1.5 w-full text-left rounded-md transition capitalize",
+                                            isSelected ? "bg-orange-50 text-orange-500" : "hover:bg-gray-50 text-gray-700"
+                                        )}
                                     >
                                         <DocumentIcon
                                             className={cn(
-                                            "w-4 h-4",
-                                            isSelected ? "text-orange-500" : "text-gray-500"
+                                                "w-4 h-4",
+                                                isSelected ? "text-orange-500" : "text-gray-500"
                                             )}
                                         />
                                         <span className="text-xs">{file.name}</span>

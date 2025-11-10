@@ -10,6 +10,7 @@ import LeftPanel from './components/gcode/LeftPanel.jsx';
 import MainPanel from './components/gcode/MainPanel.jsx';
 import RightPanel from './components/gcode/RightPanel.jsx';
 import { AppProvider } from './components/context/AppContext.jsx';
+import { GCodeProvider } from './components/context/GCodeContext.jsx';
 
 function App() {
   return (
@@ -18,34 +19,36 @@ function App() {
         <div className="h-screen flex flex-col">
 
           <GerberProvider>
-            <Router>
-              <Navbar />
+            <GCodeProvider>
+              <Router>
+                <Navbar />
 
-              <Routes>
-                <Route 
-                  path='/' 
-                  // path='/gerber' 
-                  element={
-                    <PageLayout
-                      sidebar={<GerberSidebar />}
-                      main={<MainView />}
-                      right={<OutputPanel />}
-                    />
-                  }
-                />
-                <Route 
-                  // path='/' 
-                  path='/gcode' 
-                  element={
-                    <PageLayout
-                      sidebar={<LeftPanel />}
-                      main={<MainPanel />}
-                      right={<RightPanel />}
-                    />
-                  }
-                />
-              </Routes>
-            </Router>
+                <Routes>
+                  <Route 
+                    path='/' 
+                    // path='/gerber' 
+                    element={
+                      <PageLayout
+                        sidebar={<GerberSidebar />}
+                        main={<MainView />}
+                        right={<OutputPanel />}
+                      />
+                    }
+                  />
+                  <Route 
+                    // path='/' 
+                    path='/gcode' 
+                    element={
+                      <PageLayout
+                        sidebar={<LeftPanel />}
+                        main={<MainPanel />}
+                        right={<RightPanel />}
+                      />
+                    }
+                  />
+                </Routes>
+              </Router>
+            </GCodeProvider>
           </GerberProvider>
         </div>
       </AppProvider>

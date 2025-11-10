@@ -1,9 +1,19 @@
-export const DEFAULT_MACHINE_CONF = {
-    name: "carvera",
-    url: "https://www.makera.com/cdn/shop/files/Makera_Carvera_1.jpg",
-    width: 300,
-    height: 250,
-};
+export const DEFAULT_MACHINE_CONF = [
+    {
+        name: "Carvera",
+        id: 'carvera',
+        url: "https://www.makera.com/cdn/shop/files/Makera_Carvera_1.jpg",
+        width: 300,
+        height: 250,
+    },
+    {
+        machine: 'Roland MDX-20',
+        id: 'mdx20',
+        url: 'https://image.rolanddga.com/-/media/roland/images/support/product_shots/mdx20.jpg',
+        width: 300,
+        height: 300
+    },
+]
 
 export const DEFAULT_PCB_CONF = {
     type: "single",
@@ -15,56 +25,247 @@ export const DEFAULT_PCB_CONF = {
 };
 
 export const DEFAULT_TOOL_LIB = [
+    // Roland MDX20
     {
-        name: "1/64 Mill",
+        name: "1/64 Mill - MDX20",
         toolNo: 1,
         type: "normal",
         angle: null,
-        diameter: 0.4,
+        diameter: 0.39624,
         feedRate: 4,
         plungeRate: 4,
-        rpm: 600,
+        rpm: 6000,
         maxCutDepth: 0.1,
         offsetStepOver: 0.5,
         offsetNum: 1,
+        machine: 'mdx20',
+        // id: 'mdx20-1'
     },
     {
-        name: "1/32 Mill",
+        name: "1/32 Mill - MDX20",
         toolNo: 2,
         type: "normal",
         angle: null,
         diameter: 0.8,
         feedRate: 4,
         plungeRate: 4,
-        rpm: 600,
+        rpm: 6000,
         maxCutDepth: 0.6,
         offsetStepOver: 0.5,
         offsetNum: 1,
+        machine: 'mdx20',
+        // id: 'mdx20-1'
     },
     {
-        name: "1/100 Mill",
+        name: "1/100 Mill - MDX20",
         toolNo: 3,
         type: "normal",
         angle: null,
         diameter: 0.254,
         feedRate: 2,
         plungeRate: 2,
-        rpm: 600,
+        rpm: 6000,
         maxCutDepth: 0.1,
         offsetStepOver: 0.5,
         offsetNum: 4,
+        machine: 'mdx20'
     },
     {
-        name: "V-Bit 15deg",
+        name: "V-Bit - MDX20",
         toolNo: 4,
         type: "vbit",
         angle: 60,
         diameter: 0.1,
         feedRate: 4,
         plungeRate: 4,
-        rpm: 600,
+        rpm: 6000,
         maxCutDepth: 1.14,
         offsetStepOver: 0.2,
         offsetNum: 4,
+        machine: 'mdx20'
+    },
+
+    // Carvera
+    {
+        name: "1/64 Mill - Carvera",
+        toolNo: 1,
+        type: "normal",
+        angle: null,
+        diameter: 0.39624,
+        feedRate: 8,
+        plungeRate: 4,
+        rpm: 16000,
+        maxCutDepth: 0.1,
+        offsetStepOver: 0.5,
+        offsetNum: 1,
+        machine: 'carvera'
+    },
+    {
+        name: "1/32 Mill - Carvera",
+        toolNo: 2,
+        type: "normal",
+        angle: null,
+        diameter: 0.8,
+        feedRate: 8,
+        plungeRate: 4,
+        rpm: 16000,
+        maxCutDepth: 0.6,
+        offsetStepOver: 0.5,
+        offsetNum: 1,
+        machine: 'carvera'
+    },
+    {
+        name: "1/100 Mill - Carvera",
+        toolNo: 3,
+        type: "normal",
+        angle: null,
+        diameter: 0.254,
+        feedRate: 4,
+        plungeRate: 2,
+        rpm: 16000,
+        maxCutDepth: 0.1,
+        offsetStepOver: 0.5,
+        offsetNum: 4,
+        machine: 'carvera'
+    },
+    {
+        name: "V-Bit - Carvera",
+        toolNo: 4,
+        type: "vbit",
+        angle: 60,
+        diameter: 0.1,
+        feedRate: 8,
+        plungeRate: 4,
+        rpm: 16000,
+        maxCutDepth: 1.14,
+        offsetStepOver: 0.2,
+        offsetNum: 4,
+        machine: 'carvera'
     },
 ];
+
+export const MDX20_TOOL_LIB = [
+    {
+        name: "1/64 Mill - MDX20",
+        toolNo: 1,
+        type: "normal",
+        angle: null,
+        diameter: 0.39624,
+        feedRate: 4,
+        plungeRate: 4,
+        rpm: 6000,
+        maxCutDepth: 0.1,
+        offsetStepOver: 0.5,
+        offsetNum: 1,
+        machine: 'mdx20',
+        id: 'mdx20-1'
+    },
+    {
+        name: "1/32 Mill - MDX20",
+        toolNo: 2,
+        type: "normal",
+        angle: null,
+        diameter: 0.8,
+        feedRate: 4,
+        plungeRate: 4,
+        rpm: 6000,
+        maxCutDepth: 0.6,
+        offsetStepOver: 0.5,
+        offsetNum: 1,
+        machine: 'mdx20',
+        id: 'mdx20-2'
+    },
+    {
+        name: "1/100 Mill - MDX20",
+        toolNo: 3,
+        type: "normal",
+        angle: null,
+        diameter: 0.254,
+        feedRate: 2,
+        plungeRate: 2,
+        rpm: 6000,
+        maxCutDepth: 0.1,
+        offsetStepOver: 0.5,
+        offsetNum: 4,
+        machine: 'mdx20',
+        id: 'mdx20-3'
+    },
+    {
+        name: "V-Bit - MDX20",
+        toolNo: 4,
+        type: "vbit",
+        angle: 60,
+        diameter: 0.1,
+        feedRate: 4,
+        plungeRate: 4,
+        rpm: 6000,
+        maxCutDepth: 1.14,
+        offsetStepOver: 0.2,
+        offsetNum: 4,
+        machine: 'mdx20',
+        id: 'mdx20-4'
+    },
+]
+
+export const CARVERA_TOOL_LIB = [
+    {
+        name: "1/64 Mill - Carvera",
+        toolNo: 1,
+        type: "normal",
+        angle: null,
+        diameter: 0.39624,
+        feedRate: 8,
+        plungeRate: 4,
+        rpm: 16000,
+        maxCutDepth: 0.1,
+        offsetStepOver: 0.5,
+        offsetNum: 1,
+        machine: 'carvera',
+        id: 'carvera-1'
+    },
+    {
+        name: "1/32 Mill - Carvera",
+        toolNo: 2,
+        type: "normal",
+        angle: null,
+        diameter: 0.8,
+        feedRate: 8,
+        plungeRate: 4,
+        rpm: 16000,
+        maxCutDepth: 0.6,
+        offsetStepOver: 0.5,
+        offsetNum: 1,
+        machine: 'carvera',
+        id: 'carvera-2'
+    },
+    {
+        name: "1/100 Mill - Carvera",
+        toolNo: 3,
+        type: "normal",
+        angle: null,
+        diameter: 0.254,
+        feedRate: 4,
+        plungeRate: 2,
+        rpm: 16000,
+        maxCutDepth: 0.1,
+        offsetStepOver: 0.5,
+        offsetNum: 4,
+        machine: 'carvera',
+        id: 'carvera-3'
+    },
+    {
+        name: "V-Bit - Carvera",
+        toolNo: 4,
+        type: "vbit",
+        angle: 60,
+        diameter: 0.1,
+        feedRate: 8,
+        plungeRate: 4,
+        rpm: 16000,
+        maxCutDepth: 1.14,
+        offsetStepOver: 0.2,
+        offsetNum: 4,
+        machine: 'carvera',
+        id: 'carvera-4'
+    },
+]

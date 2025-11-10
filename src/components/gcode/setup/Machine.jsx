@@ -1,32 +1,12 @@
 import { PhotoIcon } from "@heroicons/react/24/outline";
 import { useApp } from "../../context/AppContext"
 import ImageSelect from "../../ui/ImageSelect"
+import { CARVERA_TOOL_LIB, DEFAULT_MACHINE_CONF, MDX20_TOOL_LIB } from "../../../config/defaults";
 
-const options = [
-    {
-        machine: 'carvera',
-        url: 'https://www.makera.com/cdn/shop/files/Makera_Carvera_1.jpg',
-        width: 300,
-        height: 250
-    },
-    {
-        machine: 'Roland MDX-20',
-        url: 'https://image.rolanddga.com/-/media/roland/images/support/product_shots/mdx20.jpg',
-        width: 300,
-        height: 300
-    },
-    // {
-    //     machine: 'LPKF ProtoMat',
-    //     url: 'https://www.lpkfusa.com/fileadmin/mediafiles/_processed_/c/5/csm_Produkt_ProtoMat_S104_schraeg_e9179d0b21.png',
-    //     width: 300,
-    //     height: 250
-    // }, 
-]
 
 const Machine = () => {
-    const { machineConf, setMachineConf } = useApp();
-
-    const machineOptions = options.map(item => ({ name: item.machine, ...item }));
+    const { machineConf, setMachineConf, setToolLib } = useApp();
+    const machineOptions = DEFAULT_MACHINE_CONF.map(item => ({ name: item.machine, ...item }));
 
     return (
         <>
@@ -39,6 +19,10 @@ const Machine = () => {
                                 options={machineOptions}
                                 selected={machineConf}
                                 setSelected={setMachineConf}
+                                onSelect={(value) => {
+                                    setToolLib(() => value.id === 'mdx20' ? MDX20_TOOL_LIB : CARVERA_TOOL_LIB)
+                                    // TODO : save each tool library to localstorage and use them
+                                }}
                             />
                         </div>
                     </div>

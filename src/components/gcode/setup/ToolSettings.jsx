@@ -1,11 +1,9 @@
-import { useState } from "react";
+import {  useState } from "react";
 import NormalBitIcon from "../../icons/NormalBitIcon";
 import VBitIcon from "../../icons/VBitIcon";
 import Select from "../../ui/Select";
 import { AnimatePresence, motion } from "motion/react";
 import PropTypes from "prop-types";
-import { cn } from "../../../utils/cn";
-
 
 const options = [
     { id: 'vbit', label: 'V-Bit' }, 
@@ -18,21 +16,21 @@ const angles = [
     { id: 90, label: '90deg' }, 
 ];
 
-const ToolSettings = ({ tool, index, setToolLib }) => {
+const ToolSettings = ({ tool, toolID, setToolLib }) => {
     const [ , setToolType ] = useState(tool.type || 'Choose Bit');
-    const [ toolAngle, setToolAngle ] = useState(tool.angle || 'Choose Angle');
+    const [ , setToolAngle ] = useState(tool.angle || 'Choose Angle');
 
     const handleInput = (field, value) => {
         setToolLib(prev => 
-            prev.map((t, i) => 
-                i === index ? { ...t, [field]: value === "" ? "" : parseFloat(value) } : t
+            prev.map(t => 
+                t.id === toolID ? { ...t, [field]: value === "" ? "" : parseFloat(value) } : t
         ));
     };
 
     const cleanInput = (field, defaultVal = 0, min =0) => {
         setToolLib(prev => 
-            prev.map((t, i) => {
-                if (i !== index) return t;
+            prev.map(t => {
+                if (t.id !== toolID) return t;
                 const current = t[field];
                 const num = parseFloat(current);
                 const val = isNaN(num) ? defaultVal : Math.max(num, min)
@@ -41,7 +39,7 @@ const ToolSettings = ({ tool, index, setToolLib }) => {
             })
         )
     }
-    
+
     return (
         <>
             <div className="flex-1 h-44 flex items-center justify-center">
@@ -62,12 +60,14 @@ const ToolSettings = ({ tool, index, setToolLib }) => {
                         step={0.1}
                         onInput={(e) => {
                             let value = e.target.value;
-                            if (value < 0) value = 0;  
-                            handleInput('name', value)
+                            setToolLib(prev => 
+                                prev.map(t => 
+                                    t.id === toolID ? { ...t, name: value === "" ? "" : value} : t
+                            ));
                         }}
                         onBlur={(e) => {
                             if (e.target.value === '') {
-                                handleInput('name', 'unknown');
+                                handleInput('name', 'no name');
                             }
                         }}  
                     />
@@ -83,7 +83,7 @@ const ToolSettings = ({ tool, index, setToolLib }) => {
                                 setSelected={setToolType} 
                                 onSelect={(value) => {
                                     setToolLib(prev => 
-                                        prev.map((t, id) => id === index ? { ...t, type: value } : t)
+                                        prev.map(t => t.id === toolID ? { ...t, type: value } : t)
                                     )
                                 }}
                             />
@@ -91,7 +91,7 @@ const ToolSettings = ({ tool, index, setToolLib }) => {
                     </div>
                 </div>
 
-                <div className="flex justify-between items-center gap-2  border-b border-white pb-3">
+                {/* <div className="flex justify-between items-center gap-2  border-b border-white pb-3">
                     <label className="text-xs text-black font-medium">Tool Number</label>
                     <input 
                         value={tool.toolNo}
@@ -100,7 +100,7 @@ const ToolSettings = ({ tool, index, setToolLib }) => {
                         min={0}
                         step={0.1}
                     />
-                </div>
+                </div> */}
 
                 <AnimatePresence>
                     { tool.type === 'vbit' && (
@@ -115,11 +115,11 @@ const ToolSettings = ({ tool, index, setToolLib }) => {
                                 <div className="bg-white w-36">
                                     <Select 
                                         options={angles} 
-                                        selected={toolAngle} 
+                                        selected={tool.angle || 'Choose Angle'} 
                                         setSelected={setToolAngle} 
                                         onSelect={(value) => {
                                             setToolLib(prev => 
-                                                prev.map((t, id) => id === index ? { ...t, angle: value } : t)
+                                                prev.map(t => t.id === toolID ? { ...t, angle: value } : t)
                                             )
                                         }}
                                     />
@@ -133,7 +133,9 @@ const ToolSettings = ({ tool, index, setToolLib }) => {
                 <Input field={'maxCutDepth'} label={'Maximum Cut Depth'} value={tool.maxCutDepth} defaultVal={1} min={0.2} handleInput={handleInput} cleanInput={cleanInput}  />
                 <Input field={'offsetStepOver'} label={'Offset Step Over'} value={tool.offsetStepOver} defaultVal={1} min={0.2} handleInput={handleInput} cleanInput={cleanInput}  />
 
-                <div className="flex justify-between items-center gap-2">
+                <div className="border h-px border-white my-2"></div>
+
+                {/* <div className="flex justify-between items-center gap-2">
                     <div className="flex items-center">
                         <label className="text-xs text-black">Offset Number</label>
                         <motion.button
@@ -167,7 +169,7 @@ const ToolSettings = ({ tool, index, setToolLib }) => {
                         onBlur={() => cleanInput('offsetNum', 1, 1)}
                         disabled={tool.offsetNum === 0}
                     />
-                </div>
+                </div> */}
 
                 <Input field={'feedRate'} label={'Feed Rate'} value={tool.feedRate} defaultVal={1} min={0.2} handleInput={handleInput} cleanInput={cleanInput} suffix={'mm/s'}  />
                 <Input field={'plungeRate'} label={'Plunge Rate'} value={tool.plungeRate} defaultVal={1} min={0.2} handleInput={handleInput} cleanInput={cleanInput} suffix={'mm/s'}  />
@@ -193,7 +195,7 @@ ToolSettings.propTypes = {
         offsetStepOver: PropTypes.number,
         offsetNum: PropTypes.number
     }),
-    index: PropTypes.number.isRequired,
+    toolID: PropTypes.string.isRequired,
     setToolLib: PropTypes.func
 }
 

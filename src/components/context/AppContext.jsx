@@ -7,7 +7,7 @@ import {
   useContext, 
   // useEffect 
 } from "react";
-import { DEFAULT_TOOL_LIB, DEFAULT_MACHINE_CONF, DEFAULT_PCB_CONF } from "../../config/defaults";
+import { DEFAULT_TOOL_LIB, DEFAULT_MACHINE_CONF, DEFAULT_PCB_CONF, CARVERA_TOOL_LIB } from "../../config/defaults";
 const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
@@ -17,9 +17,11 @@ export const AppProvider = ({ children }) => {
     // return localStorage.getItem("gcodeSetupCompleted") === "true";
     return false
   });
-  const [ machineConf, setMachineConf ] = useState(DEFAULT_MACHINE_CONF);
+  const [ machineConf, setMachineConf ] = useState(DEFAULT_MACHINE_CONF[0]);
   const [ pcbConf, setPCBConf ] = useState(DEFAULT_PCB_CONF);
-  const [ toolLib, setToolLib ] = useState(DEFAULT_TOOL_LIB);
+  // const [ toolLib, setToolLib ] = useState(DEFAULT_TOOL_LIB);
+  const [toolLib, setToolLib] = useState(CARVERA_TOOL_LIB);
+  
 
   const markSetupComplete = () => {
     // localStorage.setItem("gcodeSetupCompleted", "true");

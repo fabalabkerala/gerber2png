@@ -24,7 +24,6 @@ const MainView = () => {
     }
 
     useEffect(() => {
-        console.log(mainSvg)
         if (resultRef.current && mainSvg.svg) {  
             resultRef.current.innerHTML = '';
             resultRef.current.appendChild(mainSvg.svg);
@@ -34,17 +33,19 @@ const MainView = () => {
     return (
         <>
             {/* Drag & Drop Zone */}
-            <motion.div 
-                ref={dropAreaRef}
-                key={'dropzone'}
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.3, ease: 'easeOut' }}
-                className="h-full"
-            >
-                <FileDropZone onFilesSelect={handleInputFiles} multiple={true} />
-            </motion.div>
+            { !mainSvg.svg &&
+                <motion.div 
+                    ref={dropAreaRef}
+                    key={'dropzone'}
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                    className="h-full"
+                >
+                    <FileDropZone onFilesSelect={handleInputFiles} multiple={true} />
+                </motion.div> 
+            }
 
             {/* SVG Display */}
             <motion.div

@@ -1,35 +1,50 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import JobDirectory from "../ui/JobDirectory";
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import { motion } from "motion/react";
 import Setup from "./setup/Setup";
 import { cn } from "../../utils/cn";
 import { useApp } from "../context/AppContext";
-
-const jobsData = [
-    {
-        name: "Top Layer",
-        files: [
-            { name: "Traces - Top", id: "v2-traces-top" },
-            { name: "Drill - Top", id: "v2-drill-top" },
-            { name: "Outline", id: "v2-outline" },
-        ],
-    },
-    {
-        name: "Bottom Layer",
-        files: [
-            { name: "Traces - Top", id: "v3-traces-top" },
-            { name: "Drill - Top", id: "v3-drill-top" },
-            { name: "Outline", id: "v3-outline" },
-        ],
-    },
-];
+import { useGcode } from "../context/GCodeContext";
 
 const LeftPanel = () => {
-    const { setupCompleted } = useApp();
-    const [ openJobs, setOpenJobs ] = useState(jobsData.map((j) => j.name));
-    const [ selectedFile, setSelectedFile ] = useState(null);
+    const { setupCompleted, pngFiles } = useApp();
+    const { currentPngFile, setCurrentPngFile } = useGcode();
     const [ showSetup, setShowSetup ] = useState(false);
+
+    const jobDir = useMemo(() => {
+        const topJobs = pngFiles
+            .filter(p => p.directory === "toplayer")
+            .map((p, i) => ({ 
+                ...p,
+                name: `${p.job} - Top`, 
+                id: `top_${p.job}_${i}`, 
+            }));
+
+        const bottomJobs = pngFiles
+            .filter(p => p.directory === "bottomlayer")
+            .map((p, i) => ({ 
+                ...p,
+                name: `${p.job} - Bottom`, 
+                id: `bottom_${p.job}_${i}`, 
+            }));
+
+        const unknownJobs = pngFiles
+            .filter(p => !['toplayer', 'bottomlayer'].includes(p.directory))
+            .map((p, i) => ({ 
+                ...p,
+                name: `${p.job} - Unknown`, 
+                id: `unknown_${p.job}_${i}`, 
+            }));
+
+        return [
+            { name: "Top Layer", files: topJobs },
+            { name: "Bottom Layer", files: bottomJobs },
+            { name: "Unknown", files: unknownJobs },
+        ]
+    }, [pngFiles]);
+
+    const [ openJobs, setOpenJobs ] = useState(jobDir.map((j) => j.name));
 
     const toggleJob = (name) => {
         setOpenJobs((prev) =>
@@ -38,7 +53,7 @@ const LeftPanel = () => {
     };
 
     const handleSelectFile = (file) => {
-        setSelectedFile(file.id);
+        setCurrentPngFile(file)
     };
 
     useEffect(() => {
@@ -47,7 +62,6 @@ const LeftPanel = () => {
 
     return (
         <div className="flex flex-col h-full bg-white pb-3 rounded-md shadow overflow-y-auto">
-            {/* Heading */}
             <div className="flex items-center justify-between bg-gray-100 pl-3 pr-1 py-1 rounded-t-md border-b">
                 <p className="font-medium text-sm text-gray-700">All Jobs</p>
                 <motion.button
@@ -63,18 +77,21 @@ const LeftPanel = () => {
                 </motion.button>
             </div>
 
-            {/* Job List */}
             <div className="flex flex-col mt-2 space-y-2 px-2">
-                { jobsData.map((job, id) => (
-                    <JobDirectory 
-                        key={id}
-                        job={job}
-                        isOpen={openJobs.includes(job.name)}
-                        onToggle={toggleJob}
-                        selectedFile={selectedFile}
-                        onSelectFile={handleSelectFile}
-                    />
-                ))}
+                { jobDir.map((job, id) => {
+                    if (job.files.length > 0) {
+                        return (
+                            <JobDirectory 
+                                key={id}
+                                job={job}
+                                isOpen={openJobs.includes(job.name)}
+                                onToggle={toggleJob}
+                                selectedFile={currentPngFile.id}
+                                onSelectFile={handleSelectFile}
+                            />
+                        )
+                    }
+                })}
             </div>
 
             <Setup showSetup={showSetup}  setShowSetup={setShowSetup} />
