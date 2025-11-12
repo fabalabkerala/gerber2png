@@ -15,13 +15,17 @@ const MainPanel = () => {
                     <button
                         onClick={() => setActiveTab("image")}
                         className={cn(
-                            "px-4 py-2 border-r transition-colors",
+                            "px-4 py-2 border-r transition-colors capitalize",
                             activeTab === "image"
                                 ? "bg-white font-medium text-gray-800"
                                 : "hover:bg-gray-200 text-gray-500"
                         )}
                     >
-                        top_drill_1000dpi.png
+                        { currentPngFile ? (
+                            `${ currentPngFile.name }`
+                        ):(
+                            'not available'
+                        )}
                     </button>
                     <button
                         onClick={() => setActiveTab("gcode")}

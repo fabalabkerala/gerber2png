@@ -60,6 +60,10 @@ const LeftPanel = () => {
         if (!setupCompleted) setShowSetup(true)
     }, [setupCompleted])
 
+    useEffect(() => {
+        return () => setCurrentPngFile(null)
+    }, [setCurrentPngFile])
+
     return (
         <div className="flex flex-col h-full bg-white pb-3 rounded-md shadow overflow-y-auto">
             <div className="flex items-center justify-between bg-gray-100 pl-3 pr-1 py-1 rounded-t-md border-b">
@@ -86,7 +90,7 @@ const LeftPanel = () => {
                                 job={job}
                                 isOpen={openJobs.includes(job.name)}
                                 onToggle={toggleJob}
-                                selectedFile={currentPngFile.id}
+                                selectedFile={currentPngFile?.id || null}
                                 onSelectFile={handleSelectFile}
                             />
                         )
