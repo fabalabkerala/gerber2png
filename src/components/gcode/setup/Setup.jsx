@@ -51,7 +51,8 @@ const Setup = ({ showSetup, setShowSetup }) => {
 
                 return {
                     ...png,
-                    tool: selectedTool.id || null   // in case nothing matches
+                    tool: selectedTool.id || null,   // in case nothing matches
+                    offsetNumber: 1
                 }; 
             } else if (png.job === 'drill' || png.job === 'outline') {
                 const selectedTool = toolLib

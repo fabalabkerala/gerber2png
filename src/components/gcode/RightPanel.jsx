@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Select from "../ui/Select";
 import { useApp } from "../context/AppContext";
 import { motion } from "motion/react";
@@ -8,8 +8,8 @@ import NormalBitIcon from "../icons/NormalBitIcon";
 import { useGcode } from "../context/GCodeContext";
 
 const RightPanel = () => {
-  const { toolLib } = useApp();
-  const { currentPngFile } = useGcode();
+  const { toolLib, setupCompleted, setPngFiles, pngFiles } = useApp();
+  const { currentPngFile, setCurrentPngFile } = useGcode();
     const [ selectedTool, setSelectedTool ] = useState('Select Tool');
     const [ currentTool, setCurrentTool ] = useState(null)
 
@@ -21,6 +21,38 @@ const RightPanel = () => {
       const updatedTool = toolLib.find(tool => tool.id === selectedTool || tool.id === currentPngFile.tool)
       setCurrentTool(updatedTool)
     }, [selectedTool, toolLib, currentPngFile])
+
+    useEffect(() => {
+      if (setupCompleted) {
+        const updatedPng = pngFiles.map(png => {
+          if (png.job === 'trace') {
+              const selectedTool = toolLib
+                  .filter(tool => tool.diameter >= 0.3 && tool.diameter <= 0.8)
+                  .sort((a, b) => a.diameter - b.diameter)[0] || null;
+
+
+              return {
+                  ...png,
+                  tool: selectedTool.id || null,   // in case nothing matches
+                  offsetNumber: 1
+              }; 
+          } else if (png.job === 'drill' || png.job === 'outline') {
+              const selectedTool = toolLib
+                  .filter(tool => tool.diameter >= 0.3 && tool.diameter <= 0.8)
+                  .sort((a, b) => b.diameter - a.diameter)[0] || null;
+
+              return {
+                  ...png,
+                  tool: selectedTool.id || null,   // in case nothing matches
+                  offsetNumber: 1
+              }; 
+          }
+
+          return png
+        })
+        setPngFiles(updatedPng);
+      }
+    }, [])
 
 
     return (
@@ -93,15 +125,17 @@ const RightPanel = () => {
                 <div className="flex items-center">
                   <label className="text-xs text-black">Offset Number</label>
                   <motion.button
-                    // onClick={() => handleInput("offsetNum", tool.offsetNum === 0 ? 1 : 0)}
+                    onClick={() => {
+                      setCurrentPngFile(prev => ({ ...prev, offsetNumber: prev.offsetNumber === 0 ? 1 : 0 }))
+                    }}
                     whileTap={{ scale: 0.9 }}
                     className="relative w-4 h-4 ml-4 flex items-center justify-center border rounded bg-white border-gray-400 hover:border-orange-500 transition-colors"
                   >
                     <motion.div
                       initial={false}
                       animate={{
-                          // scale: tool.offsetNum === 0 ? 1 : 0,
-                          // opacity: tool.offsetNum === 0 ? 1 : 0,
+                          scale: currentPngFile.offsetNumber === 0 ? 1 : 0,
+                          opacity: currentPngFile.offsetNumber === 0 ? 1 : 0,
                       }}
                       transition={{ type: "spring", stiffness: 300, damping: 20 }}
                       className="absolute w-3 h-3 bg-orange-500 rounded-sm"
@@ -113,7 +147,7 @@ const RightPanel = () => {
                 <input
                   className={cn(
                       "rounded w-20 text-center focus:outline-none text-xs py-1 border px-2 transition-all duration-300 focus:border-l-2 focus:border-l-orange-500",
-                      // tool.offsetNum === 0 ? "opacity-90 cursor-not-allowed border-white" : ""
+                      currentPngFile.offsetNumber === 0 ? "opacity-90 cursor-not-allowed border-white" : ""
                   )}
                   type="number"
                   min={1}
