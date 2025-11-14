@@ -1,41 +1,26 @@
 import { useEffect, useState } from "react";
-import JobDirectory from "../ui/JobDirectory";
 import Select from "../ui/Select";
 import { useApp } from "../context/AppContext";
 import { motion } from "motion/react";
 import { cn } from "../../utils/cn";
 import VBitIcon from "../icons/VBitIcon";
 import NormalBitIcon from "../icons/NormalBitIcon";
-const jobsData = [
-    {
-      name: "Top Layer",
-      files: [
-        { name: "Traces - Top", id: "v2-traces-top" },
-        { name: "Drill - Top", id: "v2-drill-top" },
-        { name: "Outline", id: "v2-outline" },
-      ],
-    },
-    {
-      name: "Bottom Layer",
-      files: [
-        { name: "Traces - Top", id: "v3-traces-top" },
-        { name: "Drill - Top", id: "v3-drill-top" },
-        { name: "Outline", id: "v3-outline" },
-      ],
-    },
-  ];
+import { useGcode } from "../context/GCodeContext";
 
 const RightPanel = () => {
   const { toolLib } = useApp();
-    const [ selectedTool, setSelectedTool ] = useState('Selecte Tool');
+  const { currentPngFile } = useGcode();
+    const [ selectedTool, setSelectedTool ] = useState('Select Tool');
     const [ currentTool, setCurrentTool ] = useState(null)
 
     const toolOptions = toolLib.map(tool => ({ ...tool, label: tool.name }));
 
     useEffect(() => {
-      const updatedTool = toolLib.find(tool => tool.id === selectedTool)
+      if (!currentPngFile) return;
+
+      const updatedTool = toolLib.find(tool => tool.id === selectedTool || tool.id === currentPngFile.tool)
       setCurrentTool(updatedTool)
-    }, [selectedTool, toolLib])
+    }, [selectedTool, toolLib, currentPngFile])
 
 
     return (
@@ -44,13 +29,14 @@ const RightPanel = () => {
                 <p className="font-medium text-sm text-gray-700">Setup</p>
             </div>
 
-            <div className="flex flex-col mt-2 gap-3 px-4">
+            { currentPngFile ? (
+              <div className="flex flex-col mt-2 gap-3 px-4">
               <div className="flex justify-between items-center gap-2 mt-3">
                   <p className="text-xs text-black text-nowrap tracking-wide">Type</p>
                   <div className="bg-white w-44">
                       <Select 
                           options={toolOptions} 
-                          selected={selectedTool} 
+                          selected={currentPngFile.tool || selectedTool} 
                           setSelected={setSelectedTool}
                       />
                   </div>
@@ -132,9 +118,9 @@ const RightPanel = () => {
                   type="number"
                   min={1}
                   step={0.1}
-                  // value={tool.offsetNum}
-                  onChange={e => handleInput('offsetNum', e.target.value)}
-                  onBlur={() => cleanInput('offsetNum', 1, 1)}
+                  value={currentPngFile.offsetNumber}
+                  // onChange={e => handleInput('offsetNum', e.target.value)}
+                  // onBlur={() => cleanInput('offsetNum', 1, 1)}
                   // disabled={tool.offsetNum === 0}
                 />
               </div>
@@ -169,6 +155,11 @@ const RightPanel = () => {
                 />
               </div>
             </div>
+            ): (
+              <div className="flex flex-col justify-center items-center h-full mt-2 gap-3 px-4">
+                  <p className="text-xs text-black text-nowrap tracking-wide">No Data Available</p>              
+              </div>
+            )}
         </div>
     );
 };

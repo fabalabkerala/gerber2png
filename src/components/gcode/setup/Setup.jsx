@@ -15,9 +15,15 @@ const tabs = [
     { id: 'tool', label: 'Tool Library' },
 ]
 
+const toolJob = [
+    { job: 'trace', toolDia: 0.39624 },
+    { job: 'drill', toolDia: 0.8 },
+    { job: 'outline', toolDia: 0.8 }
+]
+
 const Setup = ({ showSetup, setShowSetup }) => {
     const navigate = useNavigate()
-    const { setupCompleted, markSetupComplete } = useApp();
+    const { setupCompleted, markSetupComplete, pngFiles, setPngFiles, toolLib } = useApp();
     const [ selectedTab, setSelectedTab ] = useState(tabs[0]);
     const isFirstTime = !setupCompleted
 
@@ -36,6 +42,33 @@ const Setup = ({ showSetup, setShowSetup }) => {
     };
 
     const handleFinish = () => {
+        const updatedPng = pngFiles.map(png => {
+            if (png.job === 'trace') {
+                const selectedTool = toolLib
+                    .filter(tool => tool.diameter >= 0.3 && tool.diameter <= 0.8)
+                    .sort((a, b) => a.diameter - b.diameter)[0] || null;
+
+
+                return {
+                    ...png,
+                    tool: selectedTool.id || null   // in case nothing matches
+                }; 
+            } else if (png.job === 'drill' || png.job === 'outline') {
+                const selectedTool = toolLib
+                    .filter(tool => tool.diameter >= 0.3 && tool.diameter <= 0.8)
+                    .sort((a, b) => b.diameter - a.diameter)[0] || null;
+
+                return {
+                    ...png,
+                    tool: selectedTool.id || null,   // in case nothing matches
+                    offsetNumber: 1
+                }; 
+            }
+
+            return png
+        })
+        setPngFiles(updatedPng);
+
         markSetupComplete();
         setShowSetup(false);
         setSelectedTab(tabs[0])
