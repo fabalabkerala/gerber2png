@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect,  useState } from "react";
 import Select from "../ui/Select";
 import { useApp } from "../context/AppContext";
 import { motion } from "motion/react";
@@ -30,7 +30,6 @@ const RightPanel = () => {
                   .filter(tool => tool.diameter >= 0.3 && tool.diameter <= 0.8)
                   .sort((a, b) => a.diameter - b.diameter)[0] || null;
 
-
               return {
                   ...png,
                   tool: selectedTool.id || null,   // in case nothing matches
@@ -48,7 +47,15 @@ const RightPanel = () => {
               }; 
           }
 
-          return png
+          const defaultTool = toolLib
+                  .filter(tool => tool.diameter >= 0.3 && tool.diameter <= 0.8)
+                  .sort((a, b) => b.diameter - a.diameter)[0] || null;
+
+          return {
+            ...png,
+            tool: defaultTool.id,
+            offsetNumber: 1
+          }
         })
         setPngFiles(updatedPng);
       }
@@ -63,16 +70,19 @@ const RightPanel = () => {
 
             { currentPngFile ? (
               <div className="flex flex-col mt-2 gap-3 px-4">
-              <div className="flex justify-between items-center gap-2 mt-3">
+                <div className="flex justify-between items-center gap-2 mt-3">
                   <p className="text-xs text-black text-nowrap tracking-wide">Type</p>
                   <div className="bg-white w-44">
-                      <Select 
-                          options={toolOptions} 
-                          selected={currentPngFile.tool || selectedTool} 
-                          setSelected={setSelectedTool}
-                      />
+                    <Select 
+                      options={toolOptions} 
+                      selected={currentPngFile.tool || selectedTool} 
+                      setSelected={setSelectedTool}
+                      onSelect={(id) => {
+                        setCurrentPngFile(prev => ({ ...prev, tool: id }))
+                      }}
+                    />
                   </div>
-              </div>
+                </div>
 
               { currentTool && currentTool.type && 
                 <div className="flex items-center gap-3 border border-x-orange-500 px-2 rounded-md mt-2">
@@ -87,7 +97,7 @@ const RightPanel = () => {
               <div className="flex justify-between items-center gap-2 mt-2">
                 <label className="text-xs text-black">Tool Number</label>
                 <input 
-                  value={1}
+                  value={currentTool?.toolNo}
                   className="rounded w-20 focus:outline-none text-center text-xs py-0.5 border bg-gray-200" 
                   type="number" 
                   disabled
@@ -96,7 +106,7 @@ const RightPanel = () => {
               <div className="flex justify-between items-center gap-2">
                 <label className="text-xs text-black">Diameter <span className="text-gray-500 font-normal text-[10px]">(mm)</span></label>
                 <input 
-                  value={3}
+                  value={currentTool?.diameter}
                   className="rounded w-20 focus:outline-none text-center text-xs py-0.5 border bg-gray-200" 
                   type="number" 
                   disabled
@@ -105,7 +115,7 @@ const RightPanel = () => {
               <div className="flex justify-between items-center gap-2">
                 <label className="text-xs text-black">Maximum Cut Depth <span className="text-gray-500 font-normal text-[10px]">(mm)</span></label>
                 <input 
-                  value={3}
+                  value={currentTool?.maxCutDepth}
                   className="rounded w-20 focus:outline-none text-center text-xs py-0.5 border bg-gray-200" 
                   type="number" 
                   disabled
@@ -114,7 +124,7 @@ const RightPanel = () => {
               <div className="flex justify-between items-center gap-2">
                 <label className="text-xs text-black">Offset Stepover<span className="text-gray-500 font-normal text-[10px]">(mm)</span></label>
                 <input 
-                  value={3}
+                  value={currentTool?.offsetStepOver}
                   className="rounded w-20 focus:outline-none text-center text-xs py-0.5 border bg-gray-200" 
                   type="number" 
                   disabled
@@ -153,6 +163,10 @@ const RightPanel = () => {
                   min={1}
                   step={0.1}
                   value={currentPngFile.offsetNumber}
+                  onInput={(e) => {
+                    const val = parseInt(e.target.value);
+                    setCurrentPngFile(prev => ({ ...prev, offsetNumber: prev.offsetNumber < 0 ? 0 : val }))
+                  }}
                   // onChange={e => handleInput('offsetNum', e.target.value)}
                   // onBlur={() => cleanInput('offsetNum', 1, 1)}
                   // disabled={tool.offsetNum === 0}
@@ -164,7 +178,7 @@ const RightPanel = () => {
               <div className="flex justify-between items-center gap-2">
                 <label className="text-xs text-black">Feed Rate<span className="text-gray-500 font-normal text-[10px]">(mm/s)</span></label>
                 <input 
-                  value={3}
+                  value={currentTool?.feedRate}
                   className="rounded w-20 focus:outline-none text-center text-xs py-0.5 border bg-gray-200" 
                   type="number" 
                   disabled
@@ -173,7 +187,7 @@ const RightPanel = () => {
               <div className="flex justify-between items-center gap-2">
                 <label className="text-xs text-black">Plunge Rate<span className="text-gray-500 font-normal text-[10px]">(mm/s)</span></label>
                 <input 
-                  value={3}
+                  value={currentTool?.plungeRate}
                   className="rounded w-20 focus:outline-none text-center text-xs py-0.5 border bg-gray-200" 
                   type="number" 
                   disabled
@@ -182,7 +196,7 @@ const RightPanel = () => {
               <div className="flex justify-between items-center gap-2">
                 <label className="text-xs text-black">RPM<span className="text-gray-500 font-normal text-[10px]">(mm/s)</span></label>
                 <input 
-                  value={3}
+                  value={currentTool?.rpm}
                   className="rounded w-20 focus:outline-none text-center text-xs py-0.5 border bg-gray-200" 
                   type="number" 
                   disabled
