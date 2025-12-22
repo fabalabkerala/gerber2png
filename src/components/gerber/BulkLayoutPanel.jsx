@@ -101,6 +101,8 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                             onSelect={(value) => {
                                                 if (value.name.includes('drill')) {
                                                     setConfig(prev => ({ ...prev, background: 'white'}))
+                                                } else {
+                                                    setConfig(prev => ({ ...prev, background: 'black'}))
                                                 }
                                             }}
                                         />

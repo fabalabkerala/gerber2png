@@ -34,7 +34,7 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, gen
         }));
     }
 
-    useEffect(() => setConfig(prev => ({ ...prev, pcb: prev.column * prev.row })), [config, setConfig])
+    // useEffect(() => setConfig(prev => ({ ...prev, pcb: prev.column * prev.row })), [config, setConfig])
 
     const handleGeneration =  async (url) => {
         try {
@@ -71,12 +71,15 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, gen
             const zip = new JSZip();
 
             const blobPromises = pngFiles.map(async (png) => {
+
+                const canvasBG = (png.job).includes('drill') ? 'white' : 'black';
+                
                 const { blob } = await generatePngLayout(
                     png.url, 
                     config.row, 
                     config.column, 
                     config.spacing, 
-                    layoutBg, 
+                    canvasBG, 
                     visibleSlots
                 );
 
@@ -106,7 +109,8 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, gen
         }
     }
 
-
+    // eslint-disable-next-line react/prop-types
+    useEffect(() => setLayoutBg(config.background), [config.background])
 
     return (
         <>
