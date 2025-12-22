@@ -6,15 +6,23 @@ import {
     useMemo, 
     useState
 } from "react";
+import { useApp } from "./AppContext";
 
 const GCodeContext = createContext();
 
 export const GCodeProvider = ({ children }) => {
+    const { machineConf, pcbConf, toolLib } = useApp();
     const [ currentPngFile, setCurrentPngFile ] = useState(null);
+
+    const handleGeneration = (png) => {
+        const tool = toolLib.find(tool => tool.id === png.tool) || null;
+        console.log('Gnenre : ', png, tool, machineConf, pcbConf)
+    };
 
     const layerValues = useMemo(() => ({
         currentPngFile,
-        setCurrentPngFile
+        setCurrentPngFile,
+        handleGeneration
     }), [currentPngFile]);
 
     return (

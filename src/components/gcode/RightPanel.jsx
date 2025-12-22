@@ -6,10 +6,11 @@ import { cn } from "../../utils/cn";
 import VBitIcon from "../icons/VBitIcon";
 import NormalBitIcon from "../icons/NormalBitIcon";
 import { useGcode } from "../context/GCodeContext";
+import { CogIcon } from "@heroicons/react/20/solid";
 
 const RightPanel = () => {
   const { toolLib, setupCompleted, setPngFiles, pngFiles } = useApp();
-  const { currentPngFile, setCurrentPngFile } = useGcode();
+  const { currentPngFile, setCurrentPngFile, handleGeneration } = useGcode();
     const [ selectedTool, setSelectedTool ] = useState('Select Tool');
     const [ currentTool, setCurrentTool ] = useState(null)
 
@@ -201,6 +202,17 @@ const RightPanel = () => {
                   type="number" 
                   disabled
                 />
+              </div>
+
+              <div className="flex justify-center items-center gap-2 mt-6 bg-blue-50 py-5 rounded-md">
+                <motion.button
+                  className="flex justify-center items-center gap-2   bg-sky-500 px-2 py-1.5 rounded shadow" 
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleGeneration(currentPngFile)}
+                >
+                  <p className="text-[0.72rem] ps-0.5 text-white tracking-wider">Generate G-Code</p>
+                  <CogIcon width={16} height={16} fill="white" />
+                </motion.button>
               </div>
             </div>
             ): (
