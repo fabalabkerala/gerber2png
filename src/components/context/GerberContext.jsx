@@ -51,6 +51,8 @@ export const GerberProvider = ({ children }) => {
     }, [])
 
     const applyQuickSetup = useCallback((option) => {
+
+        console.log('Apply Quick Setup : ', option);
         const setupConfig = setUpConfig(topstack, bottomstack)
         const setup = setupConfig[option];
         const toggleButtons = setupConfig[option].toggleButtons;
@@ -153,6 +155,7 @@ export const GerberProvider = ({ children }) => {
                     const setup = setups[option];
                     if (!isDoubleside && setup.stack !== topstack) continue;
                     if (isCarvera && option === "top-drill") continue;
+                    if (isCarvera && option === 'bottom-drill') continue;
 
                     const svg = setup.stack.svg.cloneNode(true);
                     const machine = isCarvera ? 'carvera' : 'general';

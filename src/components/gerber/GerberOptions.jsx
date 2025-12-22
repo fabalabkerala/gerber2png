@@ -14,6 +14,7 @@ const SelectOptions = [
     { id: "top-drill", label: "Top Drill" },
     { id: "top-cut", label: "Top Cut" },
     { id: "bottom-trace", label: "Bottom Trace" },
+    { id: "bottom-drill", label: "Bottom Drill" },
     { id: "bottom-cut", label: "Bottom Cut" },
     { id: "custom", label: "Custom" },
 ];

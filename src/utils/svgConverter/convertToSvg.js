@@ -134,7 +134,6 @@ function gerberFilesToSvg(files, layers, svgData) {
 
 function modifiedSvg(props) {
     const { svg, id, viewbox, width, height } = props;
-    // console.log('SVG', svg, id, viewbox, width, height)
     const newSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     const outerG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     const mainG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -162,16 +161,14 @@ function modifiedSvg(props) {
         path.setAttribute('fill', 'none');
         path.setAttribute('shape-rendering', 'crispEdges');
         path.setAttribute('stroke', '#ffffff');
-        path.setAttribute('stroke-width', '10rem');
+        path.setAttribute('stroke-width', '1rem');
         outlineG.setAttribute('id', 'drillMask');
 
-        // const topLayerTransform = `translate(${ viewbox[0] + 440 } ${ viewbox[1] + viewbox[3] -500 }) scale(0.995, -0.995) translate(${ -viewbox[0] } ${ -viewbox[1]})`
-        // const bottomLayerTransform = `translate(${ viewbox[0] + viewbox[2] - 440 } ${ viewbox[1] + viewbox[3] - 500 }) scale(-0.995, -0.995) translate(${ -viewbox[0] } ${ -viewbox[1]})`
-        // const topLayerTransform = `translate(${ viewbox[0] + 440 } ${ viewbox[1] + viewbox[3] -500 }) scale(0.995, -0.995) translate(${ -viewbox[0] } ${ -viewbox[1]})`
-        // const bottomLayerTransform = `translate(${ viewbox[0] + viewbox[2] - 440 } ${ viewbox[1] + viewbox[3] - 500 }) scale(-0.995, -0.995) translate(${ -viewbox[0] } ${ -viewbox[1]})`
-        // outlineG.setAttribute('transform', `${ id === 'toplayer' ? topLayerTransform : bottomLayerTransform }`);
+        const cx = viewbox[0] + viewbox[2] / 2;
+        const cy = viewbox[1] + viewbox[3] / 2;
+        const scale = id === 'bottomlayer' ? '-1 -1' : '1 -1'
 
-        const flipY = `translate(${viewbox[0]} ${viewbox[1] + viewbox[3]}) scale(1, -1) translate(${-viewbox[0]} ${-viewbox[1]})`;
+        const flipY = `translate(${cx} ${cy}) scale(${scale}) translate(${-cx} ${-cy})`;
         outlineG.setAttribute('transform', flipY);
 
         outlineG.appendChild(path);
@@ -183,7 +180,7 @@ function modifiedSvg(props) {
 
     outer.svg.setAttribute('id', `${id}outer-svg`);
     outerG.setAttribute('id', `${id}outer`);
-    outerG.setAttribute('style', 'display: none; fill: #1a4c1a');
+    outerG.setAttribute('style', `display: none; fill: ${ id === 'fullstack' ? '#3c94d930' : '#1a4c1a'}`);
 
     newSvg.setAttribute('id', `${id}`);
     newSvg.setAttribute('width', `${outer.width}mm`);

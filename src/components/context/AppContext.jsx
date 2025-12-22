@@ -19,10 +19,8 @@ export const AppProvider = ({ children }) => {
   });
   const [ machineConf, setMachineConf ] = useState(DEFAULT_MACHINE_CONF[0]);
   const [ pcbConf, setPCBConf ] = useState(DEFAULT_PCB_CONF);
-  // const [ toolLib, setToolLib ] = useState(DEFAULT_TOOL_LIB);
   const [toolLib, setToolLib] = useState(CARVERA_TOOL_LIB);
   
-
   const markSetupComplete = () => {
     // localStorage.setItem("gcodeSetupCompleted", "true");
     setSetupCompleted(true);

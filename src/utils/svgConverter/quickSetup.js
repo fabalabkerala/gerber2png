@@ -11,7 +11,6 @@ const setUpConfig = (topstack, bottomstack) => {
                 { side: 'commonlayer', button: 'outlayer' },
             ],
             stack: topstack, 
-            // id: 'top_layer_traces',
             id: 'traces_top_layer',
             color: 'bw',
             layerid: 'top_copper',
@@ -64,6 +63,22 @@ const setUpConfig = (topstack, bottomstack) => {
             layerid: 'bottom_copper',
             canvas: 'black',
         },
+        'bottom-drill': {
+            side: 'commonlayer',
+            button: 'drill',
+            toggleButtons: [
+                { side: 'bottomlayer', button: 'trace' },
+                { side: 'bottomlayer', button: 'pads' },
+                { side: 'bottomlayer', button: 'silkscreen' },
+                { side: 'commonlayer', button: 'outline' },
+                { side: 'commonlayer', button: 'outlayer' },
+            ],
+            stack: bottomstack,
+            id: 'drills_bottom_layer',
+            color: 'bwInvert',
+            layerid: 'drill',
+            canvas: 'white',
+        },
         'bottom-cut': {
             side: 'commonlayer',
             button: 'outline',
@@ -78,7 +93,7 @@ const setUpConfig = (topstack, bottomstack) => {
             color: 'bwInvert',
             layerid: 'outline',
             canvas: 'black',
-        }
+        },
     }
     return config
 }
