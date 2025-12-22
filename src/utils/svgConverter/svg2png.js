@@ -101,7 +101,7 @@ export const getPngDimensions = async (blobUrl, dpi = 1000) => {
     });
 };
  
-export const generatePngLayout = async (url, rows, columns, spacing, background, visible, targetDPI = 600, inputDPI = 1000) => {
+export const generatePngLayout = async (url, rows, columns, spacing, background, visible, targetDPI = 1000, inputDPI = 1000) => {
     const scaleRatio = targetDPI / inputDPI;
     const scaleFactor = targetDPI / 25.4;
     const scaledSpacing = spacing * scaleFactor;
