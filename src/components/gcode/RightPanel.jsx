@@ -51,6 +51,8 @@ const RightPanel = () => {
           const defaultTool = toolLib
                   .filter(tool => tool.diameter >= 0.3 && tool.diameter <= 0.8)
                   .sort((a, b) => b.diameter - a.diameter)[0] || null;
+          
+          console.log('Tool : ', toolLib, defaultTool);
 
           return {
             ...png,
@@ -60,7 +62,11 @@ const RightPanel = () => {
         })
         setPngFiles(updatedPng);
       }
-    }, [])
+    }, [setupCompleted])
+
+    useEffect(() => {
+      console.log('Current : ', currentPngFile)
+    }, [currentPngFile])
 
 
     return (
@@ -210,10 +216,10 @@ const RightPanel = () => {
                   whileTap={{ scale: 0.98 }}
                   onClick={() => handleGeneration(currentPngFile)}
                 >
-                  <p className="text-[0.72rem] ps-0.5 text-white tracking-wider">Generate G-Code</p>
+                  <p className="text-[0.75rem] ps-0.5 text-white tracking-wider inter">Generate G-Code</p>
                   <CogIcon width={16} height={16} fill="white" />
                 </motion.button>
-              </div>
+              </div> 
             </div>
             ): (
               <div className="flex flex-col justify-center items-center h-full mt-2 gap-3 px-4">

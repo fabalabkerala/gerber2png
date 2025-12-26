@@ -69,10 +69,7 @@ JobDirectory.propTypes = {
     }),
     isOpen: PropTypes.bool,
     onToggle: PropTypes.func,
-    selectedFile: PropTypes.shape({
-        name: PropTypes.string,
-        id: PropTypes.string
-    }),
+    selectedFile: PropTypes.string,
     onSelectFile: PropTypes.func
 }
 
