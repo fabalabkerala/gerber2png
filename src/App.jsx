@@ -13,6 +13,7 @@ import { AppProvider } from './components/context/AppContext.jsx';
 import { GCodeProvider } from './components/context/GCodeContext.jsx';
 
 function App() {
+  
   return (
     <>
       <AppProvider>
