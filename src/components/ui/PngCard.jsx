@@ -22,7 +22,7 @@ function PngCard({ name, blobUrl, handleDelete }) {
                         download={name} 
                         className="bg-white py-1 px-2 rounded shadow-sm border "
                     >
-                        <ArrowDownTrayIcon width={20} height={16} stroke="#e57345" />
+                        <ArrowDownTrayIcon width={20} height={16} stroke="#5545e5" />
                     </motion.a>
                     <motion.button 
                         whileTap={{ scale: 0.97, background: '#ef4444' }}

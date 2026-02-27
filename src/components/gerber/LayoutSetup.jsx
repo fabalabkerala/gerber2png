@@ -182,12 +182,12 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, gen
                         onClick={handleGenerateAll}
                     >
                         <div className="bg-gray-100 h-full flex items-center justify-center px-2 py-1.5 rounded-s border-2 border-white">
-                            <DocumentDuplicateIcon width={12} height={12} strokeWidth={2} stroke="#e57345" />
+                            <DocumentDuplicateIcon width={12} height={12} strokeWidth={2} stroke="#5545e5" />
                         </div>
-                        <p className="text-xs text-[#e57345] tracking-wider pr-3 py-1.5">Generate All</p>
+                        <p className="text-xs text-[#5545e5] tracking-wider pr-3 py-1.5">Generate All</p>
                     </motion.button>
                     <motion.button
-                        className="flex justify-center items-center gap-1 bg-[#e57345] px-3 py-1.5 rounded shadow" 
+                        className="flex justify-center items-center gap-1 bg-[#5545e5] px-3 py-1.5 rounded shadow" 
                         whileTap={{ scale: 0.98 }}
                         onClick={() => handleGeneration(selectedPng.url)}
                     >

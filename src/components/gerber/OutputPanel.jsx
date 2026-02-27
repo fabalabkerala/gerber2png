@@ -63,16 +63,16 @@ const OutputPanel = () => {
                             onClick={() => {
                                 setShowBulkModal(true);
                             }}
-                            className="flex flex-1 items-center gap-1 bg-white border border-[#e5724565] rounded shadow overflow-hidden" 
+                            className="flex flex-1 items-center gap-1 bg-white border border-[#5545e565] rounded shadow overflow-hidden" 
                             whileTap={{ scale: 0.98 }}
                         >
                             <div className="h-full bg-neutral-100 px-1.5 py-1.5">
-                                <Squares2X2Icon width={16} height={16} strokeWidth={1.5} stroke="#e57345" />
+                                <Squares2X2Icon width={16} height={16} strokeWidth={1.5} stroke="#5545e5" />
                             </div>
-                            <p className="text-[0.72rem] ps-0.5 pe-0.5 text-[#e57345] tracking-wider text-nowrap">Multi Layout</p>
+                            <p className="text-[0.72rem] ps-0.5 pe-0.5 text-[#5545e5] tracking-wider text-nowrap">Multi Layout</p>
                         </motion.button>
                         <motion.button
-                            className="flex justify-center items-center gap-2   bg-[#e57345] px-2 py-1.5 rounded shadow" 
+                            className="flex justify-center items-center gap-2   bg-[#5545e5] px-2 py-1.5 rounded shadow" 
                             whileTap={{ scale: 0.98 }}
                             onClick={downloadZip}
                         >

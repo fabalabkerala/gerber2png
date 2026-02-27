@@ -39,7 +39,7 @@ const MainPanel = () => {
                         <ViewfinderCircleIcon 
                             className={cn(
                                 "w-4 h-4",
-                                activeTab === "gcode" ? "text-orange-500" : "text-gray-500"
+                                activeTab === "gcode" ? "text-indigo-500" : "text-gray-500"
                             )}
                         />
                         GCode Preview

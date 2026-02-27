@@ -92,7 +92,7 @@ const RightPanel = () => {
                 </div>
 
               { currentTool && currentTool.type && 
-                <div className="flex items-center gap-3 border border-x-orange-500 px-2 rounded-md mt-2">
+                <div className="flex items-center gap-3 border border-x-indigo-500 px-2 rounded-md mt-2">
                   { currentTool.type === 'vbit' ? (
                     <VBitIcon angle={currentTool.angle} className={'w-12 h-12 p-1'} />
                   ):(
@@ -146,7 +146,7 @@ const RightPanel = () => {
                       setCurrentPngFile(prev => ({ ...prev, offsetNumber: prev.offsetNumber === 0 ? 1 : 0 }))
                     }}
                     whileTap={{ scale: 0.9 }}
-                    className="relative w-4 h-4 ml-4 flex items-center justify-center border rounded bg-white border-gray-400 hover:border-orange-500 transition-colors"
+                    className="relative w-4 h-4 ml-4 flex items-center justify-center border rounded bg-white border-gray-400 hover:border-indigo-500 transition-colors"
                   >
                     <motion.div
                       initial={false}
@@ -155,7 +155,7 @@ const RightPanel = () => {
                           opacity: currentPngFile.offsetNumber === 0 ? 1 : 0,
                       }}
                       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                      className="absolute w-3 h-3 bg-orange-500 rounded-sm"
+                      className="absolute w-3 h-3 bg-indigo-500 rounded-sm"
                     />
                   </motion.button>
 
@@ -163,7 +163,7 @@ const RightPanel = () => {
                 </div>
                 <input
                   className={cn(
-                      "rounded w-20 text-center focus:outline-none text-xs py-1 border px-2 transition-all duration-300 focus:border-l-2 focus:border-l-orange-500",
+                      "rounded w-20 text-center focus:outline-none text-xs py-1 border px-2 transition-all duration-300 focus:border-l-2 focus:border-l-indigo-500",
                       currentPngFile.offsetNumber === 0 ? "opacity-90 cursor-not-allowed border-white" : ""
                   )}
                   type="number"

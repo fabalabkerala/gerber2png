@@ -71,7 +71,7 @@ const LeftPanel = () => {
                 <motion.button
                     className={cn(
                         "flex text-xs gap-1 py-1 pl-1 pr-1 rounded transition-all duration-300 group",
-                        showSetup ? 'bg-white text-orange-600' : 'hover:bg-white hover:text-orange-600'
+                        showSetup ? 'bg-white text-indigo-600' : 'hover:bg-white hover:text-indigo-600'
                     )}
                     whileTap={{ scale: 0.9 }}
                     onClick={() => setShowSetup(true)}

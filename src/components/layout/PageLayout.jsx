@@ -28,7 +28,7 @@ export const  PageLayout = ({ sidebar, main, right }) => {
                             className="absolute inset-0 bg-white/40 backdrop-blur-sm flex items-center justify-center z-[9999]"
                         >
                             <motion.div
-                            className="w-12 h-12 border-4 border-[#e57345] border-t-transparent rounded-full"
+                            className="w-12 h-12 border-4 border-[#5545e5] border-t-transparent rounded-full"
                             animate={{
                                 rotate: [0, 360],
                                 scale: [1, 1.1, 1],

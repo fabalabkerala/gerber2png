@@ -41,8 +41,8 @@ export default function Navbar() {
                 <div className="flex bg-zinc-50">
                     <Link
                         className={cn(
-                            "px-4 py-1.5 w-64 text-sm text-center hover:text-[#e06636] transition-all duration-200",
-                            activeTab === 'converter' ? 'bg-[#EBEBEB]  text-[#e06636] border-t border-t-red-400 font-medium' : 'hover:bg-zinc-50 border-x text-black font-normal'
+                            "px-4 py-1.5 w-64 text-sm text-center hover:text-[#3647e0] transition-all duration-200",
+                            activeTab === 'converter' ? 'bg-[#EBEBEB]  text-[#3647e0] border-t border-t-indigo-400 font-medium' : 'hover:bg-zinc-50 border-x text-black font-normal'
                         )}
                         onClick={() => setActiveTab('converter')}
                         to={'/'}
@@ -52,8 +52,8 @@ export default function Navbar() {
                     </Link>
                     <Link
                         className={cn(
-                            "px-4 py-1.5 w-64 text-sm text-center hover:text-[#e06636] transition-all duration-200",
-                            activeTab === 'generator' ? 'bg-[#EBEBEB]  text-[#e06636] border-t border-t-red-400 font-medium' : 'hover:bg-zinc-50 border-x text-black font-normal'
+                            "px-4 py-1.5 w-64 text-sm text-center hover:text-[#3647e0] transition-all duration-200",
+                            activeTab === 'generator' ? 'bg-[#EBEBEB]  text-[#3647e0] border-t border-t-indigo-400 font-medium' : 'hover:bg-zinc-50 border-x text-black font-normal'
                         )}
                         onClick={() => setActiveTab('generator')}
                         to={'/gcode'}

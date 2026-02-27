@@ -16,12 +16,12 @@ const ThreeWaySlider = ({ options, valueSync, onChange, variant = 'primary' }) =
 
     const variants = {
         primary: {
-            pill: 'bg-[#e57345]',
+            pill: 'bg-[#5545e5]',
             label: 'text-white'
         },
         secondary: {
-            pill: 'border-2 border-[#e57345]',
-            label: 'text-[#e57345]'
+            pill: 'border-2 border-[#5545e5]',
+            label: 'text-[#5545e5]'
         },
         
     }

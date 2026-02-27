@@ -122,7 +122,7 @@ const LayerControls = () => {
                     </div>
                     { layers.map((layer) => (
                         <div key={layer.type} className="grid grid-cols-[1fr_auto_auto] gap-3 items-center mb-2">
-                            <div className={cn("flex justify-between items-center border w-full h-fit rounded")}>
+                            <div className={cn("flex justify-between items-center border w-full h-fit rounded-lg")}>
                                 <p className="text-xs px-2 py-1 text-gray-700 capitalize">{layer.type}</p>
                             </div>
 
@@ -130,8 +130,8 @@ const LayerControls = () => {
                                 <motion.button
                                 key={`${property}_${id}`}
                                     className={cn(
-                                        "px-3 py-1.5 rounded border w-14 text-center",
-                                        !isToggled[property.layer][layer.type] ? "bg-zinc-100" : "bg-zinc-50 text-orange-400",
+                                        "px-3 py-1.5 rounded-lg border w-14 text-center",
+                                        !isToggled[property.layer][layer.type] ? "bg-indigo-100 text-indigo-700" : "bg-zinc-50 text-indigo-600",
                                         !doubleSide && property.layer.includes('bottom') ? 'pointer-events-none opacity-40' : ''
                                     )}
                                     whileTap={{ scale: 0.95 }}
@@ -159,14 +159,14 @@ const LayerControls = () => {
                 <div className="flex flex-col gap-3 px-3 pt-2 mt-4">
                     { commonLayers.map((layer, id) => (
                         <div key={id} className="flex gap-3 items-center justify-between">
-                            <div className={cn("flex justify-between items-center border w-full h-fit rounded flex-1")}>
+                            <div className={cn("flex justify-between items-center border w-full h-fit rounded-lg flex-1")}>
                                 <p className="text-xs px-2 py-1 text-gray-700 capitalize">{ layer }</p>
                             </div>
 
                             <motion.button
                                 className={cn(
-                                    "px-3 py-1.5 rounded border w-14 text-center",
-                                    !isToggled['commonlayer'][layer] ?  "bg-zinc-100" : "bg-zinc-50 text-orange-400",
+                                    "px-3 py-1.5 rounded-lg border w-14 text-center",
+                                    !isToggled['commonlayer'][layer] ? "bg-indigo-100 text-indigo-700" : "bg-zinc-50 text-indigo-600",
                                 )}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => {
@@ -183,14 +183,14 @@ const LayerControls = () => {
                         </div>
                     ))}
                     <div className={cn("flex gap-3 items-center justify-between", doubleSide ? '' : 'opacity-60 pointer-events-none')}>
-                        <div className={cn("flex justify-between items-center border w-full h-fit rounded flex-1")}>
+                        <div className={cn("flex justify-between items-center border w-full h-fit rounded-lg flex-1")}>
                             <p className="text-xs px-2 py-1 text-gray-700 capitalize">Double side outerlayer</p>
                         </div>
 
                         <motion.button
                             className={cn(
-                                "px-3 py-1.5 rounded border w-14 text-center",
-                                !isToggled.commonlayer.outlayer ?  "bg-zinc-100" : "bg-zinc-50 text-orange-400",
+                                "px-3 py-1.5 rounded-lg border w-14 text-center",
+                                !isToggled.commonlayer.outlayer ? "bg-indigo-600 text-white" : "bg-zinc-50 text-indigo-600",
                             )}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => {

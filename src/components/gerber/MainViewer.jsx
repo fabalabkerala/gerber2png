@@ -55,7 +55,7 @@ const MainView = () => {
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.3, ease: 'easeOut' }}
                 className={cn(
-                    "w-full h-full bg-zinc-100 border-2 border-white rounded-md shadow",
+                    "w-full h-full bg-white border-2 border-white rounded-md shadow",
                 )}
             >
                 <TransformWrapper initialScale={1} minScale={.5} limitToBounds={ false }>
@@ -70,14 +70,14 @@ const MainView = () => {
                         >
                         </div>
                         <div className="absolute top-0 -right-7 w-px h-full bg-zinc-300 mx-3" />
-                        <p className=" absolute top-1/2 -translate-y-1/2 -right-[2.7rem] bg-zinc-100 px-2 text-[9px] -rotate-90 font-medium rounded text-nowrap">
+                        <p className=" absolute top-1/2 -translate-y-1/2 -right-[2.7rem] bg-white px-2 text-[9px] -rotate-90 font-medium rounded text-nowrap">
                             {stackConfig.height}
                             <span className="text-gray-500 font-normal"> mm</span>
                         </p>
 
 
                         <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 w-full h-px bg-zinc-300 my-3" />
-                        <p className="absolute -bottom-[1.5rem] left-1/2 -translate-x-1/2 bg-zinc-100 px-2 text-[9px] font-medium rounded text-nowrap">
+                        <p className="absolute -bottom-[1.5rem] left-1/2 -translate-x-1/2 bg-white px-2 text-[9px] font-medium rounded text-nowrap">
                             {stackConfig.width}
                             <span className="text-gray-500 font-normal"> mm</span>
                         </p>
