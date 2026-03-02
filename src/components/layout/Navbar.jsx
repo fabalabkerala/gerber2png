@@ -24,11 +24,8 @@ export default function Navbar() {
                 <div className="flex justify-between items-center navbar h-16">
                     <div className='flex items-center md:min-w-[335px] px-4 py-4'>
                         <img className="h-12" src={ pcbLogo } alt="" />
-                        {/* <div>
-                        <span className='gerber'>Gerber</span><span className='two'>2</span><span className='png'>PNG</span>
-                        </div> */}
                     </div>
-                    <div className="flex flex-1 items-end justify-start h-full">
+                    {/* <div className="flex flex-1 items-end justify-start h-full">
                         <Link
                             className={cn(
                                 "px-4 py-1.5 w-64 text-sm text-center hover:text-[#3647e0] transition-all duration-200 h-fit",
@@ -51,21 +48,7 @@ export default function Navbar() {
                             
                             G-Code Generator
                         </Link>
-                        {/* <button 
-                            className={cn(
-                                "px-4 py-1.5 w-64 text-sm",
-                                activeTab === 'converter' ? 'bg-[#EBEBEB]  text-[#ce5e31] border-t border-t-red-400 font-medium' : 'hover:bg-zinc-50 border-x'
-                            )}
-                            onClick={() => setActiveTab('converter')}
-                        >Gerber2PNG Converter</button> */}
-                        {/* <button 
-                            className={cn(
-                                "px-4 py-1.5 w-64 text-sm",
-                                activeTab === 'generator' ? 'bg-[#EBEBEB]  text-[#ce5e31] border-t border-t-red-400 font-medium' : 'hover:bg-zinc-50 border-x'
-                            )}
-                            onClick={() => setActiveTab('generator')}
-                        >G-Code Generator</button> */}
-                    </div>
+                    </div> */}
                     <div className='flex gap-6 min-w-[280px] items-end justify-end px-4'>
                         <a href="https://git.fablabkerala.in/midlaj/gerber2png/-/wikis/home" target='_blank'>
                             <WikiIcon />
