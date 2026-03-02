@@ -15,7 +15,7 @@ const Select = ({ options, selected, setSelected, variant = "bottom", onSelect, 
     return (
         <>
             <Listbox value={selected} onChange={handleSelect}>
-                <div className="relative w-full">
+                <div className="relative w-full bg-white">
                     <ListboxButton
                         className={cn(                    
                             'relative block w-full rounded pl-2 text-left text-xs border py-1',

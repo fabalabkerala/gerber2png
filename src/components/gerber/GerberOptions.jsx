@@ -41,14 +41,13 @@ const GerberOptions = () => {
 
     return (
         <>
-            <div className="flex flex-col bg-white pb-3 rounded shadow">
+            <div className="bg-white border border-slate-200 rounded-xl">
                 {/* Heading */}
-                <div className="flex justify-between items-center bg-[#F5F5F5] px-2 py-1 rounded-tl-md rounded-tr-md relative">
+                <div className="px-4 py-2 bg-slate-50 rounded-t-xl">
                     <p className="font-medium text-sm ps-0.5 text-gray-700">Options</p>
                 </div>
 
-                <div className="px-2">
-
+                <div className="p-4 py-2">
                     <p className="text-xs text-gray-700 pt-3 pb-1 px-1">Quick Setup</p>
 
                     <div className="flex gap-3 text-sm">
@@ -79,10 +78,10 @@ const GerberOptions = () => {
                     </div>
                 </div>
 
-                <div className="w-full h-px bg-zinc-100 my-3" />
+                {/* <div className="w-full h-px bg-zinc-100 my-3" /> */}
 
-                <div className="px-3">
-                    <div className="flex gap-4 text-sm">
+                <div className="p-3">
+                    <div className="flex gap-4 text-sm bg-slate-50 p-3 rounded-lg">
                         <div className="flex items-center justify-between gap-1">
                             <p className="text-xs">Double Side PCB</p>
                             <SwitchToggle onChange={(enabled) => toggleDoubleSide(enabled, isToggled)} enabled={doubleSide} />

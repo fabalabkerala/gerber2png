@@ -6,8 +6,8 @@ export const  PageLayout = ({ sidebar, main, right }) => {
     const { loader } = useGerberView();
     return (
         <>
-            <div className="h-full relative flex flex-col md:flex-row bg-[#EBEBEB] md:overflow-hidden">
-                <aside className="w-full md:w-1/6 md:h-full min-w-[325px] py-3 px-3 md:px-0 md:ps-3 md:overflow-y-auto custom-scrollbar">
+            <div className="h-full relative flex flex-col md:flex-row bg-[#f5f6f8] md:overflow-hidden">
+                <aside className="w-full md:w-1/6 md:h-full min-w-[335px] py-3 px-3 md:px-0 md:ps-3 md:overflow-y-auto custom-scrollbar">
                     {sidebar}
                 </aside>
 

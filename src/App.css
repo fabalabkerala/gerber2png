@@ -10,20 +10,20 @@
 .navbar .gerber {
   font-size: 1.3rem;
   font-weight: 600;
-  color: rgb(229 115 69);
+  color: #0a4f3c;
   margin-left: 5px;
 }
 .navbar .two {
   font-size: 1.5rem;
   font-weight: 700;
-  color: rgba(0, 0, 0, 0.473);
+  color: #d4af37;
   letter-spacing: 2px;
   /* margin-left: 4px; */
 }
 .navbar .png {
   font-size: 1.4rem;
   font-weight: 700;
-  color: #ce5e31;
+  color: #0b6d51;
 }
 .navbar a {
   text-decoration: none;

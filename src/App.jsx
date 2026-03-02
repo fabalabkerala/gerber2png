@@ -16,7 +16,7 @@ function App() {
   return (
     <>
       <AppProvider>
-        <div className="h-screen flex flex-col">
+        <div className="h-screen flex flex-col bg-[#f5f6f8]">
 
           <GerberProvider>
             <GCodeProvider>

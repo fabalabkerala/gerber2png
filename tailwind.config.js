@@ -6,5 +6,7 @@ export default {
     theme: {
         extend: {},
     },
-    plugins: [],
+    plugins: [
+        require('@butterfail/tailwindcss-inverted-radius'),
+    ],
 }

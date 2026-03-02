@@ -16,18 +16,18 @@ const ThreeWaySlider = ({ options, valueSync, onChange, variant = 'primary' }) =
 
     const variants = {
         primary: {
-            pill: 'bg-[#5545e5]',
+            pill: 'bg-[#34d399]',
             label: 'text-white'
         },
         secondary: {
-            pill: 'border-2 border-[#5545e5]',
-            label: 'text-[#5545e5]'
+            pill: 'border-2 border-[#34d399]',
+            label: 'text-[#34d399]'
         },
         
     }
 
     return (
-        <div className="relative flex bg-gray-100 rounded-full p- w-full">
+        <div className="relative flex bg-white border border-gray-50 rounded-full p- w-full">
             { options.map((opt) => (
                 <button
                     key={opt.id}

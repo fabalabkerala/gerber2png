@@ -4,19 +4,28 @@ import { motion } from "framer-motion";
 import { CloudArrowUpIcon } from "@heroicons/react/24/outline";
 import { cn } from "../../utils/cn";
 import PropTypes from "prop-types";
+import handleZip from "../../utils/svgConverter/jsZip";
 
-export default function FileDropZone({ onFilesSelect, accept = "*", multiple = false }) {
+export default function  FileDropZone({ onFilesSelect, accept = "*", multiple = false }) {
     const [isDragging, setIsDragging] = useState(false);
     const [fileNames, setFileNames] = useState([]);
 
-    const handleFiles = (e) => {
+    const handleFiles = async (e) => {
         e.preventDefault();
         setIsDragging(false);
+        let selectedFiles = [];
 
         const files = e.dataTransfer ? e.dataTransfer.files : e.target.files;
         if (!files?.length) return;
 
-        const selectedFiles = Array.from(files);
+        if (files.length === 1 && files[0].name.endsWith('.zip')) {
+            const extractedFiles = await handleZip(files[0], { gerberOnly: true });
+            selectedFiles = extractedFiles;
+
+        } else {
+            selectedFiles = Array.from(files);
+        }
+        
         setFileNames(selectedFiles.map((f) => f.name));
         onFilesSelect?.(selectedFiles);
 
@@ -36,7 +45,7 @@ export default function FileDropZone({ onFilesSelect, accept = "*", multiple = f
             whileTap={{ scale: 0.998 }}
             className={cn(
                 "group flex flex-col items-center justify-center h-full border border-dashed rounded-lg p-6 cursor-pointer transition-colors duration-300",
-                isDragging ? "border-[#5545e5] bg-[#f1e4e023]" : "border-white bg-zinc-100 hover:border hover:border-[#5545e5] hover:bg-gray-50"
+                isDragging ? "border-[#5545e5] bg-[#f1e4e023]" : "border-white bg-white hover:border hover:border-[#5545e5] hover:bg-gray-50"
             )} 
         >
             <CloudArrowUpIcon
