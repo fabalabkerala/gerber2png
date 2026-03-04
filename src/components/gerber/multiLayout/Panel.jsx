@@ -2,16 +2,19 @@ import { PhotoIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "motion/react"
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
-import ModalHeader from "../ui/ModalHeader";
-import ImageSelect from "../ui/ImageSelect";
-import ImageLayout from "../ui/ImageLayout";
+import ModalHeader from "../../ui/ModalHeader";
+import ImageSelect from "../../ui/ImageSelect";
+import ImageLayout from "../../ui/ImageLayout";
 import LayoutConfiguration from "./LayoutConfiguration";
 import LayoutSetup from "./LayoutSetup";
-import { useApp } from "../context/AppContext";
+import { useApp } from "../../context/AppContext";
 
 const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
     const { pngFiles } = useApp()
-    const [ selectedPng, setSelectedPng ] = useState('Choose an Image');
+    const [ selectedPng, setSelectedPng ] = useState({
+        name: 'Choose an Image',
+        url: '',
+    });
     const [ generating, setGenerating ] = useState(false);
     const [ config, setConfig ] = useState({
         row: 1,

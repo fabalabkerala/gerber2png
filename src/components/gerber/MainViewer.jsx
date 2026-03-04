@@ -55,7 +55,7 @@ const MainView = () => {
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.3, ease: 'easeOut' }}
                 className={cn(
-                    "w-full h-full bg-white border-2 border-white rounded-md shadow",
+                    "w-full h-full bg-white border-2 border-white rounded-xl shadow",
                 )}
             >
                 <TransformWrapper initialScale={1} minScale={.5} limitToBounds={ false }>

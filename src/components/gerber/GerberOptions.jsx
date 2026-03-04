@@ -68,7 +68,7 @@ const GerberOptions = () => {
                         />
 
                         <motion.button 
-                            className="flex justify-center items-center gap-1 bg-[#ef4444] pr-2 ps-1 rounded bord" 
+                            className="flex justify-center items-center gap-1 bg-[#D3346E] pr-2 ps-1 rounded shadow" 
                             whileTap={{ scale: 0.96 }}
                             onClick={() => handlePngConversion(changeSelect, doubleSide)}
                         >

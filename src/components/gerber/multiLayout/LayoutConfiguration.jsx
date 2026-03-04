@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Select from "../ui/Select";
+import Select from "../../ui/Select";
 import PropTypes from "prop-types";
 
 const machineOption = [

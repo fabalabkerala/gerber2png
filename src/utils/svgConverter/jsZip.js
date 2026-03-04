@@ -11,6 +11,8 @@ const GERBER_EXTENSIONS = [
     ".gko",
     ".gm1",
     ".drl",
+    '.gbrx', 
+    '.gblx',
     ".txt"
 ];
 

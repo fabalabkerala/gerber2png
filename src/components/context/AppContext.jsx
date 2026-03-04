@@ -27,7 +27,7 @@ export const AppProvider = ({ children }) => {
   };
 
   const resetSetup = () => {
-    setMachineConf(DEFAULT_MACHINE_CONF);
+    setMachineConf(DEFAULT_MACHINE_CONF[0]);
     setPCBConf(DEFAULT_PCB_CONF);
     setToolLib(DEFAULT_TOOL_LIB);
     // localStorage.removeItem("machineConf");

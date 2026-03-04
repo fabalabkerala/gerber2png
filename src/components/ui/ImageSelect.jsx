@@ -22,7 +22,7 @@ const ImageSelect = ({ options, selected, setSelected, variant = "bottom", onSel
                             'focus:outline-none focus:ring-1 focus:ring-gray-400 capitalize'
                         )}
                     >
-                        {options.find(png => png.name === selected.name)?.name || selected}
+                        {selected?.name ?? "Choose an Image"}
                         <ChevronDownIcon
                             className="absolute top-1/2 -translate-y-1/2 right-0 size-2 w-fit px-2 py-1 h-full bg-[#F0F0F0]"
                             aria-hidden="true"

@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
-import Select from "../ui/Select";
+import Select from "../../ui/Select";
 import PropTypes from "prop-types";
 import { DocumentDuplicateIcon, PhotoIcon } from "@heroicons/react/24/outline";
 import { motion } from "motion/react";
-import { cn } from "../../utils/cn";
-import { generatePngLayout } from "../../utils/svgConverter/svg2png";
+import { cn } from "../../../utils/cn";
+import { generatePngLayout } from "../../../utils/svgConverter/svg2png";
 import { DocumentCheckIcon } from "@heroicons/react/24/outline";
 import JSZip from "jszip";
-import { useApp } from "../context/AppContext";
+import { useApp } from "../../context/AppContext";
 
 const options = [
     { id: 'black', label: 'Black' }, 
@@ -182,12 +182,12 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, gen
                         onClick={handleGenerateAll}
                     >
                         <div className="bg-gray-100 h-full flex items-center justify-center px-2 py-1.5 rounded-s border-2 border-white">
-                            <DocumentDuplicateIcon width={12} height={12} strokeWidth={2} stroke="#5545e5" />
+                            <DocumentDuplicateIcon width={12} height={12} strokeWidth={2} stroke="#D3346E" />
                         </div>
-                        <p className="text-xs text-[#5545e5] tracking-wider pr-3 py-1.5">Generate All</p>
+                        <p className="text-xs text-[#D3346E] tracking-wider pr-3 py-1.5">Generate All</p>
                     </motion.button>
                     <motion.button
-                        className="flex justify-center items-center gap-1 bg-[#5545e5] px-3 py-1.5 rounded shadow" 
+                        className="flex justify-center items-center gap-1 bg-[#D3346E] px-3 py-1.5 rounded shadow" 
                         whileTap={{ scale: 0.98 }}
                         onClick={() => handleGeneration(selectedPng.url)}
                     >

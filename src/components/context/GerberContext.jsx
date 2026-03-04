@@ -32,7 +32,7 @@ export const GerberProvider = ({ children }) => {
     const [doubleSide, setDoubleSide] = useState(false);
     const [layerType, setLayerType] = useState(null);
     const [canvasBg, setCanvasBg] = useState('black');
-    const [changeSelect, setChangeSelect] = useState('custom');
+    const [changeSelect, setChangeSelect] = useState('generate-all');
     const [stackConfig, setStackConfig] = useState({ viewbox: { viewboxX: 0, viewboxY: 0, viewboxW: 0, viewboxH: 0}, width: 0, height: 0 });
     const [isToggled, setIsToggled] = useState({
         toplayer: { trace: false, pads: false, silkscreen: false, soldermask: false },

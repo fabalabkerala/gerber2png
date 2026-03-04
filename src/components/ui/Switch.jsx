@@ -49,7 +49,3 @@ SwitchToggle.propTypes = {
     onChange: PropTypes.func
 }
 
-SwitchToggle.defaultProps = {
-    variant: 'primary',
-    onChange: () => {}
-};

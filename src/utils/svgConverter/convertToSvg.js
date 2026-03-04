@@ -17,7 +17,7 @@ export default async function convertToSvg(
     const newTopSvg = modifiedSvg({ svg: topsvg, id: 'toplayer', viewbox: stackup.top.viewBox, width: stackup.top.width, height: stackup.top.height,})
     const newBottomSvg = modifiedSvg({ svg: bottomsvg, id: 'bottomlayer', viewbox: stackup.bottom.viewBox, width: stackup.bottom.width, height: stackup.bottom.height})
 
-    const fullStackSvg = gerberFilesToSvg(files, stackup.layers, stackup.top)
+    const fullStackSvg = await gerberFilesToSvg(files, stackup.layers, stackup.top)
     const newFullStackSvg = modifiedSvg({ svg: fullStackSvg, id: 'fullstack', viewbox: stackup.top.viewBox, width: stackup.top.width, height: stackup.top.height})
 
     setStackConfig({ 
@@ -58,7 +58,7 @@ async function stackupFromFiles(filesList) {
 }
 
 
-function gerberFilesToSvg(files, layers, svgData) {
+async function gerberFilesToSvg(files, layers, svgData) {
     const ids = layers.map(({side, type}) => `${side}_${type}`);
 
     const svg = svgData.svg;
@@ -75,54 +75,60 @@ function gerberFilesToSvg(files, layers, svgData) {
     const fullLayerG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     fullLayerG.setAttribute('transform', gTransform);
 
-    Array.from(files).forEach((file, index) => {
+    const parseFile = (file, index) => new Promise((resolve, reject) => {
         const reader = new FileReader();
 
+        reader.onerror = reject;
         reader.onload = (e) => {
             const fileContent = e.target.result;
             const uint8Array = new Uint8Array(fileContent);
 
             // eslint-disable-next-line no-undef
-            let gerberToSvgStream = gerberToSvg(uint8Array, );
-            let svg = ''
+            const gerberToSvgStream = gerberToSvg(uint8Array);
+            let streamSvg = "";
 
-            gerberToSvgStream.on('data', (chunk) => { svg += chunk; });
+            gerberToSvgStream.on("data", (chunk) => { streamSvg += chunk; });
+            gerberToSvgStream.on("error", reject);
+            gerberToSvgStream.on("end", () => {
+                const svgDoc = new DOMParser().parseFromString(streamSvg, "image/svg+xml");
+                const defElement = svgDoc.querySelector("defs");
+                const gElement = svgDoc.querySelector("g");
 
-            gerberToSvgStream.on('end', () => {
-                const svgDoc = new DOMParser().parseFromString(svg, 'image/svg+xml');
-
-                const defElement = svgDoc.querySelector('defs');
-                if (defElement) {
-                    fullLayerDef.appendChild(defElement);
-                }
-
-                const gElement = svgDoc.querySelector('g');
                 if (gElement) {
-                    gElement.setAttribute('id', `g-${ids[index]}`);
-                    gElement.removeAttribute('transform');
+                    gElement.setAttribute("id", `g-${ids[index]}`);
+                    gElement.removeAttribute("transform");
 
                     const layerStyle = {
-                        'top_copper': {color: 'crimson', opacity: 0.3},
-                        'bottom_copper': {color: '#008208', opacity: 0.3},
-                        'all_outline': {color: 'green', opacity: 0.5},
-                        'top_silkscreen': {color: 'red', opacity: 0.5},
-                        'bottom_silkscreen': {color: 'blue', opacity: 0.5},
-                        // 'bottom_soldermask': {color: '#757500', opacity: 0.5, display: 'none'},
-                        'bottom_soldermask': {color: '#757500', opacity: 0.5},
-                        'bottom_solderpaste': {color: 'orange', opacity: 0.5},
-                        'top_solderpaste': {color: '#c362c3', opacity: 0.5},
-                        // 'top_soldermask': {color: '#af4e5f', opacity: 0.5, display: 'none'},
-                        'top_soldermask': {color: '#af4e5f', opacity: 0.5},
+                        "top_copper": { color: "crimson", opacity: 0.3 },
+                        "bottom_copper": { color: "#008208", opacity: 0.3 },
+                        "all_outline": { color: "green", opacity: 0.5 },
+                        "top_silkscreen": { color: "red", opacity: 0.5 },
+                        "bottom_silkscreen": { color: "blue", opacity: 0.5 },
+                        "bottom_soldermask": { color: "#757500", opacity: 0.5 },
+                        "bottom_solderpaste": { color: "orange", opacity: 0.5 },
+                        "top_solderpaste": { color: "#c362c3", opacity: 0.5 },
+                        "top_soldermask": { color: "#af4e5f", opacity: 0.5 },
                     };
 
-                    const layerstyle = layerStyle[ids[index]] || { color: 'green', opacity: 0.5 };
-                    gElement.setAttribute('style', `color: ${layerstyle.color}; opacity: ${layerstyle.opacity}; display: ${ layerstyle.display ? layerstyle.display : 'block' }`);
-                    fullLayerG.appendChild(gElement);
+                    const layerstyle = layerStyle[ids[index]] || { color: "green", opacity: 0.5 };
+                    gElement.setAttribute(
+                        "style",
+                        `color: ${layerstyle.color}; opacity: ${layerstyle.opacity}; display: ${layerstyle.display ? layerstyle.display : "block"}`
+                    );
                 }
-            })
-        }
+
+                resolve({ defElement, gElement });
+            });
+        };
 
         reader.readAsArrayBuffer(file);
+    });
+
+    const parsedLayers = await Promise.all(Array.from(files).map(parseFile));
+
+    parsedLayers.forEach(({ defElement, gElement }) => {
+        if (defElement) fullLayerDef.appendChild(defElement);
+        if (gElement) fullLayerG.appendChild(gElement);
     });
 
     fullLayerSvg.appendChild(fullLayerDef);
