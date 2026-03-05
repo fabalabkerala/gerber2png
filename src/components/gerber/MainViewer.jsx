@@ -5,6 +5,9 @@ import { useGerberLayer, useGerberSettings, useGerberView } from "../context/Ger
 import convertToSvg from "../../utils/svgConverter/convertToSvg";
 import { motion } from "motion/react";
 import { cn } from "../../utils/cn";
+import handleZip from "../../utils/svgConverter/jsZip";
+import toast from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 
 const MainView = () => {
     const { setTopStack, setBottomStack, setFullLayers } = useGerberLayer();
@@ -30,8 +33,40 @@ const MainView = () => {
         }
     },[mainSvg])
 
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const port = params.get('port');
+        const token = params.get('token');
+
+        if (!port || !token) return;
+
+        const loadZip = async () => {
+            const toastId = toast.loading('Connecting to the kicad plugin');
+
+            try {
+               const response = await fetch(`http://localhost:${port}/file?token=${token}`);
+                const blob = await response.blob();
+
+                const file = new File([blob], "gerber.zip");
+
+                const extractedFiles = await handleZip(file, { gerberOnly: true });
+
+                handleInputFiles(extractedFiles); 
+
+                toast.success('Successfully Loaded From Kicad!', { id: toastId });
+            } catch (error) {
+                console.error('Error loading files:', error);
+                toast.error('Failed to load files from the plugin.', { id: toastId });
+            }
+            
+        }
+
+        loadZip()
+    }, []);
+
     return (
         <>
+            <Toaster position="top-right" toastOptions={{ success: { duration: 2000 }}} containerStyle={{ top: 90 }} />
             {/* Drag & Drop Zone */}
             { !mainSvg.svg &&
                 <motion.div 
