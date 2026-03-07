@@ -66,7 +66,17 @@ const MainView = () => {
 
     return (
         <>
-            <Toaster position="top-right" toastOptions={{ success: { duration: 2000 }}} containerStyle={{ top: 90 }} />
+            <Toaster
+                position="top-right"
+                containerStyle={{ top: 100 }}
+                toastOptions={{
+                    className: "relative overflow-hidden border bg-white text-gray-700  !shadow-md",
+
+                    error: { className: "!border !border-dashed !border-red-200 !bg-red-50 !text-gray-800 !shadow-sm !px-4 !py-4 !rounded-2xl" },
+                    success: { className: "!border !border-dashed !border-green-200 !bg-green-50 !text-gray-800 !shadow-sm !px-4 !py-4 !rounded-2xl" },
+                    loading: { className: "!border !border-dashed !border-blue-200 !bg-blue-50 !text-gray-800 !shadow-sm !px-4 !py-4 !rounded-2xl" },
+                }}
+            />
             {/* Drag & Drop Zone */}
             { !mainSvg.svg &&
                 <motion.div 

@@ -130,9 +130,9 @@ const LayerControls = () => {
                                 <motion.button
                                     key={id}
                                     className={cn(
-                                        "px-3 py-2 rounded-md transition-colors w-14 text-center",
+                                        "px-3 py-2 rounded-md transition-all duration-300 w-14 text-center",
                                         !isToggled[property.layer][layer.type] ? "bg-emerald-100 text-teal-500 hover:bg-emerald-50" : "bg-zinc-50 text-gray-400",
-                                        !doubleSide && property.layer.includes('bottom') ? 'pointer-events-none opacity-40' : ''
+                                        !doubleSide && property.layer.includes('bottom') ? 'pointer-events-none opacity-40 grayscale' : ''
                                     )}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => {

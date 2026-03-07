@@ -4,7 +4,8 @@ import PropTypes from "prop-types";
 
 const ModalHeader = ({ title, onClose }) => {
     return (
-        <div className="flex justify-between items-center bg-[#F5F5F5] rounded-tl-md rounded-tr-md">
+        
+        <div className="flex justify-between items-center px-4 py-2 bg-slate-50 rounded-t-xl">
             <p className="font-medium text-sm px-2 text-gray-700">{ title }</p>
             { onClose &&
                 <motion.button 
