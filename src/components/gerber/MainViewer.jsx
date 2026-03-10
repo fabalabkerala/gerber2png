@@ -35,33 +35,38 @@ const MainView = () => {
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
-        const port = params.get('port');
-        const token = params.get('token');
+        const { port, token, source } = Object.fromEntries(params.entries());
 
-        if (!port || !token) return;
-
-        const loadZip = async () => {
-            const toastId = toast.loading('Connecting to the kicad plugin');
-
-            try {
-               const response = await fetch(`http://localhost:${port}/file?token=${token}`);
-                const blob = await response.blob();
-
-                const file = new File([blob], "gerber.zip");
-
-                const extractedFiles = await handleZip(file, { gerberOnly: true });
-
-                handleInputFiles(extractedFiles); 
-
-                toast.success('Successfully Loaded From Kicad!', { id: toastId });
-            } catch (error) {
-                console.error('Error loading files:', error);
-                toast.error('Failed to load files from the plugin.', { id: toastId });
-            }
-            
+        const processZip = async (blob) => {
+            const file = new File([blob], "gerber.zip");
+            const extractedFiles = await handleZip(file, { gerberOnly: true });
+            handleInputFiles(extractedFiles);
         }
 
-        loadZip()
+        const loadFromUrl = async (url, loadingMsg, successMsg) => {
+            const toastId = toast.loading(loadingMsg);
+            try {
+                const response = await fetch(url);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const blob = await response.blob();
+                await processZip(blob);
+                toast.success(successMsg, { id: toastId });
+            } catch (error) {
+                console.error('Error loading files from URL:', error);
+                toast.error('Failed to load files from URL', { id: toastId });
+            }
+        }
+
+        if (source) {
+            loadFromUrl(source, 'Loading from URL...', 'Successfully Loaded from URL!');
+            return;
+        }
+        if (port && token) {
+            loadFromUrl(`http://localhost:${port}/file?token=${token}`, 'Connecting to the kicad plugin...', 'Successfully Loaded From Kicad!');
+        }
     }, []);
 
     return (
