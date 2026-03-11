@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 
 function PngCard({ name, blobUrl, handleDelete }) {
     return (
-        <div className="flex flex-col my-2  shadow rounded bg-white overflow-hidden">
+        <div className="flex flex-col my-2  shadow rounded rounded-b-xl overflow-hidden">
             <div className="flex items-center justify-center bg-white ">
                 <img
                     src={blobUrl}
@@ -13,7 +13,7 @@ function PngCard({ name, blobUrl, handleDelete }) {
                 />
             </div>
     
-            <div className="flex items-center justify-between px-2 py-2 bg-[#F5F5F5] rounded-b">
+            <div className="flex items-center justify-between px-2 py-2 bg-[#ffffff] rounded-b-xl">
                 <p className="text-xs pl-1 truncate">{name}</p>
                 <div className="flex items-center gap-1">
                     <motion.a 

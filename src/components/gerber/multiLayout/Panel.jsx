@@ -85,7 +85,7 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                         exit={{ opacity: 0 }}
                     >
                         <motion.div
-                            className="bg-white rounded shadow-xl flex flex-col overflow-hidden relative max-h-[80vh]"
+                            className="bg-white rounded-xl shadow-xl flex flex-col overflow-hidden relative max-h-[80vh]"
                             initial={{ y: -30, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ y: -30, opacity: 0 }}

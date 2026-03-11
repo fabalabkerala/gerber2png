@@ -96,7 +96,7 @@ const LayerControls = () => {
         <>
             <div className="flex flex-col h-full bg-white border border-slate-200 rounded-xl overflow-hidden overflow-y-auto">
                 {/* Heading */}
-                <div className="px-4 py-2 bg-slate-50 sticky top-0 z-10">
+                <div className="px-4 py-2 bg-slate-50 sticky top-0 z-30">
                     <p className="font-medium text-slate-700 text-sm">Layers</p>
                 </div>
 
