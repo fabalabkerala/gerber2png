@@ -79,7 +79,7 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
             <AnimatePresence>
                 {showBulkModal && (
                     <motion.div
-                        className="fixed inset-0 bg-black/10 bg-blend-color-burn backdrop-blur-sm flex justify-center items-center z-50"
+                        className="fixed inset-0 bg-black/10 bg-blend-color-burn flex justify-center items-center z-50"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}

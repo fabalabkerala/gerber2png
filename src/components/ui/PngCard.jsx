@@ -1,15 +1,15 @@
 import PropTypes from "prop-types";
-import { ArrowDownTrayIcon, ArrowRightStartOnRectangleIcon, DocumentCheckIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { ArrowDownTrayIcon, ArrowRightEndOnRectangleIcon, ArrowRightStartOnRectangleIcon, DocumentCheckIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { motion } from "motion/react";
 
-function PngCard({ name, blobUrl, handleDelete }) {
+function PngCard({ name, blobUrl, handleDelete, handleMods }) {
     return (
-        <div className="flex flex-col my-2 shadow rounded-2xl overflow-hidden">
+        <div className="flex flex-col my-2 rounded-2xl overflow-hidden">
             <div className="flex items-center justify-center bg-white">
                 <img
                     src={blobUrl}
                     alt={name}
-                    className="max-w-full border  border-dashed hover:border-none object-contain border-gray-400"
+                    className="max-h-[180px] object-contain border border-dashed hover:border-0 border-gray-300 my-4"
                 />
             </div>
     
@@ -21,28 +21,28 @@ function PngCard({ name, blobUrl, handleDelete }) {
                 {/* <p className="text-xs py-1 px-2 bg-slate-50 w-full truncate">{name}</p> */}
                 <div className="flex items-center justify-between gap-1 px-2 py-2 pt-2 w-full">
                     <motion.button 
-                        whileTap={{ scale: 0.97, background: '#ef4444' }}
-                        onClick={handleDelete} 
-                        className="flex items-center gap-1 px-2.5 pr-1.5 py-1.5 text-xs font-medium text-white rounded-lg bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 shadow-sm transition"
+                        whileTap={{ scale: 0.9  }}
+                        onClick={handleMods} 
+                        className="flex items-center gap-1 px-2.5 pr-1.5 py-1.5 text-xs cursor-pointer font-medium text-indigo-700 rounded-lg bg-slate-100 transition-all duration-500 hover:bg-slate-50 hover:text-indigo-500"
                     >
                         <p>Export to Mods</p>
-                        <ArrowRightStartOnRectangleIcon width={20} height={16} strokeWidth={2} stroke="white" />
+                        <ArrowRightEndOnRectangleIcon width={20} height={16} strokeWidth={2}  />
                     </motion.button>
                     <div className="flex items-center gap-1">
                         <motion.a 
-                            whileTap={{ scale: 0.95 }} 
+                            whileTap={{ scale: 0.9 }} 
                             href={blobUrl} 
                             download={name} 
-                            className="bg-white py-1.5 px-2 rounded-lg border "
+                            className="hover:bg-gray-100 py-1.5 px-2 rounded-lg transition-all duration-400"
                         >
-                            <ArrowDownTrayIcon width={20} height={16} stroke="#5545e5" />
+                            <ArrowDownTrayIcon width={20} height={17} strokeWidth={2}/>
                         </motion.a>
                         <motion.button 
                             whileTap={{ scale: 0.97, background: '#ef4444' }}
                             onClick={handleDelete} 
-                            className="py-1.5 px-2 rounded-lg shadow-sm  bg-red-400  "
+                            className="py-1.5 px-2 rounded-lg bg-red-50 text-red-500 hover:text-white hover:bg-red-400 transition-all duration-400"
                         >
-                            <TrashIcon width={20} height={16} strokeWidth={2} stroke="white" />
+                            <TrashIcon width={20} height={16} strokeWidth={2} />
                         </motion.button>
                     </div>
                 </div>

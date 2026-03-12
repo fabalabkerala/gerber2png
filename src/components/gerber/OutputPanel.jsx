@@ -10,10 +10,13 @@ import JSZip from "jszip";
 import ImageIcon from "../icons/ImageIcon";
 import BulkLayoutPanel from "./multiLayout/Panel";
 import { useApp } from "../context/AppContext";
+import ModsPanel from "./modsPanel/Panel";
 
 const OutputPanel = () => {
     const { pngFiles, setPngFiles } = useApp()
     const [showBulkModal, setShowBulkModal] = useState(false);
+    const [showModsPanel, setShowModsPanel] = useState(false);
+    const [ selectedPng, setSelectedPng ] = useState(null);
     const menuRef = useRef(null);
 
 
@@ -109,6 +112,10 @@ const OutputPanel = () => {
                                     });
                                     URL.revokeObjectURL(item.url);
                                 }}
+                                handleMods={() => {
+                                    setShowModsPanel(true);
+                                    setSelectedPng(item);
+                                }}
                             />
                         ))}
                     </div>
@@ -128,6 +135,7 @@ const OutputPanel = () => {
             </AnimatePresence>
 
             <BulkLayoutPanel showBulkModal={showBulkModal} setShowBulkModal={setShowBulkModal} />
+            <ModsPanel showModsPanel={showModsPanel} setShowModsPanel={setShowModsPanel} selectedPng={selectedPng} />
         </>
     )
 }
