@@ -63,16 +63,16 @@ const OutputPanel = () => {
                             onClick={() => {
                                 setShowBulkModal(true);
                             }}
-                            className="flex flex-1 items-center gap-1 bg-white border border-[#4A34D3] rounded shadow overflow-hidden" 
+                            className="flex flex-1 items-center gap-1 bg-white border border-[#4A34D3] rounded-lg shadow overflow-hidden" 
                             whileTap={{ scale: 0.98 }}
                         >
-                            <div className="h-full bg-neutral-100 px-1.5 py-1.5">
+                            <div className="h-full bg-slate-100 px-1.5 py-1.5">
                                 <Squares2X2Icon width={16} height={16} strokeWidth={1.5} stroke="#4A34D3" />
                             </div>
                             <p className="text-[0.72rem] ps-0.5 pe-0.5 text-[#4A34D3] tracking-wider text-nowrap">Multi Layout</p>
                         </motion.button>
                         <motion.button
-                            className="flex justify-center items-center gap-2   bg-[#D3346E] px-2 py-1.5 rounded shadow" 
+                            className="flex justify-center items-center gap-2   bg-indigo-600 hover:bg-indigo-700 px-2 py-1.5 rounded-lg shadow" 
                             whileTap={{ scale: 0.98 }}
                             onClick={downloadZip}
                         >
@@ -83,7 +83,7 @@ const OutputPanel = () => {
                         <div ref={menuRef} className="relative">
                             <motion.button
                                 onClick={handleDeleteAll}
-                                className="flex justify-center items-center gap-1 px-1.5 py-1.5 rounded shadow bg-red-500 border border-red-300" 
+                                className="flex justify-center items-center gap-1 px-2 py-1.5 rounded-lg shadow bg-red-500 border border-red-300" 
                                 whileTap={{ scale: 0.96 }}
                             >
                                 <TrashIcon width={16} height={16} strokeWidth={2} stroke="white" />

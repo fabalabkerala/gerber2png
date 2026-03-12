@@ -39,11 +39,11 @@ const LayoutConfiguration = ({
     return (
         <>
             <p className="px-3 font-medium text-xs">CONFIGURATION<span className="text-xs text-gray-600 font-normal"></span></p>
-            <div className="bg-zinc-100 flex-1 p-4 mx-2 my-1 flex flex-col rounded">
+            <div className="bg-slate-100 flex-1 p-4 mx-2 my-1 flex flex-col rounded-xl">
                 <div className="flex gap-3">
                     <div className="flex items-center gap-2 flex-1">
                         <p className="text-xs w-24 text-black text-nowrap">Machine</p>
-                        <div className="bg-white w-36">
+                        <div className="w-36">
                             <Select 
                                 options={machineOption} 
                                 selected={selectedMachine} 
@@ -58,7 +58,7 @@ const LayoutConfiguration = ({
                     <div className="flex items-center gap-2">
                     <label className="text-xs w-24 text-black">Width <span className="text-gray-500 font-normal">(mm)</span></label>
                         <input 
-                            className="rounded w-32 focus:outline-none text-center text-xs py-1 border" 
+                            className="rounded-lg w-32 focus:outline-none text-center text-xs py-1.5 border" 
                             type="number"
                             value={machine.width}
                             onInput={(e) => {
@@ -69,7 +69,7 @@ const LayoutConfiguration = ({
                     <div className="flex items-center gap-2">
                     <label className="text-xs w-24 text-black">Height <span className="text-gray-500 font-normal">(mm)</span></label>
                         <input 
-                            className="rounded w-32 focus:outline-none text-center text-xs py-1 border" 
+                            className="rounded-lg w-32 focus:outline-none text-center text-xs py-1.5 border" 
                             type="number" 
                             value={machine.height}
                             onInput={(e) => {

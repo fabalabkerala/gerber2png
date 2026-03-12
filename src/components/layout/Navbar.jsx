@@ -50,10 +50,10 @@ export default function Navbar() {
                         </Link>
                     </div> */}
                     <div className='flex gap-6 min-w-[280px] items-end justify-end px-4'>
-                        <a href="https://git.fablabkerala.in/midlaj/gerber2png/-/wikis/home" target='_blank'>
+                        <a href="https://github.com/fabalabkerala/gerber2png/wiki" target='_blank'>
                             <WikiIcon />
                         </a>
-                        <a href="https://git.fablabkerala.in/midlaj/gerber2png" target='_blank'>
+                        <a href="https://github.com/fabalabkerala/gerber2png" target='_blank'>
                             <GitlabIcon />
                         </a>
                     </div>

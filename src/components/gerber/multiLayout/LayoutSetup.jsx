@@ -115,12 +115,12 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, gen
     return (
         <>
             <p className="px-3 font-medium text-xs mt-5">Number of PCBs <span className="text-[10px] text-gray-600 font-normal">(Rows X Columns)</span></p>
-            <div className="bg-zinc-100 flex-1 p-4 px-4 mx-2 my-1 flex flex-col rounded">
+            <div className="bg-slate-100 flex-1 p-4 px-4 mx-2 my-1 flex flex-col rounded-xl">
                 <div className="flex gap-4 justify-between">
                     <div className="flex items-center gap-2">
                         <label className="text-xs w-24 text-black">Rows</label>
                         <input 
-                            className="rounded w-32 focus:outline-none text-center text-xs py-1 border" 
+                            className="rounded-lg w-32 focus:outline-none text-center text-xs py-1.5 border" 
                             type="number"
                             value={config.row}
                             onInput={(e) => {
@@ -131,7 +131,7 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, gen
                     <div className="flex items-center gap-2">
                         <label className="text-xs w-24 text-black">Columns</label>
                         <input 
-                            className="rounded w-32 focus:outline-none text-center text-xs py-1 border" 
+                            className="rounded-lg w-32 focus:outline-none text-center text-xs py-1.5 border" 
                             type="number" 
                             value={config.column}
                             onInput={(e) => {
@@ -144,7 +144,7 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, gen
                     <div className="flex items-center gap-2 flex-1">
                         <label className="text-xs w-24 text-black">Spacing <span className="text-gray-500 font-normal">(mm)</span></label>
                         <input 
-                            className="rounded w-32 focus:outline-none text-center text-xs py-1 border" 
+                            className="rounded-lg w-32 focus:outline-none text-center text-xs py-1.5 border" 
                             type="number" 
                             value={config.spacing}
                             onInput={(e) => {
@@ -154,7 +154,7 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, gen
                     </div>
                     <div className="flex items-center justify-between gap-2 flex-1">
                         <p className="text-xs w-24 text-black text-nowrap">Layout BG</p>
-                        <div className="bg-white w-32">
+                        <div className="bg-transparent w-32">
                             <Select 
                                 options={options} 
                                 selected={layoutBg} 
@@ -168,7 +168,7 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, gen
                 </div>
 
                     
-                <div className={cn("flex flex-1 gap-1 items-center mt-5", selectedPng.url ? "opacity-100 pointer-events-auto" : "opacity-60 pointer-events-none")}>
+                <div className={cn("flex flex-1 gap-2 items-center mt-5", selectedPng.url ? "opacity-100 pointer-events-auto" : "opacity-60 pointer-events-none")}>
                     <div className={cn(
                         "flex items-end justify-center gap-1 bg-white border border-white py-1 px-1 rounded h-fit mr-auto ",
                         selectedPng.url ? "opacity-100" : "opacity-0"
@@ -177,23 +177,22 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, gen
                         <p className="text-[10px] text-gray-500 max-w-[140px] truncate">layout_{config.row}_x_{config.column}_{selectedPng.name}.png</p>
                     </div>
                     <motion.button
-                        className="flex justify-center items-center gap-1 border bg-white rounded overflow-hidden" 
+                        className="flex justify-center items-center gap-1 border bg-white rounded-lg overflow-hidden" 
                         whileTap={{ scale: 0.98 }}
                         onClick={handleGenerateAll}
                     >
-                        <div className="bg-gray-100 h-full flex items-center justify-center px-2 py-1.5 rounded-s border-2 border-white">
+                        <div className="bg-gray-100 h-full flex items-center justify-center px-2 py-1.5 rounded-lg border-2 border-white">
                             <DocumentDuplicateIcon width={12} height={12} strokeWidth={2} stroke="#D3346E" />
                         </div>
                         <p className="text-xs text-[#D3346E] tracking-wider pr-3 py-1.5">Generate All</p>
                     </motion.button>
                     <motion.button
-                        className="flex justify-center items-center gap-1 bg-[#D3346E] px-3 py-1.5 rounded shadow" 
+                        className="flex justify-center items-center gap-1 px-2 py-1.5 rounded-lg shadow bg-gradient-to-r from-[#D3346E] to-[#B81D50] hover:from-[#B81D50] hover:to-[#D3346E]" 
                         whileTap={{ scale: 0.98 }}
                         onClick={() => handleGeneration(selectedPng.url)}
                     >
-                        
                         <PhotoIcon width={18} height={18} strokeWidth={2} stroke="white" />
-                        <p className="font-medium text-xs ps-0.5 text-white tracking-wider">{ generating ? 'Generating..' : 'Download PNG' }</p>
+                        <p className="font-medium text-xs ps-0.5 text-white tracking-wider ">{ generating ? 'Generating..' : 'Download PNG' }</p>
                     </motion.button>
                 </div>
             </div>

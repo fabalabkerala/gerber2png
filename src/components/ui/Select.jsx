@@ -15,16 +15,16 @@ const Select = ({ options, selected, setSelected, variant = "bottom", onSelect, 
     return (
         <>
             <Listbox value={selected} onChange={handleSelect}>
-                <div className="relative w-full bg-white">
+                <div className="relative w-full bg-white rounded-lg">
                     <ListboxButton
                         className={cn(                    
-                            'relative block w-full rounded pl-2 text-left text-xs border py-1',
+                            'relative block w-full rounded-lg  pl-2 text-left text-xs border py-1.5',
                             'focus:outline-none focus:ring-1 focus:ring-gray-400'
                         )}
                     >
                         {options.find(option => option.id === selected)?.label || selected}
                         <ChevronDownIcon
-                            className="absolute top-1/2 -translate-y-1/2 right-0.5 size-5 w-fit px-0.5 fill-black bg-[#F0F0F0]"
+                            className="absolute top-1/2 -translate-y-1/2 right-0.5  size-6 py-0.5 w-fit px-0.5 fill-black bg-[#F0F0F0] rounded-md"
                             aria-hidden="true"
                         />
                     </ListboxButton>

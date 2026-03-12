@@ -68,11 +68,11 @@ const GerberOptions = () => {
                         />
 
                         <motion.button 
-                            className="flex justify-center items-center gap-1 bg-[#D3346E] pr-2 ps-1 rounded shadow" 
+                            className="flex justify-center items-center gap-1 bg-gradient-to-r from-[#D3346E] to-[#B81D50] hover:from-[#B81D50] hover:to-[#D3346E] pr-2 ps-1 rounded-lg shadow transition-all duration-300 ease-in-out" 
                             whileTap={{ scale: 0.96 }}
                             onClick={() => handlePngConversion(changeSelect, doubleSide)}
                         >
-                            <ImageIcon width={20} height={20} strokeWidth={6} stroke={"white"} />
+                            <ImageIcon width={20} height={18} strokeWidth={6} stroke={"white"} />
                             <p className="text-white text-xs text-nowrap">Generate PNG</p>
                         </motion.button>
                     </div>
@@ -81,7 +81,7 @@ const GerberOptions = () => {
                 {/* <div className="w-full h-px bg-zinc-100 my-3" /> */}
 
                 <div className="p-3">
-                    <div className="flex gap-4 text-sm bg-slate-50 p-3 rounded-lg">
+                    <div className="flex gap-4 text-sm bg-slate-50 p-3 py-2 rounded-lg">
                         <div className="flex items-center justify-between gap-1">
                             <p className="text-xs">Double Side PCB</p>
                             <SwitchToggle onChange={(enabled) => toggleDoubleSide(enabled, isToggled)} enabled={doubleSide} />

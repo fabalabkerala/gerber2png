@@ -79,7 +79,7 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
             <AnimatePresence>
                 {showBulkModal && (
                     <motion.div
-                        className="fixed inset-0 bg-black/10 bg-blend-color-burn flex justify-center items-center z-50"
+                        className="fixed inset-0 bg-black/10 bg-blend-color-burn backdrop-blur-sm flex justify-center items-center z-50"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -138,7 +138,7 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                             )}
                                         </div>
 
-                                        <div className="mt-auto flex flex-col justify-center items-center bg-neutral-100 py-1.5 rounded">
+                                        <div className="mt-auto flex flex-col justify-center items-center bg-slate-50 py-1.5 rounded-lg">
                                             <p className="text-sm font-medium">{ config.pcb }<span className="text-[11px] font-normal text-gray-500"> PCBs</span></p>
                                         </div>
                                     </div>

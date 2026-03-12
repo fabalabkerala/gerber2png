@@ -105,9 +105,12 @@ const MainView = () => {
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.3, ease: 'easeOut' }}
                 className={cn(
-                    "w-full h-full bg-white border-2 border-white rounded-xl shadow",
+                   "w-full h-full bg-white border border-slate-200 rounded-xl relative overflow-hidden",
+                    "bg-[linear-gradient(#e5e7eb5e_1px,transparent_1px),linear-gradient(90deg,#e5e7eb5e_1px,transparent_1px)]",
+                    "bg-[size:20px_20px]"
                 )}
             >
+                <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_45%,white_85%)]" />
                 <TransformWrapper initialScale={1} minScale={.5} limitToBounds={ false }>
                     <TransformComponent
                         contentStyle={{  margin:'auto', transition: 'transform 0.3s ease', position: 'relative' }} 
@@ -119,15 +122,15 @@ const MainView = () => {
                             style={{ filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.5))", }}
                         >
                         </div>
-                        <div className="absolute top-0 -right-7 w-px h-full bg-zinc-300 mx-3" />
-                        <p className=" absolute top-1/2 -translate-y-1/2 -right-[2.7rem] bg-white px-2 text-[9px] -rotate-90 font-medium rounded text-nowrap">
+                        <div className="absolute top-0 -right-7 w-px h-full bg-[linear-gradient(to_top,#d4d4d8_0%,#ffffff_35%,#ffffff_65%,#d4d4d8_100%)] mx-3" />
+                        <p className=" absolute top-1/2 -translate-y-1/2 -right-[2.7rem] px-2 text-[9px] -rotate-90 font-medium rounded text-nowrap">
                             {stackConfig.height}
                             <span className="text-gray-500 font-normal"> mm</span>
                         </p>
 
 
-                        <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 w-full h-px bg-zinc-300 my-3" />
-                        <p className="absolute -bottom-[1.5rem] left-1/2 -translate-x-1/2 bg-white px-2 text-[9px] font-medium rounded text-nowrap">
+                        <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 w-full h-px bg-[linear-gradient(to_left,#d4d4d8_0%,#ffffff_35%,#ffffff_65%,#d4d4d8_100%)] my-3" />
+                        <p className="absolute -bottom-[1.4rem] left-1/2 -translate-x-1/2 px-2 text-[9px] font-medium rounded text-nowrap">
                             {stackConfig.width}
                             <span className="text-gray-500 font-normal"> mm</span>
                         </p>
