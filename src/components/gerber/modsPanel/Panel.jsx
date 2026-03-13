@@ -98,12 +98,17 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng}) => {
             }));
 
             mods.window.focus();
+            setShowModsPanel(false);
         }
     }
     
     useEffect(() => {
         console.log('modsStatus :', modsStatus);
         console.log('modsWindows :', modsWindows);
+
+        return () => {
+            setShowConnectedMods(false);
+        }
     }, [modsStatus, modsWindows])
     
     return (
