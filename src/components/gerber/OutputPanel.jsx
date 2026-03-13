@@ -61,7 +61,7 @@ const OutputPanel = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.99 }}
                 >
-                    <div className="flex justify-between items-center gap-2 rounded-tl-md rounded-tr-md pb-3">
+                    <div className="flex justify-between items-center gap-2 rounded-tl-md rounded-tr-md">
                         <motion.button
                             onClick={() => {
                                 setShowBulkModal(true);
@@ -92,7 +92,6 @@ const OutputPanel = () => {
                                 <TrashIcon width={16} height={16} strokeWidth={2} stroke="white" />
                             </motion.button>
                         </div>
-                        
                     </div>
                     <div className="relative border-t border-white my-2">
                         <p className="absolute -top-2 left-1/2 -translate-x-1/2 bg-[#f5f6f8] px-2 text-xs text-gray-700">Preview</p>

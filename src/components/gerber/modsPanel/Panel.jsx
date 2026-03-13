@@ -1,10 +1,11 @@
-import { ArrowRightEndOnRectangleIcon, CheckBadgeIcon, DocumentCheckIcon, PhotoIcon, Square2StackIcon } from "@heroicons/react/24/outline";
+import { ArrowRightEndOnRectangleIcon, CheckBadgeIcon, DocumentCheckIcon, PhotoIcon, QueueListIcon, Square2StackIcon } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "motion/react"
 import PropTypes from "prop-types";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ModalHeader from "../../ui/ModalHeader";
 import Select from "../../ui/Select";
 import { cn } from "../../../utils/cn";
+import ModsList from "./ModsList";
 
 const machineOption = [
     { id: 'mdx', label: 'Rolland MDX Mill', program: 'programs/machines/Roland/SRM-20+mill/mill+2D+PCB' }, 
@@ -14,31 +15,25 @@ const machineOption = [
 const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng}) => {
     const [ selectedMachine, setSelectedMachine ] = useState(machineOption[0].id);
     const [ modsStatus, setModsStatus ] = useState('initial');
-    const modsWindowRef = useRef(null);
+    const [ modsWindows, setModsWindows ] = useState([]);
+    const [ showConnectedMods, setShowConnectedMods ] = useState(false);
 
-    const handleMods = async (selectedMachine) => {
+    const openMods = async (selectedMachine) => {
         if (!selectedPng?.url) return;
 
-        let modsWindow = modsWindowRef.current;
         const machine = machineOption.find(opt => opt.id === selectedMachine);
         const baseUrl = 'https://modsproject.org/?program=';
+        const modsWindow = window.open(baseUrl + machine.program, '_blank');
+        setModsStatus('opening');
 
-        if (!modsWindow || modsWindow.closed) {
-
-            setModsStatus('opening');
-
-            modsWindow = window.open(baseUrl + machine.program, '_blank');
-
-            if (!modsWindow) {
-                setModsStatus('error');
-                return;
-            }
-
-            modsWindowRef.current = modsWindow;
-        } else {
-            modsWindow.focus();
+        if (!modsWindow) {
+            setModsStatus('error');
+            return;
         }
         
+        setModsWindows(prev => [...prev, { id: `mods-${prev.length}`, machine: machine, window: modsWindow, image: selectedPng.url }]);
+
+
         const buffer = await fetch(selectedPng.url).then(res => res.arrayBuffer());
         setModsStatus('sending');
 
@@ -47,7 +42,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng}) => {
                 clearInterval(sendInterval);
                 setModsStatus('initial');
                 clearTimeout(timeout);
-                modsWindowRef.current = null;
+                setModsWindows(prev => prev.filter(win => win.window !== modsWindow));
                 return;
             } 
             modsWindow.postMessage(
@@ -71,20 +66,45 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng}) => {
         const timeout = setTimeout(() => {
             setModsStatus('error');
             window.removeEventListener("message", handler);
-            if (modsWindowRef.current) {
-                modsWindowRef.current.close();
-                modsWindowRef.current = null;
+            if (modsWindow) {
+                modsWindow.close();
+                setModsWindows(prev => prev.filter(win => win.window !== modsWindow));
             }
         }, 15000);
 
         const polling = setInterval(() => {
             if (modsWindow && modsWindow.closed) {
-                modsWindowRef.current = null;
+                setModsWindows(prev => prev.filter(win => win.window !== modsWindow));
                 setModsStatus('initial');
                 clearInterval(polling);
             }
         }, 1000);
     }
+
+    const updateMods = async (mods) => {
+        if (mods.window && !mods.window.closed) {
+            const buffer = await fetch(selectedPng.url).then(res => res.arrayBuffer());
+
+            mods.window.postMessage(
+                { type: 'png', data: buffer }, 
+                'https://modsproject.org'
+            );
+
+            setModsWindows(prev => prev.map(m => {
+                if (m.id === mods.id) {
+                    return { ...m, image: selectedPng.url }
+                }
+                return m;
+            }));
+
+            mods.window.focus();
+        }
+    }
+    
+    useEffect(() => {
+        console.log('modsStatus :', modsStatus);
+        console.log('modsWindows :', modsWindows);
+    }, [modsStatus, modsWindows])
     
     return (
         <>
@@ -142,17 +162,17 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng}) => {
                                         </div>
 
                                         <div className="flex-1 flex flex-col min-w-96">
-                                            { modsWindowRef.current && (
-                                                <div className="mb-3 flex items-center gap-2 py-2 px-2 rounded-lg bg-teal-50 border border-dashed border-green-200 w-full">
+                                            { modsWindows.length > 0 && (
+                                                <div className="mb-3 flex items-center gap-2 py-2 px-2 rounded-xl bg-teal-50 border border-dashed border-green-200 w-full">
                                                     <CheckBadgeIcon width={16} height={16} strokeWidth={2} stroke="green" />
-                                                    <p className="text-sm text-green-700 font-medium">Connected to Mods</p>
+                                                    <p className="text-xs text-green-700 font-medium">Connected Mods Available</p>
                                                 </div>
                                             )}
                                             <div className="bg-slate-100 flex-1 p-4 flex flex-col rounded-xl">
                                                 <div className="flex gap-3">
                                                     <div className="flex items-center gap-2 flex-1">
                                                         <p className="text-xs w-24 text-black text-nowrap">Machine</p>
-                                                        <div className={cn("w-full", modsWindowRef.current ? "pointer-events-none opacity-60" : "")}>
+                                                        <div className={cn("w-full")}>
                                                             <Select 
                                                                 options={machineOption} 
                                                                 selected={selectedMachine} 
@@ -165,18 +185,29 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng}) => {
 
                                             <div className={cn("flex gap-2 items-center mt-5", selectedPng.url ? "opacity-100 pointer-events-auto" : "opacity-60 pointer-events-none")}>
                                                 <div className={cn(
-                                                    "flex items-end justify-center gap-1 bg-white border border-white py-1 rounded h-fit mr-auto ",
+                                                    "flex items-end justify-center gap-1 bg-white border border-white py-1 rounded h-fit mr-auto pr-20",
                                                     selectedPng.url ? "opacity-100" : "opacity-0"
                                                 )}>
                                                     <DocumentCheckIcon width={15} height={15} strokeWidth={2} stroke="green" />
                                                     <p className="text-[10px] text-gray-500 max-w-[140px] truncate">{selectedPng.name}.png</p>
                                                 </div>
                                                 <motion.button
+                                                    className={cn(
+                                                        "flex justify-center items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-slate-50 to-slate-100 text-indigo-700 hover:from-slate-100 hover:to-slate-100",
+                                                        modsWindows.length > 0 ? "cursor-pointer" : "opacity-0 pointer-events-none"
+                                                    )}
+                                                    whileTap={{ scale: 0.98 }}
+                                                    onClick={() => setShowConnectedMods(prev => !prev) }
+                                                >
+                                                    <p className="font-medium text-xs ps-0.5  tracking-wider ">Use Connected Mods</p>
+                                                    <QueueListIcon width={18} height={18} strokeWidth={2}  />
+                                                </motion.button>
+                                                <motion.button
                                                     className="flex justify-center items-center gap-2 px-2 py-1.5 rounded-lg shadow bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-500" 
                                                     whileTap={{ scale: 0.98 }}
-                                                    onClick={() => handleMods(selectedMachine)}
+                                                    onClick={() => openMods(selectedMachine)}
                                                 >
-                                                    <p className="font-medium text-xs ps-0.5 text-white tracking-wider ">{ modsStatus === 'sending' ? 'Exporting..' : modsWindowRef.current ? 'Update Mods' : 'Open In Mods' }</p>
+                                                    <p className="font-medium text-xs ps-0.5 text-white tracking-wider ">Open In Mods</p>
                                                     <ArrowRightEndOnRectangleIcon width={18} height={18} strokeWidth={2} stroke="white" />
                                                 </motion.button>
                                             </div>
@@ -186,6 +217,13 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng}) => {
 
 
                             </div>
+                            <ModsList 
+                                showConnectedMods={showConnectedMods} 
+                                setShowConnectedMods={setShowConnectedMods} 
+                                modsWindows={modsWindows} 
+                                selectedPng={selectedPng}
+                                updateMods={updateMods}
+                            />
                             <AnimatePresence>
                                 { modsStatus === 'sending' && (
                                     <motion.div
