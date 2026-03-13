@@ -26,6 +26,24 @@ async function svg2png(svg, swidth, sheight, canvasBg) {
             ctx.fillRect(0, 0, scaledWidth + scaledToolWidth * 2, scaledHeight + scaledToolWidth * 2);
             ctx.drawImage(img, scaledToolWidth, scaledToolWidth, scaledWidth , scaledHeight );
 
+            // // Convert to binary: black and white only
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                if (r !== 255 || g !== 255 || b !== 255) {
+                    data[i] = 0;     // Red
+                    data[i + 1] = 0; // Green
+                    data[i + 2] = 0; // Blue
+                }
+                // Alpha remains unchanged
+            }
+            ctx.putImageData(imageData, 0, 0);
+
+            console.log('Canvas Created with dimensions :', canvas.width, canvas.height, canvas);
+
             (window.URL || window.webkitURL || window).revokeObjectURL(blobURL);
 
             resolve(canvas);
@@ -72,7 +90,7 @@ const generatePNG = async (targetSvg, twoSide, name, canvasBg, layertype) => {
             }, 'image/png');
         }).catch(err => { 
             console.error('Error converting svg to png :', err)
-            reject(err);
+            reject(err);z
         });      
     })
 }
