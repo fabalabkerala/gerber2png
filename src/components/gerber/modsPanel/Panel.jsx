@@ -1,10 +1,11 @@
 import { ArrowRightEndOnRectangleIcon, CheckBadgeIcon, DocumentCheckIcon, PhotoIcon, ArrowRightIcon, CheckCircleIcon  } from "@heroicons/react/24/outline";
 import { AnimatePresence, motion } from "motion/react"
 import PropTypes from "prop-types";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import ModalHeader from "../../ui/ModalHeader";
 import Select from "../../ui/Select";
 import { cn } from "../../../utils/cn";
+import { useGerberSettings } from "../../context/GerberContext";
 
 const machineOption = [
     { id: 'mdx', label: 'Rolland MDX Mill', program: 'programs/machines/Roland/SRM-20+mill/mill+2D+PCB' }, 
@@ -12,17 +13,55 @@ const machineOption = [
 ]
 
 const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng}) => {
-    const [ selectedMachine, setSelectedMachine ] = useState(machineOption[0].id);
     const [ modsStatus, setModsStatus ] = useState('initial');
-    const [ modsWindows, setModsWindows ] = useState([]);
+    const { 
+        doubleSide,
+        modsMachine,
+        setModsMachine,
+        toolConfig,
+        updateToolConfig,
+        saveSettings
+     } = useGerberSettings();
+    const [currentStep, setCurrentStep] = useState(0);
+
+    const [isDirty, setIsDirty] = useState(false);
+    const [saved, setSaved] = useState(false);
+
+    const processSteps = doubleSide
+        ? [
+            { label: "Top Trace", desc: "Copper Top" },
+            { label: "Drill", desc: "Holes" },
+            { label: "Flip", desc: "Align Board" },
+            { label: "Bottom Trace", desc: "Copper Bottom" },
+            { label: "Outline", desc: "Cut Board" },
+            ]
+        : [
+            { label: "Trace", desc: "Copper Paths" },
+            { label: "Drill", desc: "Holes" },
+            { label: "Outline", desc: "Cut Board" },
+        ];
 
     const modsWindowRef = useRef(null);
 
-    const openMods = async (selectedMachine) => {
+    const handleToolChange = (step, key, value) => {
+        updateToolConfig(step, key, value);
+        setIsDirty(true);
+        setSaved(false);
+    };
+
+    const handleSave = () => {
+        saveSettings();
+        setIsDirty(false);
+        setSaved(true);
+
+        setTimeout(() => setSaved(false), 1500);
+    };
+
+    const openMods = async (modsMachine) => {
         if (!selectedPng?.url) return;
 
         let modsWindow = modsWindowRef.current?.window;
-        const machine = machineOption.find(opt => opt.id === selectedMachine);
+        const machine = machineOption.find(opt => opt.id === modsMachine);
 
         if (!modsWindow || modsWindow.closed) {
             const baseUrl = 'https://modsproject.org/?program=';
@@ -117,7 +156,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng}) => {
                             <ModalHeader title="Layout Setup" onClose={() => setShowModsPanel(false)} />
                             
                             <div className="overflow-y-auto custom-scrollbar">
-                                <div className="flex gap-3 p-3 pb-8">
+                                <div className="flex flex-col gap-3 p-3 pb-8">
                                     <div className="flex gap-2 p-2">
                                         <div className="py-3 px-12  pl-3  h-48 flex flex-col justify-center items-center">
                                             { selectedPng.url ? (
@@ -167,7 +206,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng}) => {
                                                 "
                                             >
                                             {/* Preview */}
-                                            <div className="flex items-center px-3 py-3 bg-white border border-dashed rounded-lg gap-3">
+                                            <div className="flex items-center px-3 py-3 bg-white border border-dashed border-blue-200 rounded-lg gap-3">
                                                 <div className="flex flex-col items-center justify-center gap-1">
                                                     <p className="text-[11px] text-indigo-900 leading-tight">Current</p>
                                                     <div className="w-14 h-14 bg-white border rounded-lg flex items-center justify-center overflow-hidden shadow-md">
@@ -211,8 +250,8 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng}) => {
                                                         <div className={cn("w-full", modsWindowRef.current?.window ? "pointer-events-none opacity-60" : "")}>
                                                             <Select 
                                                                 options={machineOption} 
-                                                                selected={selectedMachine} 
-                                                                setSelected={setSelectedMachine} 
+                                                                selected={modsMachine} 
+                                                                setSelected={setModsMachine} 
                                                             />
                                                         </div>
                                                     </div>
@@ -227,21 +266,10 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng}) => {
                                                     <DocumentCheckIcon width={15} height={15} strokeWidth={2} stroke="green" />
                                                     <p className="text-[10px] text-gray-500 max-w-[140px] truncate">{selectedPng.name}.png</p>
                                                 </div>
-                                                {/* <motion.button
-                                                    className={cn(
-                                                        "flex justify-center items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-slate-50 to-slate-100 text-indigo-700 hover:from-slate-100 hover:to-slate-100",
-                                                        modsWindows.length > 0 ? "cursor-pointer" : "opacity-0 pointer-events-none"
-                                                    )}
-                                                    whileTap={{ scale: 0.98 }}
-                                                    onClick={() => setShowConnectedMods(prev => !prev) }
-                                                >
-                                                    <p className="font-medium text-xs ps-0.5  tracking-wider ">Use Connected Mods</p>
-                                                    <QueueListIcon width={18} height={18} strokeWidth={2}  />
-                                                </motion.button> */}
                                                 <motion.button
                                                     className="flex justify-center items-center gap-2 px-2 py-1.5 rounded-lg shadow bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-500" 
                                                     whileTap={{ scale: 0.98 }}
-                                                    onClick={() => openMods(selectedMachine)}
+                                                    onClick={() => openMods(modsMachine)}
                                                 >
                                                     <p className="font-medium text-xs ps-0.5 text-white tracking-wider ">{ modsWindowRef.current?.window ? 'Update In Mods' : 'Open Mods' }</p>
                                                     <ArrowRightEndOnRectangleIcon width={18} height={18} strokeWidth={2} stroke="white" />
@@ -249,9 +277,89 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng}) => {
                                             </div>
                                         </div>
                                     </div>
+<motion.div
+  className="px-4 pb-4"
+  initial={{ opacity: 0, y: 10 }}
+  animate={{ opacity: 1, y: 0 }}
+>
+  <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+
+    {/* Header */}
+    <div className="flex items-center justify-between mb-3">
+      <p className="text-xs font-semibold text-gray-600 tracking-wide">
+        TOOL CONFIGURATION
+      </p>
+
+      <div className="flex items-center gap-2">
+        {saved && (
+          <span className="text-[11px] text-green-600">✓ Saved</span>
+        )}
+        <motion.button
+          whileTap={{ scale: 0.96 }}
+          onClick={handleSave}
+          className="
+            text-[11px] px-3 py-1.5 rounded-md
+            bg-indigo-600 text-white
+            hover:bg-indigo-700 transition
+          "
+        >
+          Save
+        </motion.button>
+      </div>
+    </div>
+
+    {/* Status */}
+    <p className="text-[11px] text-gray-400 mb-3">
+      {isDirty ? "Unsaved changes" : "All changes saved"}
+    </p>
+
+    {/* Dynamic Config */}
+    {(() => {
+      const stepKey = processSteps[currentStep].label.toLowerCase();
+
+      let configKey = "trace";
+      if (stepKey.includes("drill")) configKey = "drill";
+      if (stepKey.includes("outline")) configKey = "outline";
+
+      const config = toolConfig[modsMachine][configKey];
+
+      return (
+        <div className="grid grid-cols-2 gap-3">
+
+          {Object.entries(config).map(([key, value]) => (
+            <div key={key} className="flex flex-col gap-1">
+              <label className="text-[11px] text-gray-500 capitalize">
+                {key}
+              </label>
+
+              <input
+                type={typeof value === "number" ? "number" : "text"}
+                value={value}
+                onChange={(e) =>
+                  handleToolChange(
+                    configKey,
+                    key,
+                    typeof value === "number"
+                      ? parseFloat(e.target.value)
+                      : e.target.value
+                  )
+                }
+                className="
+                  text-xs px-2 py-1.5 rounded-md
+                  border border-gray-300
+                  focus:outline-none focus:ring-1 focus:ring-indigo-500
+                "
+              />
+            </div>
+          ))}
+
+        </div>
+      );
+    })()}
+
+  </div>
+</motion.div>
                                 </div>
-
-
                             </div>
                             <AnimatePresence>
                                 { modsStatus === 'sending' && (

@@ -269,3 +269,17 @@ export const CARVERA_TOOL_LIB = [
         id: 'carvera-4'
     },
 ]
+
+
+export const MACHINE_PRESETS = {
+    mdx: {
+        trace: { tool: "V-Bit (0.2mm)", depth: 0.1, feedRate: 4 },
+        drill: { tool: "0.8mm", depth: 1.6, feedRate: 6 },
+        outline: { tool: "1mm End Mill", passDepth: 0.5, tabs: true }
+    },
+    carvera: {
+        trace: { tool: "0.2mm End Mill", depth: 0.08, feedRate: 5 },
+        drill: { tool: "0.6mm", depth: 1.6, feedRate: 7 },
+        outline: { tool: "1mm End Mill", passDepth: 0.6, tabs: false }
+    }
+};

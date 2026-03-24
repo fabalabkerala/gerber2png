@@ -6,6 +6,7 @@ import setUpConfig from "../../utils/svgConverter/quickSetup";
 import handleColorChange from "../../utils/svgConverter/svgColorChange";
 import generatePNG from "../../utils/svgConverter/svg2png";
 import { useApp } from "./AppContext";
+import { MACHINE_PRESETS } from "../../config/defaults";
 
 const GerberLayersContext = createContext();
 const GerberSettingsContext = createContext();
@@ -40,6 +41,16 @@ export const GerberProvider = ({ children }) => {
         commonlayer: { outline: false, drill: false, outlayer: true}
     });
 
+    const DEFAULT_MACHINE = Object.keys(MACHINE_PRESETS)[0];
+    const [modsMachine, setModsMachine] = useState(DEFAULT_MACHINE);
+    const [toolConfig, setToolConfig] = useState(() => {
+        const initial = {};
+        Object.keys(MACHINE_PRESETS).forEach(machine => {
+            initial[machine] = structuredClone(MACHINE_PRESETS[machine]);
+        });
+        return initial;
+    });
+
     const handleToggleCick = useCallback((layertype, layerproperty) => {
         setIsToggled((prevState) => ({
             ...prevState,
@@ -50,9 +61,35 @@ export const GerberProvider = ({ children }) => {
         }));
     }, [])
 
+    const updateToolConfig = useCallback((step, key, value) => {
+        setToolConfig(prev => ({
+            ...prev,
+            [modsMachine]: {
+                ...prev[modsMachine],
+                [step]: {
+                    ...prev[modsMachine][step],
+                    [key]: value
+                }
+            }
+        }));
+    }, [modsMachine]);
+
+    const resetToolConfig = useCallback(() => {
+        setToolConfig(prev => ({
+            ...prev,
+            [modsMachine]: structuredClone(MACHINE_PRESETS[modsMachine])
+        }));
+    }, [modsMachine]);
+
+    const saveSettings = useCallback(() => {
+        localStorage.setItem("gerberSettings", JSON.stringify({
+            toolConfig,
+            modsMachine
+        }));
+    }, [toolConfig, modsMachine]);
+
     const applyQuickSetup = useCallback((option) => {
 
-        console.log('Apply Quick Setup : ', option);
         const setupConfig = setUpConfig(topstack, bottomstack)
         const setup = setupConfig[option];
         const toggleButtons = setupConfig[option].toggleButtons;
@@ -103,6 +140,22 @@ export const GerberProvider = ({ children }) => {
             handleColorChange({ color: setup.color, id: topstack.id, svgs: [topstack.svg, bottomstack.svg] }); 
         }, 300);  
     }, [bottomstack, doubleSide, topstack])
+
+    useEffect(() => {
+        const saved = localStorage.getItem("gerberSettings");
+
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+
+                if (parsed.toolConfig) setToolConfig(parsed.toolConfig);
+                if (parsed.selectedMachine) setSelectedMachine(parsed.selectedMachine);
+
+            } catch (e) {
+                console.warn("Invalid gerber settings");
+            }
+        }
+    }, []);
     
 
     const settingValues = {
@@ -113,17 +166,18 @@ export const GerberProvider = ({ children }) => {
         stackConfig, setStackConfig,
         isToggled, setIsToggled,
         handleToggleCick,
-        applyQuickSetup
+        applyQuickSetup,
+        modsMachine, setModsMachine,
+        toolConfig, setToolConfig,
+        updateToolConfig,
+        resetToolConfig,
+        saveSettings
     }
 
     // ------------------------
     // View / UI
     // ------------------------
     const [mainSvg, setMainSvg] = useState({id: null, svg: null});
-    // const [pngUrls, setPngUrls] = useState([
-    //     // { name: 'topdfjsdfasdasdfasd_url2.png', url: 'https://shorthand.com/the-craft/raster-images/assets/5kVrMqC0wp/sh-unsplash_5qt09yibrok-4096x2731.jpeg', width: 20, height: 20 },
-    //     // { name: 'top_url.png', url: 'https://shorthand.com/the-craft/raster-images/assets/5kVrMqC0wp/sh-unsplash_5qt09yibrok-4096x2731.jpeg', width: 100, height: 60 },
-    // ]);
     const [side, setSide] = useState(null);
     const [loader, setLoader] = useState(false);
 
