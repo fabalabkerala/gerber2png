@@ -283,3 +283,6 @@ export const MACHINE_PRESETS = {
         outline: { tool: "1mm End Mill", passDepth: 0.6, tabs: false }
     }
 };
+
+// 1/8" 0.8mm corn bit
+// 1/8" 0.2mm v-bit

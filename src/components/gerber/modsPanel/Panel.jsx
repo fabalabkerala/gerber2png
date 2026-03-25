@@ -17,6 +17,9 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng}) => {
     const [ modsStatus, setModsStatus ] = useState('initial');
     const { modsMachine, setModsMachine } = useGerberSettings();
 
+    const [currentStep, setCurrentStep] = useState(0);
+    const [completedSteps, setCompletedSteps] = useState([]);
+
     const modsWindowRef = useRef(null);
 
     const openMods = async (modsMachine) => {
@@ -212,25 +215,35 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng}) => {
                                         </div> 
                                     </div>
 
-                                    <div className={cn("flex gap-2 items-center mx-2 bg-gradient-to-br from-slate-50 to-teal-100 rounded-xl flex-1 px-3 py-3", selectedPng.url ? "opacity-100 pointer-events-auto" : "opacity-60 pointer-events-none")}>
-                                        <div className={cn(
-                                            "flex items-end justify-center gap-1 py-1 rounded h-fit mr-auto pr-20",
-                                            selectedPng.url ? "opacity-100" : "opacity-0"
-                                        )}>
-                                            <DocumentCheckIcon width={15} height={15} strokeWidth={2} stroke="green" />
-                                            <p className="text-[10px] text-gray-500 max-w-[140px] truncate">{selectedPng.name}.png</p>
+                                    { !modsWindowRef.current?.window && (
+                                        <div className={cn("flex gap-2 items-center mx-2 bg-gradient-to-br from-slate-50 to-teal-100 rounded-xl flex-1 px-3 py-3", selectedPng.url ? "opacity-100 pointer-events-auto" : "opacity-60 pointer-events-none")}>
+                                            <div className={cn(
+                                                "flex items-end justify-center gap-1 py-1 rounded h-fit mr-auto pr-20",
+                                                selectedPng.url ? "opacity-100" : "opacity-0"
+                                            )}>
+                                                <DocumentCheckIcon width={15} height={15} strokeWidth={2} stroke="green" />
+                                                <p className="text-[10px] text-gray-500 max-w-[140px] truncate">{selectedPng.name}.png</p>
+                                            </div>
+                                            <motion.button
+                                                className="flex justify-center items-center gap-2 px-2 py-1.5 rounded-lg shadow bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-500" 
+                                                whileTap={{ scale: 0.98 }}
+                                                onClick={() => openMods(modsMachine)}
+                                            >
+                                                <p className="font-medium text-xs ps-0.5 text-white tracking-wider ">Open Mods</p>
+                                                <ArrowRightEndOnRectangleIcon width={18} height={18} strokeWidth={2} stroke="white" />
+                                            </motion.button>
                                         </div>
-                                        <motion.button
-                                            className="flex justify-center items-center gap-2 px-2 py-1.5 rounded-lg shadow bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-500" 
-                                            whileTap={{ scale: 0.98 }}
-                                            onClick={() => openMods(modsMachine)}
-                                        >
-                                            <p className="font-medium text-xs ps-0.5 text-white tracking-wider ">{ modsWindowRef.current?.window ? 'Send to Mods' : 'Open Mods' }</p>
-                                            <ArrowRightEndOnRectangleIcon width={18} height={18} strokeWidth={2} stroke="white" />
-                                        </motion.button>
-                                    </div>
+                                    )}
 
-                                    <ProcessSteps modsWindowRef={modsWindowRef} selectedPng={selectedPng} />
+                                    <ProcessSteps 
+                                        modsWindowRef={modsWindowRef}
+                                        selectedPng={selectedPng} 
+                                        openMods={openMods} 
+                                        currentStep={currentStep} 
+                                        completedSteps={completedSteps} 
+                                        setCurrentStep={setCurrentStep} 
+                                        setCompletedSteps={setCompletedSteps}
+                                    />
                                 </div>
                             </div>
                             <AnimatePresence>
