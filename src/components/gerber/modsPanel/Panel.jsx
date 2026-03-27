@@ -13,7 +13,7 @@ const machineOption = [
     { id: 'carvera', label: 'Makera Carvera', program: 'programs/machines/Makera/Carvera' }, 
 ]
 
-const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng}) => {
+const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng}) => {
     const [ modsStatus, setModsStatus ] = useState('initial');
     const { modsMachine, setModsMachine } = useGerberSettings();
 
@@ -22,8 +22,8 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng}) => {
 
     const modsWindowRef = useRef(null);
 
-    const openMods = async (modsMachine) => {
-        if (!selectedPng?.url) return;
+    const openMods = async (modsMachine, file) => {
+        if (!file?.url) return;
 
         let modsWindow = modsWindowRef.current?.window;
         const machine = machineOption.find(opt => opt.id === modsMachine);
@@ -39,9 +39,9 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng}) => {
             }
         }
 
-        modsWindowRef.current = { window: modsWindow, machine: machine, image: selectedPng.url };
+        modsWindowRef.current = { window: modsWindow, machine: machine, image: file.url };
         
-        const buffer = await fetch(selectedPng.url).then(res => res.arrayBuffer());
+        const buffer = await fetch(file.url).then(res => res.arrayBuffer());
         setModsStatus('sending');
 
         const sendInterval = setInterval(() => {
@@ -227,7 +227,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng}) => {
                                             <motion.button
                                                 className="flex justify-center items-center gap-2 px-2 py-1.5 rounded-lg shadow bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-500" 
                                                 whileTap={{ scale: 0.98 }}
-                                                onClick={() => openMods(modsMachine)}
+                                                onClick={() => openMods(modsMachine, selectedPng)}
                                             >
                                                 <p className="font-medium text-xs ps-0.5 text-white tracking-wider ">Open Mods</p>
                                                 <ArrowRightEndOnRectangleIcon width={18} height={18} strokeWidth={2} stroke="white" />
@@ -243,6 +243,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng}) => {
                                         completedSteps={completedSteps} 
                                         setCurrentStep={setCurrentStep} 
                                         setCompletedSteps={setCompletedSteps}
+                                        setSelectedPng={setSelectedPng}
                                     />
                                 </div>
                             </div>

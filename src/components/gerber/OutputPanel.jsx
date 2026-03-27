@@ -302,6 +302,7 @@ const OutputPanel = () => {
         showModsPanel={showModsPanel}
         setShowModsPanel={setShowModsPanel}
         selectedPng={selectedPng}
+        setSelectedPng={setSelectedPng}
       />
     </>
   );

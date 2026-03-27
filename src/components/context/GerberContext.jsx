@@ -209,7 +209,7 @@ export const GerberProvider = ({ children }) => {
                     const setup = setups[option];
                     if (!isDoubleside && setup.stack !== topstack) continue;
                     if (isCarvera && option === "top-drill") continue;
-                    if (isCarvera && option === 'bottom-drill') continue;
+                    if ((isCarvera || generateAll) && option === 'bottom-drill') continue;
 
                     const svg = setup.stack.svg.cloneNode(true);
                     const machine = isCarvera ? 'carvera' : 'general';
@@ -236,7 +236,7 @@ export const GerberProvider = ({ children }) => {
             const blob = await generatePNG(targetSvg, isDoubleside, mainSvg.id, canvasBg, layerType);
 
             const directory = method.includes('top') ? 'toplayer' : method.includes('bottom') ? 'bottomlayer' : 'others';
-            const jobs = ['trace', 'drill', 'cut'];
+            const jobs = ['trace', 'drill', 'outline'];
             const job = jobs.find(job => method.includes(job)) || 'custom';
 
             // setPngUrls(prev => [ ...prev, { name: blob.name, url: blob.url, width: blob.width, height: blob.height }])
