@@ -18,11 +18,13 @@ const LayerControls = () => {
     const { topstack, bottomstack, fullLayers } = useGerberLayer();
     const { layerType, setLayerType, setChangeSelect, handleToggleCick, isToggled, doubleSide, canvasBg, setCanvasBg } = useGerberSettings();
     const { side, setMainSvg } = useGerberView();
+    const topEnabled = side !== 'bottom';
+    const bottomEnabled = side !== 'top';
 
     const viewOptions = [
         { id: "all", label: "All Layers", svg: fullLayers },
         { id: "top", label: "Top", svg: topstack.svg },
-        { id: "bottom", label: "Bottom", svg: bottomstack.svg, class: doubleSide ? 'pointer-events-auto opacity-100': 'pointer-events-none opacity-50' },
+        { id: "bottom", label: "Bottom", svg: bottomstack.svg },
     ];
     const handleSide = (id) => {
         setChangeSelect('custom');
@@ -132,7 +134,8 @@ const LayerControls = () => {
                                     className={cn(
                                         "px-3 py-2 rounded-md transition-all duration-300 w-14 text-center",
                                         !isToggled[property.layer][layer.type] ? "bg-emerald-100 text-teal-500 hover:bg-emerald-50 dark:bg-emerald-500/15 dark:text-emerald-300 dark:hover:bg-emerald-500/20" : "bg-zinc-50 text-gray-400 dark:bg-slate-800 dark:text-slate-500",
-                                        !doubleSide && property.layer.includes('bottom') ? 'pointer-events-none opacity-40 grayscale' : ''
+                                        property.layer.includes('bottom') && !bottomEnabled ? 'pointer-events-none opacity-40 grayscale' : '',
+                                        property.layer.includes('top') && !topEnabled ? 'pointer-events-none opacity-40 grayscale' : ''
                                     )}
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => {

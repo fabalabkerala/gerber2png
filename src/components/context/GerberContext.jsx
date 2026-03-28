@@ -30,7 +30,8 @@ export const GerberProvider = ({ children }) => {
     // ------------------------
     // Settings / Flags
     // ------------------------
-    const [doubleSide, setDoubleSide] = useState(false);
+    const [boardSide, setBoardSide] = useState('top');
+    const doubleSide = boardSide === 'double';
     const [layerType, setLayerType] = useState(null);
     const [canvasBg, setCanvasBg] = useState('black');
     const [changeSelect, setChangeSelect] = useState('generate-all');
@@ -159,7 +160,8 @@ export const GerberProvider = ({ children }) => {
     
 
     const settingValues = {
-        doubleSide, setDoubleSide,
+        boardSide, setBoardSide,
+        doubleSide,
         layerType, setLayerType,
         canvasBg, setCanvasBg,
         changeSelect, setChangeSelect,
@@ -181,23 +183,45 @@ export const GerberProvider = ({ children }) => {
     const [side, setSide] = useState(null);
     const [loader, setLoader] = useState(false);
 
-    const toggleDoubleSide = useCallback((enabled, isToggled) => {
-        setDoubleSide(enabled);
+    const setBoardMode = useCallback((mode) => {
+        setBoardSide(mode);
+        setIsToggled((prev) => ({
+            ...prev,
+            commonlayer: {
+                ...prev.commonlayer,
+                outlayer: mode !== 'double'
+            }
+        }));
 
-        if (!enabled && !isToggled['commonlayer']['outlayer'] || enabled && isToggled['commonlayer']['outlayer']) {
-            handleToggleCick('commonlayer', 'outlayer');
+        if (!topstack.svg || !bottomstack.svg || !fullLayers) return;
+
+        const showOuter = mode === 'double' ? 'block' : 'none';
+        topstack.svg.querySelector('#toplayerouter').style.display = showOuter;
+        bottomstack.svg.querySelector('#bottomlayerouter').style.display = showOuter;
+        fullLayers.querySelector('#fullstackouter').style.display = showOuter;
+
+        if (mode === 'bottom') {
+            setMainSvg({ id: 'bottom', svg: bottomstack.svg });
+            setSide('bottom');
+            return;
         }
 
-        topstack.svg.querySelector('#toplayerouter').style.display = enabled ? 'block' : 'none';
-        bottomstack.svg.querySelector('#bottomlayerouter').style.display = enabled ? 'block' : 'none';
-        fullLayers.querySelector('#fullstackouter').style.display = enabled ? 'block' : 'none';
-    }, [bottomstack.svg, fullLayers, handleToggleCick, topstack.svg])
+        if (mode === 'double') {
+            setMainSvg({ id: 'all', svg: fullLayers });
+            setSide('all');
+            return;
+        }
+
+        setMainSvg({ id: 'top', svg: topstack.svg });
+        setSide('top');
+    }, [bottomstack.svg, fullLayers, topstack.svg])
 
     
-    const handlePngConversion = useCallback(async (method, isDoubleside) => {
+    const handlePngConversion = useCallback(async (method, mode) => {
         setLoader(true);
 
         try {
+            const isDoubleside = mode === 'double';
             const isCarvera = method === 'generate-for-carvera';
             const generateAll = method === 'generate-all' || isCarvera;
             const newUrls = [];
@@ -207,9 +231,10 @@ export const GerberProvider = ({ children }) => {
 
                 for (const option in setups) {
                     const setup = setups[option];
-                    if (!isDoubleside && setup.stack !== topstack) continue;
-                    if (isCarvera && option === "top-drill") continue;
-                    if ((isCarvera || generateAll) && option === 'bottom-drill') continue;
+                    if (mode === 'top' && option.startsWith('bottom')) continue;
+                    if (mode === 'bottom' && option.startsWith('top')) continue;
+                    if (isCarvera && option.includes('drill')) continue;
+                    if ((isCarvera || generateAll) && isDoubleside && option === 'bottom-drill') continue;
 
                     const svg = setup.stack.svg.cloneNode(true);
                     const machine = isCarvera ? 'carvera' : 'general';
@@ -265,9 +290,9 @@ export const GerberProvider = ({ children }) => {
         mainSvg, setMainSvg,
         side, setSide,
         loader, setLoader,
-        toggleDoubleSide,
+        setBoardMode,
         handlePngConversion
-    }), [handlePngConversion, loader, mainSvg, side, toggleDoubleSide])
+    }), [handlePngConversion, loader, mainSvg, setBoardMode, side])
 
     // const handleReset = () => {
     //     setMainSvg({id: null, svg: null});

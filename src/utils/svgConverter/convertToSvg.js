@@ -182,7 +182,7 @@ function modifiedSvg(props) {
         svg.insertBefore(outlineG, svg.firstChild);
     }
 
-    const outer = generateOuterSvg(width, height, 0.8, { viewboxX: viewbox[0], viewboxY: viewbox[1]}, id === 'bottomlayer');
+    const outer = generateOuterSvg(width, height, 0.0, { viewboxX: viewbox[0], viewboxY: viewbox[1]}, id === 'bottomlayer');
 
     outer.svg.setAttribute('id', `${id}outer-svg`);
     outerG.setAttribute('id', `${id}outer`);
@@ -195,7 +195,7 @@ function modifiedSvg(props) {
     svg.setAttribute('id', `${id}svg`);
     // mainG.appendChild(svg);
     mainG.setAttribute('id', `${id}MainG`);
-    mainG.setAttribute('transform', 'translate(3, 3)');
+    mainG.setAttribute('transform', 'translate(0, 0)');
 
     outerG.appendChild(outer.svg);
     mainG.appendChild(svg);

@@ -1,7 +1,8 @@
 import generateOuterSvg from "./generateOuter";
 
-export const updateToolWidth = (svgs, width, stackConfig) => {
+export const updateToolWidth = (svgs, width, stackConfig, correction = 0) => {
     const toolwidth = parseFloat(width);
+    let dimension = null
 
     svgs.forEach(({stack, name}) => {
         const outer = stack.svg.querySelector(`#${name}outer`);
@@ -12,8 +13,13 @@ export const updateToolWidth = (svgs, width, stackConfig) => {
         stack.svg.setAttribute('width', `${newOuter.width}mm`);
         stack.svg.setAttribute('height', `${newOuter.height}mm`);
         outer.querySelector('svg').replaceWith(newOuter.svg);
-        main.setAttribute('transform', `translate(${ toolwidth === 0 ? 0 : 3 } ${ toolwidth === 0 ? 0 : 3 })`);
+        const offset = toolwidth === 0 ? 0 : correction;
+        main.setAttribute('transform', `translate(${offset} ${offset})`);
+        
+        dimension = { width: newOuter.width, height: newOuter.height }
     })
+
+    return dimension
 }
 
 export const updateSvg = (svg, option, setup, machine = 'general', topstack, doubleSide) => {
@@ -24,11 +30,12 @@ export const updateSvg = (svg, option, setup, machine = 'general', topstack, dou
             const id = g.getAttribute('id');
             g.style.display = id.includes(setup.layerid) ? 'block' : id.includes(setup.stack.id) ? 'none' : id.includes('drillMask') ? 'none' : '';
 
-            if (option === 'top-outline' && machine === 'carvera') {
-                g.style.display = id.includes('drill') ? 'block' : g.style.display;
+            if (option.includes('outline') && machine === 'carvera') {
+                g.style.display = id.includes('drill') ? doubleSide && option === 'bottom-outline' ? 'none' : 'block' : g.style.display;
             }
         }
     })
+
 
     const clipPath = gerberSvg.querySelector('clipPath');
     if (clipPath) clipPath.style.display = setup.layerid === 'outline' ? option === 'top-outline' && doubleSide ? 'none' : 'block' : 'none';

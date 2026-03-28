@@ -109,7 +109,7 @@ const OutputPanel = () => {
                 }, 200);
                 }}
                 className={`
-                flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg transition border
+                flex items-center gap-2 px-2 py-2 text-xs font-semibold rounded-xl transition border
                 ${
                     hasFiles
                     ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 dark:bg-emerald-500/10 dark:border-emerald-500/30 dark:text-emerald-200 dark:hover:bg-emerald-500/15"
@@ -118,7 +118,7 @@ const OutputPanel = () => {
                 `}
             >
               <img className="w-5 h-5" src={mods} alt="icon" />
-              {isExporting ? "Opening..." : "Open Mods"}
+              {isExporting ? "Opening..." : "Open in Mods"}
             </motion.button>
         </div>
 
