@@ -111,7 +111,7 @@ export const GerberProvider = ({ children }) => {
                     ...updatedState,
                     commonlayer: {
                         ...updatedState.commonlayer,
-                        outlayer: option === 'top-cut' ? false : true
+                        outlayer: option === 'top-outline' ? false : true
                     }
                 }
             }

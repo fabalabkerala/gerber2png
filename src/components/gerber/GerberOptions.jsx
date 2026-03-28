@@ -12,10 +12,10 @@ const SelectOptions = [
     { id: "generate-for-carvera", label: "Generate for Carvera" },
     { id: "top-trace", label: "Top Trace" },
     { id: "top-drill", label: "Top Drill" },
-    { id: "top-cut", label: "Top Cut" },
+    { id: "top-outline", label: "Top Cut" },
     { id: "bottom-trace", label: "Bottom Trace" },
     { id: "bottom-drill", label: "Bottom Drill" },
-    { id: "bottom-cut", label: "Bottom Cut" },
+    { id: "bottom-outline", label: "Bottom Cut" },
     { id: "custom", label: "Custom" },
 ];
   

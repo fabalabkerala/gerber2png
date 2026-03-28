@@ -12,6 +12,7 @@ import ImageIcon from "../icons/ImageIcon";
 import BulkLayoutPanel from "./multiLayout/Panel";
 import { useApp } from "../context/AppContext";
 import ModsPanel from "./modsPanel/Panel";
+import mods from './../../assets/favicon.ico'
 
 const OutputPanel = () => {
   const { pngFiles, setPngFiles } = useApp();
@@ -108,25 +109,41 @@ const OutputPanel = () => {
                 }, 200);
                 }}
                 className={`
-                flex items-center gap-2 px-4 py-2 text-xs font-medium rounded-lg transition
+                flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg transition
                 ${
                     hasFiles
-                    ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-sm hover:opacity-95"
+                    ? "bg-gradient-to-r from-slate-100 to-slate-200 text-indigo-700 shadow-sm hover:opacity-95"
                     : "bg-slate-100 text-gray-400 cursor-not-allowed"
                 }
                 `}
             >
-                {isExporting ? "Opening..." : "Open Mods"}
-                <ArrowRightEndOnRectangleIcon width={14} />
+              <img className="w-5 h-5" src={mods} alt="icon" />
+              {isExporting ? "Opening..." : "Open Mods"}
             </motion.button>
         </div>
 
         {/* ACTION STRIP */}
         <div className="px-3 py-2 bg-slate-50">
-          <div className="flex items-center justify-between bg-white rounded-xl px-1 py-1 shadow-sm">
+          <div className="flex items-center justify-between bg-white rounded-xl px-1 py-1 border border-indigo-100">
 
             {/* LEFT */}
             <div className="flex items-center gap-1">
+              <motion.button
+                whileTap={{ scale: hasFiles ? 0.96 : 1 }}
+                disabled={!hasFiles}
+                onClick={downloadZip}
+                className={`
+                  flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition shadow-sm
+                  ${
+                    hasFiles
+                      ? "bg-gradient-to-r from-[#D3346E] to-[#B81D50] border-[#C12B61] text-white hover:from-[#B81D50] hover:to-[#D3346E]"
+                      : "bg-slate-100 border-slate-200 text-gray-400 cursor-not-allowed"
+                  }
+                `}
+              >
+                <FolderArrowDownIcon width={14} />
+                Download All
+              </motion.button>
               <motion.button
                 whileTap={{ scale: hasFiles ? 0.96 : 1 }}
                 disabled={!hasFiles}
@@ -142,23 +159,6 @@ const OutputPanel = () => {
               >
                 <Squares2X2Icon width={14} />
                 Layout
-              </motion.button>
-
-              <motion.button
-                whileTap={{ scale: hasFiles ? 0.96 : 1 }}
-                disabled={!hasFiles}
-                onClick={downloadZip}
-                className={`
-                  flex items-center gap-1.5 px-2 py-1.5 text-xs font-medium rounded-lg transition
-                  ${
-                    hasFiles
-                      ? "text-gray-700 hover:bg-slate-100"
-                      : "text-gray-400 cursor-not-allowed"
-                  }
-                `}
-              >
-                <FolderArrowDownIcon width={14} />
-                Download All
               </motion.button>
             </div>
 

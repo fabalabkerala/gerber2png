@@ -52,8 +52,6 @@ const ProcessSteps = ({
                 file
             };
         });
-
-        console.log('png Files ', pngFiles, 'map  : ', map)
         return ORDER.map(k => map[k]).filter(Boolean);
     };
     const steps = buildSteps(pngFiles);
@@ -69,7 +67,8 @@ const ProcessSteps = ({
     // const configKey = current?.key;
     // const config = toolConfig?.[modsMachine]?.[configKey];
 
-    const handleComplete = () => {
+    const handleMods = () => {
+        openMods(modsMachine, selectedPng)
         setCompletedSteps(prev => [...prev, currentStep]);
         if (currentStep < steps.length - 1) {
             setCurrentStep(prev => prev + 1);
@@ -112,7 +111,6 @@ const ProcessSteps = ({
                                 return (
                                     <div key={index} className="flex flex-col items-center z-10 w-full">
 
-                                        {/* NODE */}
                                         <motion.div
                                             animate={{ scale: isActive ? 1.15 : 1 }}
                                             className={`
@@ -135,31 +133,15 @@ const ProcessSteps = ({
                                             </p>
                                         </div>
 
-                                        {/* ACTION AREA (KEY CHANGE 🔥) */}
                                         <div className="mt-2 h-6 flex items-center justify-center gap-1">
-
-                                            {/* COMPLETE → only active */}
                                             {isActive && !completedSteps.includes(index) && (
-                                                <>
-                                                    <motion.button
-                                                        className="flex justify-center text-[10px] px-2 py-1 rounded-md items-center gap-2 shadow bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-500" 
-                                                        whileTap={{ scale: 0.98 }}
-                                                        onClick={() => openMods(modsMachine, selectedPng)}
-                                                    >
-                                                        <p className="font-medium ps-0.5 text-white">Send to Mods</p>
-                                                    </motion.button>
-                                                    <motion.button
-                                                        whileTap={{ scale: 0.92 }}
-                                                        onClick={handleComplete}
-                                                        className="
-                                                            text-[10px] px-2 py-1 rounded-md
-                                                            bg-indigo-50 text-indigo-600 border border-indigo-200
-                                                            hover:bg-indigo-100 transition
-                                                        "
-                                                    >
-                                                        Mark as Completed
-                                                    </motion.button>
-                                                </>
+                                                <motion.button
+                                                    className="flex justify-center text-[10px] px-2 py-1 rounded-md items-center gap-2 shadow bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-500" 
+                                                    whileTap={{ scale: 0.98 }}
+                                                    onClick={handleMods}
+                                                >
+                                                    <p className="font-medium ps-0.5 text-white">Send to Mods</p>
+                                                </motion.button>
                                             )}
 
                                             {/* UNDO → only last completed */}

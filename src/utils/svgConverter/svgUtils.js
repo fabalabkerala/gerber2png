@@ -24,17 +24,17 @@ export const updateSvg = (svg, option, setup, machine = 'general', topstack, dou
             const id = g.getAttribute('id');
             g.style.display = id.includes(setup.layerid) ? 'block' : id.includes(setup.stack.id) ? 'none' : id.includes('drillMask') ? 'none' : '';
 
-            if (option === 'top-cut' && machine === 'carvera') {
+            if (option === 'top-outline' && machine === 'carvera') {
                 g.style.display = id.includes('drill') ? 'block' : g.style.display;
             }
         }
     })
 
     const clipPath = gerberSvg.querySelector('clipPath');
-    if (clipPath) clipPath.style.display = setup.layerid === 'outline' ? option === 'top-cut' && doubleSide ? 'none' : 'block' : 'none';
+    if (clipPath) clipPath.style.display = setup.layerid === 'outline' ? option === 'top-outline' && doubleSide ? 'none' : 'block' : 'none';
 
     const outerG = svg.querySelector(`#${ setup.stack === topstack ? 'toplayer': 'bottomlayer' }outer`);
-    outerG.style.display = option === 'top-cut' ? doubleSide ? 'block' : 'none' : 'none';
+    outerG.style.display = option === 'top-outline' ? doubleSide ? 'block' : 'none' : 'none';
 
 
 }

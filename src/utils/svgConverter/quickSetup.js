@@ -32,7 +32,7 @@ const setUpConfig = (topstack, bottomstack) => {
             layerid: 'drill', 
             canvas: 'white',
         },
-        'top-cut': {
+        'top-outline': {
             side: 'commonlayer',
             button: 'outline',
             toggleButtons: [
@@ -79,7 +79,7 @@ const setUpConfig = (topstack, bottomstack) => {
             layerid: 'drill',
             canvas: 'white',
         },
-        'bottom-cut': {
+        'bottom-outline': {
             side: 'commonlayer',
             button: 'outline',
             toggleButtons: [

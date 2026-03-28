@@ -86,19 +86,6 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
             }
         }, 1000);
     }
-
-    const updateMods = async (mods) => {
-        if (mods.window && !mods.window.closed) {
-            const buffer = await fetch(selectedPng.url).then(res => res.arrayBuffer());
-
-            mods.window.postMessage(
-                { type: 'png', data: buffer }, 
-                'https://modsproject.org'
-            );
-            mods.window.focus();
-            setShowModsPanel(false);
-        }
-    }
     
     return (
         <>
@@ -118,7 +105,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                             transition={{ type: "spring", stiffness: 200, damping: 20 }}
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <ModalHeader title="Layout Setup" onClose={() => setShowModsPanel(false)} />
+                            <ModalHeader title="Mods Workflow" onClose={() => setShowModsPanel(false)} />
                             
                             <div className="overflow-y-auto custom-scrollbar">
                                 <div className="flex flex-col gap-2 p-3 pb-8">
