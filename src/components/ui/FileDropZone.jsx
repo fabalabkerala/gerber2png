@@ -45,21 +45,23 @@ export default function  FileDropZone({ onFilesSelect, accept = "*", multiple = 
             whileTap={{ scale: 0.998 }}
             className={cn(
                 "group flex flex-col items-center justify-center h-full border border-dashed rounded-xl p-6 cursor-pointer transition-colors duration-300",
-                isDragging ? "border-[#5545e5] bg-[#f1e4e023]" : "border-white bg-white hover:border hover:border-[#5545e5] hover:bg-gray-50"
+                isDragging
+                    ? "border-[#5545e5] bg-[#f1e4e023] dark:border-cyan-400 dark:bg-cyan-500/10"
+                    : "border-white bg-white hover:border hover:border-[#5545e5] hover:bg-gray-50 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-cyan-400 dark:hover:bg-slate-900/80"
             )} 
         >
             <CloudArrowUpIcon
                 className={`w-12 h-12 mb-2 transition-colors ${
-                isDragging ? "text-[#5545e5]" : "text-gray-500 group-hover:text-[#5545e5]"
+                isDragging ? "text-[#5545e5] dark:text-cyan-300" : "text-gray-500 group-hover:text-[#5545e5] dark:text-slate-400 dark:group-hover:text-cyan-300"
                 }`}
             />
 
-            <p className="text-sm text-gray-600 text-center">
-                <span className="font-medium text-[#5545e5]"> Click to Upload </span> <span>or Drag and Drop</span>
+            <p className="text-sm text-gray-600 text-center dark:text-slate-300">
+                <span className="font-medium text-[#5545e5] dark:text-cyan-300"> Click to Upload </span> <span>or Drag and Drop</span>
             </p>
 
             {fileNames.length > 0 && (
-                <ul className="mt-2 text-xs text-gray-500">
+                <ul className="mt-2 text-xs text-gray-500 dark:text-slate-400">
                 {fileNames.map((name, idx) => (
                     <li key={idx} className="truncate max-w-[250px]">
                     {name}

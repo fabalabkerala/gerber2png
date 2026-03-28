@@ -38,11 +38,11 @@ const LayoutConfiguration = ({
 
     return (
         <>
-            <p className="px-3 font-medium text-xs">CONFIGURATION<span className="text-xs text-gray-600 font-normal"></span></p>
-            <div className="bg-slate-100 flex-1 p-4 mx-2 my-1 flex flex-col rounded-xl">
+            <p className="px-3 font-medium text-xs dark:text-slate-200">CONFIGURATION<span className="text-xs text-gray-600 font-normal dark:text-slate-400"></span></p>
+            <div className="bg-slate-100 flex-1 p-4 mx-2 my-1 flex flex-col rounded-xl dark:bg-slate-950/60">
                 <div className="flex gap-3">
                     <div className="flex items-center gap-2 flex-1">
-                        <p className="text-xs w-24 text-black text-nowrap">Machine</p>
+                        <p className="text-xs w-24 text-black text-nowrap dark:text-slate-200">Machine</p>
                         <div className="w-36">
                             <Select 
                                 options={machineOption} 
@@ -56,9 +56,9 @@ const LayoutConfiguration = ({
 
                 <div className="flex gap-4 mt-3">
                     <div className="flex items-center gap-2">
-                    <label className="text-xs w-24 text-black">Width <span className="text-gray-500 font-normal">(mm)</span></label>
+                    <label className="text-xs w-24 text-black dark:text-slate-200">Width <span className="text-gray-500 font-normal dark:text-slate-400">(mm)</span></label>
                         <input 
-                            className="rounded-lg w-32 focus:outline-none text-center text-xs py-1.5 border" 
+                            className="rounded-lg w-32 focus:outline-none text-center text-xs py-1.5 border dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100" 
                             type="number"
                             value={machine.width}
                             onInput={(e) => {
@@ -67,9 +67,9 @@ const LayoutConfiguration = ({
                         />
                     </div>
                     <div className="flex items-center gap-2">
-                    <label className="text-xs w-24 text-black">Height <span className="text-gray-500 font-normal">(mm)</span></label>
+                    <label className="text-xs w-24 text-black dark:text-slate-200">Height <span className="text-gray-500 font-normal dark:text-slate-400">(mm)</span></label>
                         <input 
-                            className="rounded-lg w-32 focus:outline-none text-center text-xs py-1.5 border" 
+                            className="rounded-lg w-32 focus:outline-none text-center text-xs py-1.5 border dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100" 
                             type="number" 
                             value={machine.height}
                             onInput={(e) => {
@@ -131,4 +131,3 @@ LayoutConfiguration.propTypes = {
 }
 
 export default LayoutConfiguration
-

@@ -65,13 +65,13 @@ const LeftPanel = () => {
     }, [setCurrentPngFile])
 
     return (
-        <div className="flex flex-col h-full bg-white pb-3 rounded-md shadow overflow-y-auto">
-            <div className="flex items-center justify-between bg-gray-100 pl-3 pr-1 py-1 rounded-t-md border-b">
-                <p className="font-medium text-sm text-gray-700">All Jobs</p>
+        <div className="flex flex-col h-full bg-white pb-3 rounded-md shadow overflow-y-auto transition-colors dark:bg-slate-900 dark:shadow-none dark:border dark:border-slate-800">
+            <div className="flex items-center justify-between bg-gray-100 pl-3 pr-1 py-1 rounded-t-md border-b dark:bg-slate-950/80 dark:border-slate-800">
+                <p className="font-medium text-sm text-gray-700 dark:text-slate-100">All Jobs</p>
                 <motion.button
                     className={cn(
                         "flex text-xs gap-1 py-1 pl-1 pr-1 rounded transition-all duration-300 group",
-                        showSetup ? 'bg-white text-orange-600' : 'hover:bg-white hover:text-orange-600'
+                        showSetup ? 'bg-white text-orange-600 dark:bg-slate-900 dark:text-orange-300' : 'hover:bg-white hover:text-orange-600 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-orange-300'
                     )}
                     whileTap={{ scale: 0.9 }}
                     onClick={() => setShowSetup(true)}

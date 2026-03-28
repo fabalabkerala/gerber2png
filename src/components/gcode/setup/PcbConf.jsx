@@ -60,10 +60,10 @@ const PcbConfiguration = () => {
         <>
             <div className="flex gap-3 p-3 h-full">
                 <div className="flex-1 py-3 px-2">
-                    <div className=" bg-zinc-50 flex-1 p-4 mx-2 my-1 flex flex-col gap-3 rounded h-full">
+                    <div className=" bg-zinc-50 flex-1 p-4 mx-2 my-1 flex flex-col gap-3 rounded h-full dark:bg-slate-950/50">
                         <div className="flex items-center gap-6">
-                            <p className="text-xs text-black text-nowrap font-medium tracking-wide">Copper Sheet</p>
-                            <div className="bg-white w-32">
+                            <p className="text-xs text-black text-nowrap font-medium tracking-wide dark:text-slate-200">Copper Sheet</p>
+                            <div className="w-32">
                                 <Select 
                                     options={options} 
                                     selected={preset} 
@@ -81,8 +81,8 @@ const PcbConfiguration = () => {
                             </div>
                         </div>
                         <div className="flex justify-between items-center gap-2 mt-3">
-                            <p className="text-xs text-black text-nowrap tracking-wide">Type</p>
-                            <div className="bg-white w-32">
+                            <p className="text-xs text-black text-nowrap tracking-wide dark:text-slate-200">Type</p>
+                            <div className="w-32">
                                 <Select 
                                     options={sideOption} 
                                     selected={pcbSide} 
@@ -146,21 +146,21 @@ const PcbConfiguration = () => {
                         <div className="flex flex-col gap-2">
                             {Object.entries(labels).map(([key, label]) => (
                                 <div key={key} className="flex gap-3 py-1">
-                                    <p className="text-xs w-32">{label}</p>
-                                    <p className="text-xs font-medium">
+                                    <p className="text-xs w-32 dark:text-slate-300">{label}</p>
+                                    <p className="text-xs font-medium dark:text-slate-100">
                                         {key === "type"
                                         ? pcbConf[key] === "double" ? "Yes" : "No"
                                         : pcbConf[key].value}
                                         {key !== "type" && (
-                                        <span className="text-gray-500 font-normal text-[10px]">mm</span>
+                                        <span className="text-gray-500 font-normal text-[10px] dark:text-slate-400">mm</span>
                                         )}
                                     </p>
                                 </div>
                             ))}
                             <div className="flex gap-3 py-1">
-                                <p className="text-xs w-32">Cut Depth</p>
-                                <p className="text-xs font-medium">
-                                    { pcbConf.copperThickness.value + pcbConf.cutOffset.value }<span className="text-gray-500 font-normal text-[10px]">mm</span>
+                                <p className="text-xs w-32 dark:text-slate-300">Cut Depth</p>
+                                <p className="text-xs font-medium dark:text-slate-100">
+                                    { pcbConf.copperThickness.value + pcbConf.cutOffset.value }<span className="text-gray-500 font-normal text-[10px] dark:text-slate-400">mm</span>
                                 </p>
                             </div>
                         </div>
@@ -177,10 +177,10 @@ const InputField = ({name, label, value, maxValue, handleInput, defaultValue = 0
     return (
         <>
             <div className="flex justify-between items-center gap-2">
-                <label className="text-xs text-black">{ label } <span className="text-gray-500 font-normal text-[10px]">(mm)</span></label>
+                <label className="text-xs text-black dark:text-slate-200">{ label } <span className="text-gray-500 font-normal text-[10px] dark:text-slate-400">(mm)</span></label>
                 <input 
                     value={value}
-                    className="rounded w-32 focus:outline-none text-center text-xs py-1 border" 
+                    className="rounded w-32 focus:outline-none text-center text-xs py-1 border dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100" 
                     type="number"
                     min={0}
                     step={0.1}

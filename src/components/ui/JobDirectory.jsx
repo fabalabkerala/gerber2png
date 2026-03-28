@@ -9,16 +9,16 @@ const JobDirectory = ({job, isOpen,  onToggle, selectedFile, onSelectFile }) => 
 
     return (
         <>
-            <div className=" border-gray-100 rounded-md overflow-hidden">
+            <div className="rounded-md overflow-hidden">
                 <button
                     onClick={() => onToggle(job.name)}
                     className={cn(
-                        "flex items-center w-full gap-2 px-2 py-1.5 hover:bg-gray-50 transition",
-                        isSelectedInThisJob ? 'bg-gray-50' : ''
+                        "flex items-center w-full gap-2 px-2 py-1.5 hover:bg-gray-50 transition dark:hover:bg-slate-800",
+                        isSelectedInThisJob ? 'bg-gray-50 dark:bg-slate-800/80' : ''
                     )}
                 >
-                    <FolderIcon className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm font-medium text-gray-700">
+                    <FolderIcon className="w-4 h-4 text-gray-500 dark:text-slate-400" />
+                    <span className="text-sm font-medium text-gray-700 dark:text-slate-200">
                         {job.name}
                     </span>
                 </button>
@@ -30,7 +30,7 @@ const JobDirectory = ({job, isOpen,  onToggle, selectedFile, onSelectFile }) => 
                             animate={{ height: "auto", opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
                             transition={{ duration: 0.2, ease: "easeInOut" }}
-                            className="ml-6 border-gray-200"
+                            className="ml-6"
                         >
                             {job.files.map((file) => {
                                 const isSelected = selectedFile === file.id;
@@ -40,13 +40,13 @@ const JobDirectory = ({job, isOpen,  onToggle, selectedFile, onSelectFile }) => 
                                         onClick={() => onSelectFile(file)}
                                         className={cn(
                                             "flex items-center gap-2 px-2 py-1.5 w-full text-left rounded-md transition capitalize",
-                                            isSelected ? "bg-orange-50 text-orange-500" : "hover:bg-gray-50 text-gray-700"
+                                            isSelected ? "bg-orange-50 text-orange-500 dark:bg-orange-500/10 dark:text-orange-300" : "hover:bg-gray-50 text-gray-700 dark:hover:bg-slate-800 dark:text-slate-300"
                                         )}
                                     >
                                         <DocumentIcon
                                             className={cn(
                                                 "w-4 h-4",
-                                                isSelected ? "text-orange-500" : "text-gray-500"
+                                                isSelected ? "text-orange-500 dark:text-orange-300" : "text-gray-500 dark:text-slate-400"
                                             )}
                                         />
                                         <span className="text-xs">{file.name}</span>

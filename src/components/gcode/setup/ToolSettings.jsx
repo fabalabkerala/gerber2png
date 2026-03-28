@@ -49,12 +49,12 @@ const ToolSettings = ({ tool, toolID, setToolLib }) => {
                     <VBitIcon className={'w-auto h-28'} angle={tool.angle} />
                 )}
             </div>
-            <div className="bg-slate-100 flex-1 p-4  flex flex-col gap-2 rounded ">
+            <div className="bg-slate-100 flex-1 p-4  flex flex-col gap-2 rounded dark:bg-slate-950/50">
                 <div className="flex justify-between items-center">
-                    <p className="text-xs text-black w-24 font-medium">Name</p>
+                    <p className="text-xs text-black w-24 font-medium dark:text-slate-200">Name</p>
                     <input 
                         value={tool.name}
-                        className="rounded flex-1 focus:outline-none text-xs py-1 border px-2 focus:border-l-2 focus:border-l-orange-500" 
+                        className="rounded flex-1 focus:outline-none text-xs py-1 border px-2 focus:border-l-2 focus:border-l-orange-500 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100" 
                         type="text"
                         min={0}
                         step={0.1}
@@ -75,8 +75,8 @@ const ToolSettings = ({ tool, toolID, setToolLib }) => {
 
                 <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center justify-between flex-1">
-                        <p className="text-xs w-24 text-black text-nowrap font-medium">Bit Type</p>
-                        <div className="bg-white w-36">
+                        <p className="text-xs w-24 text-black text-nowrap font-medium dark:text-slate-200">Bit Type</p>
+                        <div className="w-36">
                             <Select 
                                 options={options} 
                                 selected={tool.type} 
@@ -111,8 +111,8 @@ const ToolSettings = ({ tool, toolID, setToolLib }) => {
                             exit={{ opacity: 0, height: 0 }}
                         >
                             <div className="flex items-center justify-between flex-1">
-                                <p className="text-xs w-24 text-black text-nowrap font-medium">Angle</p>
-                                <div className="bg-white w-36">
+                                <p className="text-xs w-24 text-black text-nowrap font-medium dark:text-slate-200">Angle</p>
+                                <div className="w-36">
                                     <Select 
                                         options={angles} 
                                         selected={tool.angle || 'Choose Angle'} 
@@ -133,7 +133,7 @@ const ToolSettings = ({ tool, toolID, setToolLib }) => {
                 <Input field={'maxCutDepth'} label={'Maximum Cut Depth'} value={tool.maxCutDepth} defaultVal={1} min={0.2} handleInput={handleInput} cleanInput={cleanInput}  />
                 <Input field={'offsetStepOver'} label={'Offset Step Over'} value={tool.offsetStepOver} defaultVal={1} min={0.2} handleInput={handleInput} cleanInput={cleanInput}  />
 
-                <div className="border h-px border-white my-2"></div>
+                <div className="border h-px border-white my-2 dark:border-slate-800"></div>
 
                 {/* <div className="flex justify-between items-center gap-2">
                     <div className="flex items-center">
@@ -207,8 +207,8 @@ const Input = ({ field, label, value, suffix, defaultVal, min, handleInput, clea
         animate={{ opacity: 1, height: 'auto' }}
         exit={{ opacity: 0, height: 0 }}
     >
-        <label className="text-xs text-black">
-            {label} {suffix && <span className="text-gray-500 text-[10px]">{`(${suffix})`}</span>}
+        <label className="text-xs text-black dark:text-slate-200">
+            {label} {suffix && <span className="text-gray-500 text-[10px] dark:text-slate-400">{`(${suffix})`}</span>}
         </label>
         <input
             value={value}
@@ -217,7 +217,7 @@ const Input = ({ field, label, value, suffix, defaultVal, min, handleInput, clea
             step={0.1}
             onChange={e => handleInput(field, e.target.value)}
             onBlur={() => cleanInput(field, defaultVal, min)}
-            className="rounded w-36 text-center text-xs py-1 border px-2 focus:outline-none focus:border-l-2 focus:border-l-orange-500"
+            className="rounded w-36 text-center text-xs py-1 border px-2 focus:outline-none focus:border-l-2 focus:border-l-orange-500 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100"
         />
     </motion.div>
 );

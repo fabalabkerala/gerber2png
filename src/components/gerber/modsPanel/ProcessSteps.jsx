@@ -72,8 +72,8 @@ const ProcessSteps = ({
         setCompletedSteps(prev => [...prev, currentStep]);
         if (currentStep < steps.length - 1) {
             setCurrentStep(prev => prev + 1);
+            setSelectedPng(steps[currentStep + 1].file)
         }
-        setSelectedPng(steps[currentStep + 1].file)
     };
 
     const handleUndo = () => {
@@ -88,10 +88,10 @@ const ProcessSteps = ({
         <>
             { modsWindowRef?.current?.window && (
                 <div className="pb-5 px-2 my-2">
-                    <div className="bg-gradient-to-br from-slate-50 to-white rounded-xl py-4 mb-4">
+                    <div className="bg-gradient-to-br from-slate-50 to-white rounded-xl py-4 mb-4 dark:from-slate-950/80 dark:to-slate-900 dark:border dark:border-slate-800">
                         <div className="flex items-center justify-between relative">
                             {/* Base line */}
-                            <div className="absolute top-4 left-0 right-0 h-[1px] bg-slate-200" />
+                            <div className="absolute top-4 left-0 right-0 h-[1px] bg-slate-200 dark:bg-slate-700" />
 
                             {/* Progress line */}
                             <motion.div
@@ -117,7 +117,7 @@ const ProcessSteps = ({
                                                 w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold border transition-all
                                                 ${isCompleted && "bg-teal-500 text-white border-teal-500"}
                                                 ${isActive && "bg-indigo-500 text-white border-indigo-500 ring-4 ring-indigo-100"}
-                                                ${isLocked && "bg-gray-100 text-gray-400"}
+                                                ${isLocked && "bg-gray-100 text-gray-400 dark:bg-slate-800 dark:text-slate-500 dark:border-slate-700"}
                                             `}
                                         >
                                             {isCompleted ? "✓" : index + 1}
@@ -125,10 +125,10 @@ const ProcessSteps = ({
 
                                         {/* LABEL */}
                                         <div className="mt-2 text-center">
-                                            <p className={`text-xs capitalize font-semibold ${isActive ? "text-indigo-600" : "text-gray-700"}`}>
+                                            <p className={`text-xs capitalize font-semibold ${isActive ? "text-indigo-600 dark:text-cyan-300" : "text-gray-700 dark:text-slate-200"}`}>
                                                 {step.label}
                                             </p>
-                                            <p className="text-[10px] text-gray-400 capitalize">
+                                            <p className="text-[10px] text-gray-400 capitalize dark:text-slate-500">
                                                 {step.sub}
                                             </p>
                                         </div>
@@ -152,7 +152,7 @@ const ProcessSteps = ({
                                                     className="
                                                         text-[10px] px-2 py-1 rounded-md
                                                         bg-red-50 text-red-500 border border-red-200
-                                                        hover:bg-red-100 transition
+                                                        hover:bg-red-100 transition dark:bg-red-500/10 dark:text-red-300 dark:border-red-500/30 dark:hover:bg-red-500/15
                                                     "
                                                 >
                                                     Undo

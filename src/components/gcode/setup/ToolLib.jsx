@@ -18,7 +18,7 @@ const ToolLibrary = () => {
         <>
             <div className="flex gap-3 p-3 h-full">
                 <div className="flex-1 flex flex-col px-2">
-                    <p className="text-sm pb-1 border-b px-1 py-1 font-medium text-gray-700">Tool Library</p>
+                    <p className="text-sm pb-1 border-b px-1 py-1 font-medium text-gray-700 dark:text-slate-100 dark:border-slate-800">Tool Library</p>
                     <div className=" bg-zinc-0 flex-1  mt-3 flex flex-col gap-1 rounded h-full overflow-y-auto custom-scrollbar">
                         <Reorder.Group
                             axis="y"
@@ -34,18 +34,18 @@ const ToolLibrary = () => {
                                         value={tool}
                                         className={cn(
                                             "flex gap-2 items-center border-l-2 border  px-2 py-2.5 cursor-pointer rounded",
-                                            selectedToolID === tool.id ? 'bg-slate-100 border-l-orange-500 hover:bg-zinc-100' : 'hover:bg-zinc-100'
+                                            selectedToolID === tool.id ? 'bg-slate-100 border-l-orange-500 hover:bg-zinc-100 dark:bg-slate-800 dark:hover:bg-slate-800' : 'hover:bg-zinc-100 dark:hover:bg-slate-800'
                                         )}
                                         onClick={() => setSelectedToolID(tool.id)}
                                     >
-                                        <p className="text-xs text-zinc-900 leading-none">{index + 1} </p>
+                                        <p className="text-xs text-zinc-900 leading-none dark:text-slate-200">{index + 1} </p>
                                         { tool.type === 'normal' ? (
                                             <NormalBitIcon className={'w-4 h-4 mr-2'}  />
                                         ):(
                                             <VBitIcon className={'w-4 h-4 mr-2'} angle={tool.angle} />
                                         )}
-                                        <p className="text-[10px] px-2 py-1 bg-zinc-100 rounded leading-none border"> T-{tool.toolNo}</p>
-                                        <p className="text-sm px-2 leading-none"> {tool.name}</p>
+                                        <p className="text-[10px] px-2 py-1 bg-zinc-100 rounded leading-none border dark:bg-slate-900 dark:border-slate-700 dark:text-slate-300"> T-{tool.toolNo}</p>
+                                        <p className="text-sm px-2 leading-none dark:text-slate-200"> {tool.name}</p>
                                     </Reorder.Item>
                                 )
                             ))}
@@ -61,7 +61,7 @@ const ToolLibrary = () => {
                         <>
                             <div className="flex-1 flex flex-col items-center justify-center w-full h-full">
                                 <PhotoIcon width={20} height={20} strokeWidth={2} stroke="gray" />
-                                <p>No Preview Available</p>
+                                <p className="dark:text-slate-300">No Preview Available</p>
                             </div>
                         </>
                     )}

@@ -80,13 +80,13 @@ const Setup = ({ showSetup, setShowSetup }) => {
             <AnimatePresence>
                 {showSetup && (
                     <motion.div
-                        className="fixed inset-0 bg-black/10 bg-blend-color-burn flex justify-center items-center z-50"
+                        className="fixed inset-0 bg-black/10 bg-blend-color-burn flex justify-center items-center z-50 dark:bg-slate-950/70"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                     >
                         <motion.div
-                            className="bg-white rounded-md shadow-xl flex flex-col overflow-hidden relative h-[80vh] w-1/2 min-w-96"
+                            className="bg-white rounded-md shadow-xl flex flex-col overflow-hidden relative h-[80vh] w-1/2 min-w-96 dark:bg-slate-900 dark:border dark:border-slate-800"
                             initial={{ y: -30, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ y: -30, opacity: 0 }}
@@ -94,8 +94,8 @@ const Setup = ({ showSetup, setShowSetup }) => {
                             onClick={(e) => e.stopPropagation()}
                         >
                             
-                            <div className="flex justify-between items-center bg-neutral-100 rounded-tl-md rounded-tr-md border-b">
-                                <p className="text-sm px-3 py-1 text-gray-900">Setup</p>
+                            <div className="flex justify-between items-center bg-neutral-100 rounded-tl-md rounded-tr-md border-b dark:bg-slate-950/80 dark:border-slate-800">
+                                <p className="text-sm px-3 py-1 text-gray-900 dark:text-slate-100">Setup</p>
                                 { !isFirstTime && 
                                     <motion.button 
                                         whileTap={{ scale: 0.97, background: '#ef4444' }}
@@ -106,7 +106,7 @@ const Setup = ({ showSetup, setShowSetup }) => {
                                     </motion.button>
                                 }
                             </div>
-                            <div className="flex items-center bg-neutral-50 rounded-tl-md rounded-tr-md">
+                            <div className="flex items-center bg-neutral-50 rounded-tl-md rounded-tr-md dark:bg-slate-950/40">
                                 { tabs.map((tab, index)=> (
                                     <motion.button 
                                         key={index}
@@ -114,7 +114,7 @@ const Setup = ({ showSetup, setShowSetup }) => {
                                         onClick={ () => setSelectedTab(tab) }
                                         className={cn(
                                             "py-1.5 px-3 text-xs capitalize",
-                                            selectedTab.id === tab.id ? "bg-white border-t border-[#e57345]" : "border-t border-t-neutral-50 border-r"
+                                            selectedTab.id === tab.id ? "bg-white border-t border-[#e57345] dark:bg-slate-900 dark:text-slate-100" : "border-t border-t-neutral-50 border-r dark:border-t-slate-950/40 dark:border-r-slate-800 dark:text-slate-400"
                                         )}
                                     >
                                         {tab.label}
@@ -130,7 +130,7 @@ const Setup = ({ showSetup, setShowSetup }) => {
                             </div>
 
                             { isFirstTime &&
-                                <div className="w-full bg-white bottom-0 flex gap-2 justify-between p-3">
+                                <div className="w-full bg-white bottom-0 flex gap-2 justify-between p-3 dark:bg-slate-900 dark:border-t dark:border-slate-800">
                                     <div>
                                         { selectedTab.id !== 'machine' &&
                                             <motion.button
@@ -138,8 +138,8 @@ const Setup = ({ showSetup, setShowSetup }) => {
                                                 whileTap={{ scale: 0.98 }}
                                                 onClick={handleBack}
                                             >
-                                                <PlayIcon width={16} height={16} strokeWidth={2} className="rotate-180 text-gray-700" />
-                                                <p className="text-xs text-gray-700 font-medium ">Back</p>
+                                                <PlayIcon width={16} height={16} strokeWidth={2} className="rotate-180 text-gray-700 dark:text-slate-300" />
+                                                <p className="text-xs text-gray-700 font-medium dark:text-slate-300">Back</p>
                                             </motion.button>
                                         }
                                     </div>

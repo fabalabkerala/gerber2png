@@ -16,7 +16,7 @@ function App() {
   return (
     <>
       <AppProvider>
-        <div className="h-screen flex flex-col bg-[#f5f6f8]">
+        <div className="h-screen flex flex-col bg-slate-100 text-slate-900 transition-colors dark:bg-[#081018] dark:text-slate-100">
 
           <GerberProvider>
             <GCodeProvider>

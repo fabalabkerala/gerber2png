@@ -92,13 +92,13 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
             <AnimatePresence>
                 {showModsPanel && (
                     <motion.div
-                        className="fixed inset-0 bg-black/10 bg-blend-color-burn flex justify-center items-center z-50"
+                        className="fixed inset-0 bg-black/10 bg-blend-color-burn flex justify-center items-center z-50 dark:bg-slate-950/70"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                     >
                         <motion.div
-                            className="bg-white rounded-xl shadow-xl md:w-[900px] flex flex-col overflow-hidden relative max-h-[80vh]"
+                            className="bg-white rounded-xl shadow-xl md:w-[900px] flex flex-col overflow-hidden relative max-h-[80vh] dark:bg-slate-900 dark:border dark:border-slate-800"
                             initial={{ y: -30, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ y: -30, opacity: 0 }}
@@ -110,7 +110,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                             <div className="overflow-y-auto custom-scrollbar">
                                 <div className="flex flex-col gap-2 p-3 pb-8">
                                     <div className="flex gap-4 p-2">
-                                        <div className="pt-6 pb-8 pl-8 pr-10 h-44 flex flex-col justify-center items-center border border-dashed rounded-xl">
+                                        <div className="pt-6 pb-8 pl-8 pr-10 h-44 flex flex-col justify-center items-center border border-dashed rounded-xl dark:border-slate-700 dark:bg-slate-950/40">
                                             { selectedPng.url ? (
                                                 <>
                                                 <div className="flex h-full w-full">
@@ -118,17 +118,17 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                                         <img src={selectedPng.url} alt="dsdfsd" className="h-full object-contain" />
 
                                                         <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-full h-px bg-zinc-300 my-3" />
-                                                        <p className="absolute -bottom-5 left-1/2 -translate-x-1/2 bg-white px-2 text-[10px] text-nowrap font-medium">
+                                                        <p className="absolute -bottom-5 left-1/2 -translate-x-1/2 bg-white px-2 text-[10px] text-nowrap font-medium dark:bg-slate-900 dark:text-slate-200">
                                                             {/* {dimension.width} */}
                                                             {selectedPng.width}
-                                                            <span className="text-gray-500 font-normal"> mm</span>
+                                                            <span className="text-gray-500 font-normal dark:text-slate-400"> mm</span>
                                                         </p>
 
                                                         <div className="absolute top-0 -right-6 w-px h-full bg-zinc-300 mx-3" />
-                                                        <p className="absolute top-1/2 -translate-y-1/2 -right-[48px] bg-white px-2 text-[10px] text-nowrap -rotate-90 origin-center font-medium">
+                                                        <p className="absolute top-1/2 -translate-y-1/2 -right-[48px] bg-white px-2 text-[10px] text-nowrap -rotate-90 origin-center font-medium dark:bg-slate-900 dark:text-slate-200">
                                                             {/* {dimension.height} */}
                                                             {selectedPng.height}
-                                                            <span className="text-gray-500 font-normal"> mm</span>
+                                                            <span className="text-gray-500 font-normal dark:text-slate-400"> mm</span>
                                                         </p>
                                                     </div>
                                                 </div>
@@ -137,7 +137,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                             ): (
                                                 <>
                                                     <PhotoIcon width={20} height={20} strokeWidth={2} stroke="gray" />
-                                                    <p className="text-xs font-medium">No Preview Available</p>
+                                                    <p className="text-xs font-medium dark:text-slate-300">No Preview Available</p>
                                                 </>
                                             )}
                                         </div>
@@ -146,8 +146,8 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                             { modsWindowRef.current?.window && (
                                                 <>
                                                     <div className="flex items-center justify-between">
-                                                        <div className="py-2 px-3  bg-gradient-to-br rounded-xl mb-3">
-                                                            <p className="text-base font-semibold text-gray-800">{modsWindowRef.current?.machine.label}</p>
+                                                        <div className="py-2 px-3 bg-gradient-to-br rounded-xl mb-3 dark:from-slate-950 dark:to-slate-800">
+                                                            <p className="text-base font-semibold text-gray-800 dark:text-slate-100">{modsWindowRef.current?.machine.label}</p>
                                                             <div className="flex items-center gap-1 w-full">
                                                                 <CheckBadgeIcon width={14} height={14} strokeWidth={2} stroke="green" />
                                                                 <p className="text-xs text-green-700 font-medium">Mods is Connected</p>
@@ -160,7 +160,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                                             {/* Preview */}
                                                             <div className="flex items-center px-4 py-4 rounded-lg gap-3">
                                                                 <div className="flex flex-col items-center justify-center gap-1">
-                                                                    <div className="w-7 h-7 p-1 bg-white border rounded-lg flex items-center justify-center overflow-hidden shadow-md">
+                                                                    <div className="w-7 h-7 p-1 bg-white border rounded-lg flex items-center justify-center overflow-hidden shadow-md dark:bg-slate-900 dark:border-slate-700">
                                                                         {modsWindowRef.current?.image ? (
                                                                             <img src={modsWindowRef.current.image} className="w-full h-full object-contain" />
                                                                         ):(
@@ -169,10 +169,10 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                                                     </div>
                                                                 </div>
                         
-                                                                <ArrowRightIcon className="w-3 h-3 text-gray-400"/>
+                                                                <ArrowRightIcon className="w-3 h-3 text-gray-400 dark:text-slate-500"/>
                                                                 
                                                                 <div className="flex flex-col items-center justify-center gap-1">
-                                                                    <div className="w-9 h-9 p-1 bg-white border rounded-lg flex items-center justify-center overflow-hidden shadow-md">
+                                                                    <div className="w-9 h-9 p-1 bg-white border rounded-lg flex items-center justify-center overflow-hidden shadow-md dark:bg-slate-900 dark:border-slate-700">
                                                                         {selectedPng.url ? (
                                                                             <img src={selectedPng.url} className="w-full h-full object-contain" />
                                                                         ):(
@@ -185,10 +185,10 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                                     </div>
                                                 </>
                                             )}
-                                            <div className="bg-slate-50 flex-1 p-4 flex flex-col rounded-xl">
+                                            <div className="bg-slate-50 flex-1 p-4 flex flex-col rounded-xl dark:bg-slate-950/60">
                                                 <div className="flex gap-3">
                                                     <div className="flex items-center gap-2 flex-1">
-                                                        <p className="text-xs w-24 text-black text-nowrap">Machine</p>
+                                                        <p className="text-xs w-24 text-black text-nowrap dark:text-slate-200">Machine</p>
                                                         <div className={cn("w-full", modsWindowRef.current?.window ? "pointer-events-none opacity-60" : "")}>
                                                             <Select 
                                                                 options={machineOption} 
@@ -203,13 +203,13 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                     </div>
 
                                     { !modsWindowRef.current?.window && (
-                                        <div className={cn("flex gap-2 items-center mx-2 bg-gradient-to-br from-slate-50 to-teal-100 rounded-xl flex-1 px-3 py-3", selectedPng.url ? "opacity-100 pointer-events-auto" : "opacity-60 pointer-events-none")}>
+                                        <div className={cn("flex gap-2 items-center mx-2 bg-gradient-to-br from-slate-50 to-teal-100 rounded-xl flex-1 px-3 py-3 dark:from-slate-950/70 dark:to-emerald-500/10", selectedPng.url ? "opacity-100 pointer-events-auto" : "opacity-60 pointer-events-none")}>
                                             <div className={cn(
                                                 "flex items-end justify-center gap-1 py-1 rounded h-fit mr-auto pr-20",
                                                 selectedPng.url ? "opacity-100" : "opacity-0"
                                             )}>
                                                 <DocumentCheckIcon width={15} height={15} strokeWidth={2} stroke="green" />
-                                                <p className="text-[10px] text-gray-500 max-w-[140px] truncate">{selectedPng.name}.png</p>
+                                                <p className="text-[10px] text-gray-500 max-w-[140px] truncate dark:text-slate-400">{selectedPng.name}.png</p>
                                             </div>
                                             <motion.button
                                                 className="flex justify-center items-center gap-2 px-2 py-1.5 rounded-lg shadow bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-500" 
@@ -242,10 +242,10 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                         animate={{ opacity: 1 }}
                                         exit={{ opacity: 0 }}
                                         transition={{ duration: 0.25, ease: "easeOut" }}
-                                        className="absolute inset-0 bg-white/40 flex items-center justify-center z-[9999]"
+                                        className="absolute inset-0 bg-white/40 flex items-center justify-center z-[9999] dark:bg-slate-950/50"
                                     >
                                         <motion.div
-                                            className="w-12 h-12 border-4 border-[#5545e5] border-t-transparent rounded-full"
+                                            className="w-12 h-12 border-4 border-[#5545e5] border-t-transparent rounded-full dark:border-cyan-400"
                                             animate={{
                                                 rotate: [0, 360],
                                                 scale: [1, 1.1, 1],

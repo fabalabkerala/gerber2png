@@ -27,14 +27,14 @@ const ThreeWaySlider = ({ options, valueSync, onChange, variant = 'primary' }) =
     }
 
     return (
-        <div className="relative flex bg-white border border-gray-50 rounded-full p- w-full">
+        <div className="relative flex bg-white border border-gray-100 rounded-full w-full dark:bg-slate-900 dark:border-slate-700">
             { options.map((opt) => (
                 <button
                     key={opt.id}
                     onClick={() => handleClick(opt.id)}
                     className={cn(
                         "relative z-10 px-4 py-1.5 text-xs font-medium transition-colors duration-200 flex-1 text-nowrap",
-                        selected === opt.id ? variants[variant].label : 'text-gray-700', 
+                        selected === opt.id ? variants[variant].label : 'text-gray-700 dark:text-slate-300', 
                         opt.class
                     )}
                 >

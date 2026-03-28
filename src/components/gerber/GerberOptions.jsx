@@ -41,14 +41,14 @@ const GerberOptions = () => {
 
     return (
         <>
-            <div className="bg-white border border-slate-200 rounded-xl">
+            <div className="bg-white border border-slate-200 rounded-xl transition-colors dark:bg-slate-900 dark:border-slate-800">
                 {/* Heading */}
-                <div className="px-4 py-2 bg-slate-50 rounded-t-xl">
-                    <p className="font-medium text-sm ps-0.5 text-gray-700">Options</p>
+                <div className="px-4 py-2 bg-slate-50 rounded-t-xl dark:bg-slate-950/80">
+                    <p className="font-medium text-sm ps-0.5 text-gray-700 dark:text-slate-100">Options</p>
                 </div>
 
                 <div className="p-4 py-2">
-                    <p className="text-xs text-gray-700 pt-3 pb-1 px-1">Quick Setup</p>
+                    <p className="text-xs text-gray-700 pt-3 pb-1 px-1 dark:text-slate-300">Quick Setup</p>
 
                     <div className="flex gap-3 text-sm">
                         <Select 
@@ -81,9 +81,9 @@ const GerberOptions = () => {
                 {/* <div className="w-full h-px bg-zinc-100 my-3" /> */}
 
                 <div className="p-3">
-                    <div className="flex gap-4 text-sm bg-slate-50 p-3 py-2 rounded-lg">
+                    <div className="flex gap-4 text-sm bg-slate-50 p-3 py-2 rounded-lg dark:bg-slate-950/60">
                         <div className="flex items-center justify-between gap-1">
-                            <p className="text-xs">Double Side PCB</p>
+                            <p className="text-xs dark:text-slate-200">Double Side PCB</p>
                             <SwitchToggle onChange={(enabled) => toggleDoubleSide(enabled, isToggled)} enabled={doubleSide} />
                         </div>
 
@@ -93,7 +93,7 @@ const GerberOptions = () => {
                                 doubleSide ? 'opacity-1' : ' opacity-40 pointer-events-none'
                             )}
                         >
-                            <p className="text-xs text-nowrap">Tool Width</p>
+                            <p className="text-xs text-nowrap dark:text-slate-200">Tool Width</p>
                             <Select options={toolOption} setSelected={setToolSelected} selected={toolSelected} onSelect={handleToolWidth} />
                         </div>
                     </div>  

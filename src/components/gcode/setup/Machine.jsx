@@ -14,7 +14,7 @@ const Machine = () => {
                 <div className="flex flex-col gap-3 w-full">
                     <div className="py-1">
                         <div className="w-1/3">
-                            <p className="text-xs px-1 py-1 text-gray-700">Choose Machine</p>
+                            <p className="text-xs px-1 py-1 text-gray-700 dark:text-slate-300">Choose Machine</p>
                             <ImageSelect
                                 options={machineOptions}
                                 selected={machineConf}
@@ -35,20 +35,20 @@ const Machine = () => {
                             ): (
                                 <>
                                     <PhotoIcon width={20} height={20} strokeWidth={2} stroke="gray" />
-                                    <p className="text-xs font-medium">No Preview Available</p>
+                                    <p className="text-xs font-medium dark:text-slate-300">No Preview Available</p>
                                 </>
                             )}
                         </div>
-                        <div className="w-2/3 h-full px-4 py-3 bg-zinc-50 rounded">
-                            <p className="text-sm border- pb-0.5 font-medium">Bedsize<span className="text-[10px] text-gray-600 font-normal"></span></p>
+                        <div className="w-2/3 h-full px-4 py-3 bg-zinc-50 rounded dark:bg-slate-950/50">
+                            <p className="text-sm border- pb-0.5 font-medium dark:text-slate-100">Bedsize<span className="text-[10px] text-gray-600 font-normal"></span></p>
                             <div className="flex flex-col gap-2 justify-between rounded mt-3">
                                 <div className="flex items-center gap-2">
-                                    <label className="text-xs w-20 text-black">Width</label>
-                                    <p className="px-4 py-1 border-b text-xs font-medium">{ machineConf.width } <span className="font-normal text-gray-500 text-[10px]">mm</span></p>
+                                    <label className="text-xs w-20 text-black dark:text-slate-200">Width</label>
+                                    <p className="px-4 py-1 border-b text-xs font-medium dark:text-slate-100 dark:border-slate-700">{ machineConf.width } <span className="font-normal text-gray-500 text-[10px] dark:text-slate-400">mm</span></p>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <label className="text-xs w-20 text-black">Height</label>
-                                    <p className="px-4 py-1 border-b text-xs font-medium">{ machineConf.height } <span className="font-normal text-gray-500 text-[10px]">mm</span></p>
+                                    <label className="text-xs w-20 text-black dark:text-slate-200">Height</label>
+                                    <p className="px-4 py-1 border-b text-xs font-medium dark:text-slate-100 dark:border-slate-700">{ machineConf.height } <span className="font-normal text-gray-500 text-[10px] dark:text-slate-400">mm</span></p>
                                 </div>
                             </div>
                         </div>

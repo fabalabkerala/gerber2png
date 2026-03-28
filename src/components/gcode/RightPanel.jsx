@@ -70,16 +70,16 @@ const RightPanel = () => {
 
 
     return (
-        <div className="flex flex-col h-full bg-white pb-3 rounded-md shadow overflow-y-auto">
-            <div className="flex items-center bg-gray-100 px-3 py-2 rounded-t-md border-b">
-                <p className="font-medium text-sm text-gray-700">Setup</p>
+        <div className="flex flex-col h-full bg-white pb-3 rounded-md shadow overflow-y-auto transition-colors dark:bg-slate-900 dark:shadow-none dark:border dark:border-slate-800">
+            <div className="flex items-center bg-gray-100 px-3 py-2 rounded-t-md border-b dark:bg-slate-950/80 dark:border-slate-800">
+                <p className="font-medium text-sm text-gray-700 dark:text-slate-100">Setup</p>
             </div>
 
             { currentPngFile ? (
               <div className="flex flex-col mt-2 gap-3 px-4">
                 <div className="flex justify-between items-center gap-2 mt-3">
-                  <p className="text-xs text-black text-nowrap tracking-wide">Type</p>
-                  <div className="bg-white w-44">
+                  <p className="text-xs text-black text-nowrap tracking-wide dark:text-slate-200">Type</p>
+                  <div className="w-44">
                     <Select 
                       options={toolOptions} 
                       selected={currentPngFile.tool || selectedTool} 
@@ -92,47 +92,47 @@ const RightPanel = () => {
                 </div>
 
               { currentTool && currentTool.type && 
-                <div className="flex items-center gap-3 border border-x-orange-500 px-2 rounded-md mt-2">
+                <div className="flex items-center gap-3 border border-x-orange-500 px-2 rounded-md mt-2 dark:border-orange-400/60 dark:bg-slate-950/50">
                   { currentTool.type === 'vbit' ? (
                     <VBitIcon angle={currentTool.angle} className={'w-12 h-12 p-1'} />
                   ):(
                     <NormalBitIcon className={'w-12 h-12 p-1'} />
                   )}
-                  <p className="truncate text-sm">{currentTool.name}</p>
+                  <p className="truncate text-sm dark:text-slate-200">{currentTool.name}</p>
                 </div>
               }
               <div className="flex justify-between items-center gap-2 mt-2">
-                <label className="text-xs text-black">Tool Number</label>
+                <label className="text-xs text-black dark:text-slate-200">Tool Number</label>
                 <input 
                   value={currentTool?.toolNo}
-                  className="rounded w-20 focus:outline-none text-center text-xs py-0.5 border bg-gray-200" 
+                  className="rounded w-20 focus:outline-none text-center text-xs py-0.5 border bg-gray-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200" 
                   type="number" 
                   disabled
                 />
               </div>
               <div className="flex justify-between items-center gap-2">
-                <label className="text-xs text-black">Diameter <span className="text-gray-500 font-normal text-[10px]">(mm)</span></label>
+                <label className="text-xs text-black dark:text-slate-200">Diameter <span className="text-gray-500 font-normal text-[10px] dark:text-slate-400">(mm)</span></label>
                 <input 
                   value={currentTool?.diameter}
-                  className="rounded w-20 focus:outline-none text-center text-xs py-0.5 border bg-gray-200" 
+                  className="rounded w-20 focus:outline-none text-center text-xs py-0.5 border bg-gray-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200" 
                   type="number" 
                   disabled
                 />
               </div>
               <div className="flex justify-between items-center gap-2">
-                <label className="text-xs text-black">Maximum Cut Depth <span className="text-gray-500 font-normal text-[10px]">(mm)</span></label>
+                <label className="text-xs text-black dark:text-slate-200">Maximum Cut Depth <span className="text-gray-500 font-normal text-[10px] dark:text-slate-400">(mm)</span></label>
                 <input 
                   value={currentTool?.maxCutDepth}
-                  className="rounded w-20 focus:outline-none text-center text-xs py-0.5 border bg-gray-200" 
+                  className="rounded w-20 focus:outline-none text-center text-xs py-0.5 border bg-gray-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200" 
                   type="number" 
                   disabled
                 />
               </div>
               <div className="flex justify-between items-center gap-2">
-                <label className="text-xs text-black">Offset Stepover<span className="text-gray-500 font-normal text-[10px]">(mm)</span></label>
+                <label className="text-xs text-black dark:text-slate-200">Offset Stepover<span className="text-gray-500 font-normal text-[10px] dark:text-slate-400">(mm)</span></label>
                 <input 
                   value={currentTool?.offsetStepOver}
-                  className="rounded w-20 focus:outline-none text-center text-xs py-0.5 border bg-gray-200" 
+                  className="rounded w-20 focus:outline-none text-center text-xs py-0.5 border bg-gray-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200" 
                   type="number" 
                   disabled
                 />
@@ -140,13 +140,13 @@ const RightPanel = () => {
 
               <div className="flex justify-between items-center gap-2">
                 <div className="flex items-center">
-                  <label className="text-xs text-black">Offset Number</label>
+                  <label className="text-xs text-black dark:text-slate-200">Offset Number</label>
                   <motion.button
                     onClick={() => {
                       setCurrentPngFile(prev => ({ ...prev, offsetNumber: prev.offsetNumber === 0 ? 1 : 0 }))
                     }}
                     whileTap={{ scale: 0.9 }}
-                    className="relative w-4 h-4 ml-4 flex items-center justify-center border rounded bg-white border-gray-400 hover:border-orange-500 transition-colors"
+                    className="relative w-4 h-4 ml-4 flex items-center justify-center border rounded bg-white border-gray-400 hover:border-orange-500 transition-colors dark:bg-slate-900 dark:border-slate-600"
                   >
                     <motion.div
                       initial={false}
@@ -159,12 +159,12 @@ const RightPanel = () => {
                     />
                   </motion.button>
 
-                  <span className="text-xs pl-1 font-medium text-black tracking-wider">Fill</span>
+                  <span className="text-xs pl-1 font-medium text-black tracking-wider dark:text-slate-200">Fill</span>
                 </div>
                 <input
                   className={cn(
-                      "rounded w-20 text-center focus:outline-none text-xs py-1 border px-2 transition-all duration-300 focus:border-l-2 focus:border-l-orange-500",
-                      currentPngFile.offsetNumber === 0 ? "opacity-90 cursor-not-allowed border-white" : ""
+                      "rounded w-20 text-center focus:outline-none text-xs py-1 border px-2 transition-all duration-300 focus:border-l-2 focus:border-l-orange-500 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-200",
+                      currentPngFile.offsetNumber === 0 ? "opacity-90 cursor-not-allowed border-white dark:border-slate-800" : ""
                   )}
                   type="number"
                   min={1}
@@ -180,37 +180,37 @@ const RightPanel = () => {
                 />
               </div>
 
-              <div className="h-px border my-2" />
+              <div className="h-px border my-2 dark:border-slate-800" />
 
               <div className="flex justify-between items-center gap-2">
-                <label className="text-xs text-black">Feed Rate<span className="text-gray-500 font-normal text-[10px]">(mm/s)</span></label>
+                <label className="text-xs text-black dark:text-slate-200">Feed Rate<span className="text-gray-500 font-normal text-[10px] dark:text-slate-400">(mm/s)</span></label>
                 <input 
                   value={currentTool?.feedRate}
-                  className="rounded w-20 focus:outline-none text-center text-xs py-0.5 border bg-gray-200" 
+                  className="rounded w-20 focus:outline-none text-center text-xs py-0.5 border bg-gray-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200" 
                   type="number" 
                   disabled
                 />
               </div>
               <div className="flex justify-between items-center gap-2">
-                <label className="text-xs text-black">Plunge Rate<span className="text-gray-500 font-normal text-[10px]">(mm/s)</span></label>
+                <label className="text-xs text-black dark:text-slate-200">Plunge Rate<span className="text-gray-500 font-normal text-[10px] dark:text-slate-400">(mm/s)</span></label>
                 <input 
                   value={currentTool?.plungeRate}
-                  className="rounded w-20 focus:outline-none text-center text-xs py-0.5 border bg-gray-200" 
+                  className="rounded w-20 focus:outline-none text-center text-xs py-0.5 border bg-gray-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200" 
                   type="number" 
                   disabled
                 />
               </div>
               <div className="flex justify-between items-center gap-2">
-                <label className="text-xs text-black">RPM<span className="text-gray-500 font-normal text-[10px]">(mm/s)</span></label>
+                <label className="text-xs text-black dark:text-slate-200">RPM<span className="text-gray-500 font-normal text-[10px] dark:text-slate-400">(mm/s)</span></label>
                 <input 
                   value={currentTool?.rpm}
-                  className="rounded w-20 focus:outline-none text-center text-xs py-0.5 border bg-gray-200" 
+                  className="rounded w-20 focus:outline-none text-center text-xs py-0.5 border bg-gray-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200" 
                   type="number" 
                   disabled
                 />
               </div>
 
-              <div className="flex justify-center items-center gap-2 mt-6 bg-blue-50 py-5 rounded-md">
+              <div className="flex justify-center items-center gap-2 mt-6 bg-blue-50 py-5 rounded-md dark:bg-cyan-500/10">
                 <motion.button
                   className="flex justify-center items-center gap-2   bg-sky-500 px-2 py-1.5 rounded shadow" 
                   whileTap={{ scale: 0.98 }}
@@ -223,7 +223,7 @@ const RightPanel = () => {
             </div>
             ): (
               <div className="flex flex-col justify-center items-center h-full mt-2 gap-3 px-4">
-                  <p className="text-xs text-black text-nowrap tracking-wide">No Data Available</p>              
+                  <p className="text-xs text-black text-nowrap tracking-wide dark:text-slate-300">No Data Available</p>              
               </div>
             )}
         </div>

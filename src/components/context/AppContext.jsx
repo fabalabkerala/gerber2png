@@ -5,7 +5,7 @@ import {
   useState, 
   useMemo, 
   useContext, 
-  // useEffect 
+  useEffect 
 } from "react";
 import { DEFAULT_TOOL_LIB, DEFAULT_MACHINE_CONF, DEFAULT_PCB_CONF, CARVERA_TOOL_LIB } from "../../config/defaults";
 const AppContext = createContext();
@@ -20,6 +20,27 @@ export const AppProvider = ({ children }) => {
   const [ machineConf, setMachineConf ] = useState(DEFAULT_MACHINE_CONF[0]);
   const [ pcbConf, setPCBConf ] = useState(DEFAULT_PCB_CONF);
   const [toolLib, setToolLib] = useState(CARVERA_TOOL_LIB);
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === "undefined") return "light";
+
+    const savedTheme = window.localStorage.getItem("theme");
+    if (savedTheme === "light" || savedTheme === "dark") return savedTheme;
+
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const isDark = theme === "dark";
+
+    root.classList.toggle("dark", isDark);
+    root.style.colorScheme = isDark ? "dark" : "light";
+    window.localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  };
   
   const markSetupComplete = () => {
     // localStorage.setItem("gcodeSetupCompleted", "true");
@@ -71,10 +92,13 @@ export const AppProvider = ({ children }) => {
     setPCBConf,
     toolLib, 
     setToolLib,
+    theme,
+    setTheme,
+    toggleTheme,
     markSetupComplete,
     setupCompleted,
     resetSetup
-  }), [pngFiles, activeTab, machineConf, pcbConf, toolLib, setupCompleted]);
+  }), [pngFiles, activeTab, machineConf, pcbConf, toolLib, theme, setupCompleted]);
 
   return (
     <AppContext.Provider value={value}>

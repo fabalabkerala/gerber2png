@@ -15,11 +15,11 @@ export default function SwitchToggle({ variant = "primary", enabled: controlled,
     const variants = {
         primary: {
             on: 'bg-[#EF4444]',
-            off: 'bg-gray-300'
+            off: 'bg-gray-300 dark:bg-slate-600'
         },
         secondary: {
             on: 'bg-green-500',
-            off: 'bg-green-500'
+            off: 'bg-gray-300 dark:bg-slate-600'
         }
     }
     
@@ -34,7 +34,7 @@ export default function SwitchToggle({ variant = "primary", enabled: controlled,
             >
                 <div
                     className={cn(
-                        "w-3 h-3 rounded-full bg-white shadow transform transition-transform",
+                        "w-3 h-3 rounded-full bg-white shadow transform transition-transform dark:bg-slate-100",
                         enabled ? "translate-x-3" : "translate-x-0"
                     )}
                 />
@@ -48,4 +48,3 @@ SwitchToggle.propTypes = {
     enabled: PropTypes.bool,
     onChange: PropTypes.func
 }
-

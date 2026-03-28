@@ -79,13 +79,13 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
             <AnimatePresence>
                 {showBulkModal && (
                     <motion.div
-                        className="fixed inset-0 bg-black/10 bg-blend-color-burn flex justify-center items-center z-50"
+                        className="fixed inset-0 bg-black/10 bg-blend-color-burn flex justify-center items-center z-50 dark:bg-slate-950/70"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                     >
                         <motion.div
-                            className="bg-white rounded-xl shadow-xl flex flex-col overflow-hidden relative max-h-[80vh]"
+                            className="bg-white rounded-xl shadow-xl flex flex-col overflow-hidden relative max-h-[80vh] dark:bg-slate-900 dark:border dark:border-slate-800"
                             initial={{ y: -30, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ y: -30, opacity: 0 }}
@@ -116,30 +116,30 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                                         <img src={selectedPng.url} alt="dsdfsd" className="h-full object-contain" />
 
                                                         <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-full h-px bg-zinc-300 my-3" />
-                                                        <p className="absolute -bottom-5 left-1/2 -translate-x-1/2 bg-white px-2 text-xs font-medium">
+                                                        <p className="absolute -bottom-5 left-1/2 -translate-x-1/2 bg-white px-2 text-xs font-medium dark:bg-slate-900 dark:text-slate-200">
                                                             {/* {dimension.width} */}
                                                             {selectedPng.width}
-                                                            <span className="text-gray-500 font-normal"> mm</span>
+                                                            <span className="text-gray-500 font-normal dark:text-slate-400"> mm</span>
                                                         </p>
 
                                                         <div className="absolute top-0 -right-6 w-px h-full bg-zinc-300 mx-3" />
-                                                        <p className=" absolute top-1/2 -translate-y-1/2 -right-[48px] bg-white px-2 text-xs -rotate-90 origin-center font-medium">
+                                                        <p className=" absolute top-1/2 -translate-y-1/2 -right-[48px] bg-white px-2 text-xs -rotate-90 origin-center font-medium dark:bg-slate-900 dark:text-slate-200">
                                                             {/* {dimension.height} */}
                                                             {selectedPng.height}
-                                                            <span className="text-gray-500 font-normal"> mm</span>
+                                                            <span className="text-gray-500 font-normal dark:text-slate-400"> mm</span>
                                                         </p>
                                                     </div>
                                                 </div>
                                             ): (
                                                 <>
                                                     <PhotoIcon width={20} height={20} strokeWidth={2} stroke="gray" />
-                                                    <p className="text-xs font-medium">No Preview Available</p>
+                                                    <p className="text-xs font-medium dark:text-slate-300">No Preview Available</p>
                                                 </>
                                             )}
                                         </div>
 
-                                        <div className="mt-auto flex flex-col justify-center items-center bg-slate-50 py-1.5 rounded-lg">
-                                            <p className="text-sm font-medium">{ config.pcb }<span className="text-[11px] font-normal text-gray-500"> PCBs</span></p>
+                                        <div className="mt-auto flex flex-col justify-center items-center bg-slate-50 py-1.5 rounded-lg dark:bg-slate-950/60">
+                                            <p className="text-sm font-medium dark:text-slate-100">{ config.pcb }<span className="text-[11px] font-normal text-gray-500 dark:text-slate-400"> PCBs</span></p>
                                         </div>
                                     </div>
 
@@ -165,7 +165,7 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                 {/* Your bulk options go here */}
                                 <div className="flex flex-col gap-2 p-3 overflow-hidden">
                                     <div className="relative border-t mx-2">
-                                        <p className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-white px-2 text-sm text-gray-700">Preview</p>
+                                        <p className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-white px-2 text-sm text-gray-700 dark:bg-slate-900 dark:text-slate-200">Preview</p>
                                     </div>
 
                                     { selectedPng.url && config.row > 0 && config.column > 0 ? (
@@ -185,9 +185,9 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                             <div className="relative w-full h-full flex flex-col justify-center items-center">
                                                 <PhotoIcon width={25} height={25} strokeWidth={2} stroke={ config.row <= 0 && config.column <= 0 ? "red" : "gray"} />
                                                 { config.row <= 0 || config.column <= 0 ? (
-                                                    <p className="text-red-500">Image Will Not Fit In the Bed</p>
+                                                    <p className="text-red-500 dark:text-red-300">Image Will Not Fit In the Bed</p>
                                                 ): (
-                                                    <p>No Image Selected</p>
+                                                    <p className="dark:text-slate-300">No Image Selected</p>
                                                 )}
                                             </div>
                                         </div>
@@ -203,10 +203,10 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                         animate={{ opacity: 1 }}
                                         exit={{ opacity: 0 }}
                                         transition={{ duration: 0.25, ease: "easeOut" }}
-                                        className="absolute inset-0 bg-white/40 backdrop-blur- flex items-center justify-center z-[9999]"
+                                        className="absolute inset-0 bg-white/40 backdrop-blur- flex items-center justify-center z-[9999] dark:bg-slate-950/50"
                                     >
                                         <motion.div
-                                            className="w-12 h-12 border-4 border-[#5545e5] border-t-transparent rounded-full"
+                                            className="w-12 h-12 border-4 border-[#5545e5] border-t-transparent rounded-full dark:border-cyan-400"
                                             animate={{
                                                 rotate: [0, 360],
                                                 scale: [1, 1.1, 1],

@@ -57,7 +57,7 @@ const OutputPanel = () => {
   return (
     <>
       {/* MAIN PANEL */}
-      <div className="flex flex-col h-full bg-white border border-slate-200 rounded-xl overflow-hidden">
+      <div className="flex flex-col h-full bg-white border border-slate-200 rounded-xl overflow-hidden transition-colors dark:bg-slate-900 dark:border-slate-800">
 
         {/* HEADER */}
         <div className="px-3 py-3 flex items-center justify-between">
@@ -67,13 +67,13 @@ const OutputPanel = () => {
                     <>
                         {/* READY STATE */}
                         <div className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
-                        <p className="text-xs font-semibold text-gray-700">
+                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 dark:bg-cyan-400" />
+                        <p className="text-xs font-semibold text-gray-700 dark:text-slate-100">
                             Ready for Mods
                         </p>
                         </div>
 
-                        <p className="text-[10px] text-gray-500 ml-3">
+                        <p className="text-[10px] text-gray-500 ml-3 dark:text-slate-400">
                         {pngFiles.length} output
                         {pngFiles.length !== 1 && "s"} generated
                         </p>
@@ -83,12 +83,12 @@ const OutputPanel = () => {
                         {/* EMPTY STATE */}
                         <div className="flex items-center gap-1.5">
                             <span className="w-1.5 h-1.5 rounded-full bg-gray-300" />
-                            <p className="text-xs font-semibold text-gray-500">
+                            <p className="text-xs font-semibold text-gray-500 dark:text-slate-400">
                                 No outputs yet
                             </p>
                         </div>
 
-                        <p className="text-[10px] text-gray-400 ml-3">
+                        <p className="text-[10px] text-gray-400 ml-3 dark:text-slate-500">
                             Generate PNG to continue
                         </p>
                     </>
@@ -109,11 +109,11 @@ const OutputPanel = () => {
                 }, 200);
                 }}
                 className={`
-                flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg transition
+                flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg transition border
                 ${
                     hasFiles
-                    ? "bg-gradient-to-r from-slate-100 to-slate-200 text-indigo-700 shadow-sm hover:opacity-95"
-                    : "bg-slate-100 text-gray-400 cursor-not-allowed"
+                    ? "bg-emerald-50 border-emerald-200 text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 dark:bg-emerald-500/10 dark:border-emerald-500/30 dark:text-emerald-200 dark:hover:bg-emerald-500/15"
+                    : "bg-slate-100 border-slate-200 text-gray-400 cursor-not-allowed dark:bg-slate-800 dark:border-slate-700 dark:text-slate-500"
                 }
                 `}
             >
@@ -123,8 +123,8 @@ const OutputPanel = () => {
         </div>
 
         {/* ACTION STRIP */}
-        <div className="px-3 py-2 bg-slate-50">
-          <div className="flex items-center justify-between bg-white rounded-xl px-1 py-1 border border-indigo-100">
+        <div className="px-3 py-2 bg-slate-50 dark:bg-slate-900/40">
+          <div className="flex items-center justify-between bg-white rounded-xl px-1 py-1 border border-indigo-100 dark:bg-slate-950/50 dark:border-slate-800">
 
             {/* LEFT */}
             <div className="flex items-center gap-1">
@@ -133,11 +133,11 @@ const OutputPanel = () => {
                 disabled={!hasFiles}
                 onClick={downloadZip}
                 className={`
-                  flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition shadow-sm
+                  flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition shadow-sm border
                   ${
                     hasFiles
                       ? "bg-gradient-to-r from-[#D3346E] to-[#B81D50] border-[#C12B61] text-white hover:from-[#B81D50] hover:to-[#D3346E]"
-                      : "bg-slate-100 border-slate-200 text-gray-400 cursor-not-allowed"
+                      : "bg-slate-100 border-slate-200 text-gray-400 cursor-not-allowed dark:bg-slate-800 dark:border-slate-700 dark:text-slate-500"
                   }
                 `}
               >
@@ -152,8 +152,8 @@ const OutputPanel = () => {
                   flex items-center gap-1.5 px-2 py-1.5 text-xs font-medium rounded-lg transition
                   ${
                     hasFiles
-                      ? "text-gray-700 hover:bg-slate-100"
-                      : "text-gray-400 cursor-not-allowed"
+                      ? "text-gray-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                      : "text-gray-400 cursor-not-allowed dark:text-slate-500"
                   }
                 `}
               >
@@ -171,8 +171,8 @@ const OutputPanel = () => {
                 p-2 rounded-lg transition
                 ${
                   hasFiles
-                    ? "text-red-500 hover:bg-red-50"
-                    : "text-gray-400 cursor-not-allowed"
+                    ? "text-red-500 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/10"
+                    : "text-gray-400 cursor-not-allowed dark:text-slate-500"
                 }
               `}
             >
@@ -243,7 +243,7 @@ const OutputPanel = () => {
       <AnimatePresence>
         {showDeleteConfirm && (
           <motion.div
-            className="fixed inset-0 bg-black/30 backdrop-blur-[2px] flex items-center justify-center z-50"
+            className="fixed inset-0 bg-black/30 backdrop-blur-[2px] flex items-center justify-center z-50 dark:bg-slate-950/70"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -253,15 +253,15 @@ const OutputPanel = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.94, opacity: 0 }}
               transition={{ type: "spring", stiffness: 260, damping: 20 }}
-              className="bg-white rounded-xl p-5 w-[300px] space-y-4 shadow-xl"
+              className="bg-white rounded-xl p-5 w-[300px] space-y-4 shadow-xl dark:bg-slate-900 dark:border dark:border-slate-800"
             >
               <div className="space-y-1">
-                <p className="text-sm font-semibold text-gray-800">
+                <p className="text-sm font-semibold text-gray-800 dark:text-slate-100">
                   Delete all outputs?
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 dark:text-slate-400">
                   This will permanently remove{" "}
-                  <span className="font-medium text-gray-700">
+                  <span className="font-medium text-gray-700 dark:text-slate-200">
                     {pngFiles.length} PNG file
                     {pngFiles.length !== 1 && "s"}
                   </span>{" "}
@@ -269,20 +269,20 @@ const OutputPanel = () => {
                 </p>
               </div>
 
-              <div className="text-[11px] text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+              <div className="text-[11px] text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2 dark:text-red-300 dark:bg-red-500/10 dark:border-red-500/25">
                 This action cannot be undone.
               </div>
 
               <div className="flex justify-end gap-2">
                 <button
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="px-3 py-1.5 text-xs rounded-xl bg-slate-100 hover:bg-slate-200 transition"
+                  className="px-3 py-1.5 text-xs rounded-xl bg-slate-100 hover:bg-slate-200 transition dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDeleteAll}
-                  className="px-3 py-1.5 text-xs rounded-xl bg-red-500 text-white hover:bg-red-600 transition"
+                  className="px-3 py-1.5 text-xs rounded-xl bg-red-500 text-white hover:bg-red-600 transition dark:bg-red-500 dark:hover:bg-red-400"
                 >
                   Delete All
                 </button>

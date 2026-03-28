@@ -16,15 +16,35 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color: #0f172a;
+  background-color: #f1f5f9;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #f1f5f9;
+  color: #0f172a;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.dark body {
+  background: #081018;
+  color: #e2e8f0;
 }
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: inherit;
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: inherit;
 }
 
 /* body {
@@ -103,4 +123,13 @@ button:focus-visible {
 
 .custom-scrollbar:hover {
   scrollbar-color: #9ca3af transparent; /* Firefox */
+}
+
+.dark .custom-scrollbar:hover::-webkit-scrollbar-thumb,
+.dark .custom-scrollbar:active::-webkit-scrollbar-thumb {
+  background-color: #475569;
+}
+
+.dark .custom-scrollbar:hover {
+  scrollbar-color: #475569 transparent;
 }
