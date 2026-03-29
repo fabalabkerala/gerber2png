@@ -88,14 +88,14 @@ const ProcessSteps = ({
         <>
             { modsWindowRef?.current?.window && (
                 <div className="pb-5 px-2 my-2">
-                    <div className="bg-gradient-to-br from-slate-50 to-white rounded-xl py-4 mb-4 dark:from-slate-950/80 dark:to-slate-900 dark:border dark:border-slate-800">
+                    <div className="rounded-xl border border-slate-200/80 bg-gradient-to-br from-slate-50 to-white py-4 mb-4 shadow-sm dark:border-slate-800 dark:from-slate-950/80 dark:to-slate-900">
                         <div className="flex items-center justify-between relative">
                             {/* Base line */}
                             <div className="absolute top-4 left-0 right-0 h-[1px] bg-slate-200 dark:bg-slate-700" />
 
                             {/* Progress line */}
                             <motion.div
-                                className="absolute top-4 left-0 h-[1px] bg-indigo-500"
+                                className="absolute top-4 left-0 h-[1px] bg-gradient-to-r from-teal-500 to-[#D3346E] dark:from-emerald-400 dark:to-[#D3346E]"
                                 animate={{
                                     width: `${(currentStep / (steps.length - 1)) * 100}%`
                                 }}
@@ -113,19 +113,19 @@ const ProcessSteps = ({
 
                                         <motion.div
                                             animate={{ scale: isActive ? 1.15 : 1 }}
-                                            className={`
-                                                w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold border transition-all
-                                                ${isCompleted && "bg-teal-500 text-white border-teal-500"}
-                                                ${isActive && "bg-indigo-500 text-white border-indigo-500 ring-4 ring-indigo-100"}
-                                                ${isLocked && "bg-gray-100 text-gray-400 dark:bg-slate-800 dark:text-slate-500 dark:border-slate-700"}
-                                            `}
+                                            className={cn(
+                                                "w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold border transition-all",
+                                                isCompleted && "bg-teal-500 text-white border-teal-500",
+                                                isActive && "bg-[#D3346E] text-white border-[#D3346E] ring-4 ring-rose-100 dark:ring-rose-400/20",
+                                                isLocked && "bg-gray-100 text-gray-400 border-slate-200 dark:bg-slate-800 dark:text-slate-500 dark:border-slate-700"
+                                            )}
                                         >
                                             {isCompleted ? "✓" : index + 1}
                                         </motion.div>
 
                                         {/* LABEL */}
                                         <div className="mt-2 text-center">
-                                            <p className={`text-xs capitalize font-semibold ${isActive ? "text-indigo-600 dark:text-cyan-300" : "text-gray-700 dark:text-slate-200"}`}>
+                                            <p className={`text-xs capitalize font-semibold ${isActive ? "text-[#B81D50] dark:text-rose-300" : "text-gray-700 dark:text-slate-200"}`}>
                                                 {step.label}
                                             </p>
                                             <p className="text-[10px] text-gray-400 capitalize dark:text-slate-500">
@@ -136,7 +136,7 @@ const ProcessSteps = ({
                                         <div className="mt-2 h-6 flex items-center justify-center gap-1">
                                             {isActive && !completedSteps.includes(index) && (
                                                 <motion.button
-                                                    className="flex justify-center text-[10px] px-2 py-1 rounded-md items-center gap-2 shadow bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-500" 
+                                                    className="flex justify-center text-[10px] px-2.5 py-1 rounded-md items-center gap-2 shadow-sm bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-500 dark:from-emerald-500 dark:to-cyan-500 dark:hover:from-emerald-400 dark:hover:to-cyan-400" 
                                                     whileTap={{ scale: 0.98 }}
                                                     onClick={handleMods}
                                                 >
@@ -152,7 +152,7 @@ const ProcessSteps = ({
                                                     className="
                                                         text-[10px] px-2 py-1 rounded-md
                                                         bg-red-50 text-red-500 border border-red-200
-                                                        hover:bg-red-100 transition dark:bg-red-500/10 dark:text-red-300 dark:border-red-500/30 dark:hover:bg-red-500/15
+                                                        hover:bg-red-100 transition dark:bg-red-500/10 dark:text-red-300 dark:border-red-500/30 dark:hover:bg-red-500/20
                                                     "
                                                 >
                                                     Undo

@@ -17,7 +17,10 @@ export default async function convertToSvg(
     const newTopSvg = modifiedSvg({ svg: topsvg, id: 'toplayer', viewbox: stackup.top.viewBox, width: stackup.top.width, height: stackup.top.height,})
     const newBottomSvg = modifiedSvg({ svg: bottomsvg, id: 'bottomlayer', viewbox: stackup.bottom.viewBox, width: stackup.bottom.width, height: stackup.bottom.height})
 
-    const fullStackSvg = await gerberFilesToSvg(files, stackup.layers, stackup.top)
+    const fullStackSvg = buildFullStackSvg({
+        topSvg: new DOMParser().parseFromString(stackup.top.svg, 'image/svg+xml').documentElement,
+        bottomSvg: new DOMParser().parseFromString(stackup.bottom.svg, 'image/svg+xml').documentElement,
+    })
     const newFullStackSvg = modifiedSvg({ svg: fullStackSvg, id: 'fullstack', viewbox: stackup.top.viewBox, width: stackup.top.width, height: stackup.top.height})
 
     setStackConfig({ 
@@ -58,83 +61,191 @@ async function stackupFromFiles(filesList) {
 }
 
 
-async function gerberFilesToSvg(files, layers, svgData) {
-    const ids = layers.map(({side, type}) => `${side}_${type}`);
-
-    const svg = svgData.svg;
-    const svgDoc = new DOMParser().parseFromString(svg, 'image/svg+xml');
-    const rootGElement = svgDoc.documentElement.querySelector('svg > g');
-    const gTransform = rootGElement.getAttribute('transform');
-
+function buildFullStackSvg({ topSvg, bottomSvg }) {
+    const namespacedTopSvg = namespaceSvgTree(topSvg.cloneNode(true), 'full-top');
+    const namespacedBottomSvg = namespaceSvgTree(bottomSvg.cloneNode(true), 'full-bottom');
     const fullLayerSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    for (const [key, value] of Object.entries(svgData.attributes)) {
-        fullLayerSvg.setAttribute(key, value);
-    }
+    copyAttributes(namespacedTopSvg, fullLayerSvg);
 
     const fullLayerDef = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
     const fullLayerG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    fullLayerG.setAttribute('transform', gTransform);
 
-    const parseFile = (file, index) => new Promise((resolve, reject) => {
-        const reader = new FileReader();
+    appendDefs(fullLayerDef, getDirectChildByTagName(namespacedTopSvg, 'defs'));
+    appendDefs(fullLayerDef, getDirectChildByTagName(namespacedBottomSvg, 'defs'));
 
-        reader.onerror = reject;
-        reader.onload = (e) => {
-            const fileContent = e.target.result;
-            const uint8Array = new Uint8Array(fileContent);
+    const topRootGroup = buildLayerGroup(
+        getDirectChildByTagName(namespacedTopSvg, 'g'),
+        (id) => !id.includes('bottom_')
+    );
+    const bottomRootGroup = buildLayerGroup(
+        getDirectChildByTagName(namespacedBottomSvg, 'g'),
+        (id) => id.includes('bottom_')
+    );
 
-            // eslint-disable-next-line no-undef
-            const gerberToSvgStream = gerberToSvg(uint8Array);
-            let streamSvg = "";
+    if (topRootGroup) {
+        topRootGroup.classList.add('fullstack-top-layer');
+        fullLayerG.appendChild(topRootGroup);
+    }
+    if (bottomRootGroup) {
+        bottomRootGroup.classList.add('fullstack-bottom-layer');
+        fullLayerG.appendChild(bottomRootGroup);
+    }
 
-            gerberToSvgStream.on("data", (chunk) => { streamSvg += chunk; });
-            gerberToSvgStream.on("error", reject);
-            gerberToSvgStream.on("end", () => {
-                const svgDoc = new DOMParser().parseFromString(streamSvg, "image/svg+xml");
-                const defElement = svgDoc.querySelector("defs");
-                const gElement = svgDoc.querySelector("g");
-
-                if (gElement) {
-                    gElement.setAttribute("id", `g-${ids[index]}`);
-                    gElement.removeAttribute("transform");
-
-                    const layerStyle = {
-                        "top_copper": { color: "crimson", opacity: 0.3 },
-                        "bottom_copper": { color: "#008208", opacity: 0.3 },
-                        "all_outline": { color: "green", opacity: 0.5 },
-                        "top_silkscreen": { color: "red", opacity: 0.5 },
-                        "bottom_silkscreen": { color: "blue", opacity: 0.5 },
-                        "bottom_soldermask": { color: "#757500", opacity: 0.5 },
-                        "bottom_solderpaste": { color: "orange", opacity: 0.5 },
-                        "top_solderpaste": { color: "#c362c3", opacity: 0.5 },
-                        "top_soldermask": { color: "#af4e5f", opacity: 0.5 },
-                    };
-
-                    const layerstyle = layerStyle[ids[index]] || { color: "green", opacity: 0.5 };
-                    gElement.setAttribute(
-                        "style",
-                        `color: ${layerstyle.color}; opacity: ${layerstyle.opacity}; display: ${layerstyle.display ? layerstyle.display : "block"}`
-                    );
-                }
-
-                resolve({ defElement, gElement });
-            });
-        };
-
-        reader.readAsArrayBuffer(file);
-    });
-
-    const parsedLayers = await Promise.all(Array.from(files).map(parseFile));
-
-    parsedLayers.forEach(({ defElement, gElement }) => {
-        if (defElement) fullLayerDef.appendChild(defElement);
-        if (gElement) fullLayerG.appendChild(gElement);
-    });
+    appendFullLayerStyles(fullLayerDef);
 
     fullLayerSvg.appendChild(fullLayerDef);
     fullLayerSvg.appendChild(fullLayerG);
 
     return fullLayerSvg
+}
+
+function copyAttributes(source, target) {
+    Array.from(source.attributes).forEach(({ name, value }) => {
+        target.setAttribute(name, value);
+    });
+}
+
+function getDirectChildByTagName(node, tagName) {
+    return Array.from(node.children).find((child) => child.tagName.toLowerCase() === tagName) || null;
+}
+
+function appendDefs(targetDefs, sourceDefs) {
+    if (!sourceDefs) return;
+
+    Array.from(sourceDefs.children).forEach((child) => {
+        targetDefs.appendChild(child.cloneNode(true));
+    });
+}
+
+function buildLayerGroup(rootGroup, shouldKeep) {
+    if (!rootGroup) return null;
+
+    const clonedRoot = rootGroup.cloneNode(true);
+    clonedRoot.querySelectorAll('g[id]').forEach((child) => {
+        const childId = child.getAttribute('id') || '';
+        if (!shouldKeep(childId)) {
+            child.remove();
+        }
+    });
+
+    return clonedRoot;
+}
+
+function namespaceSvgTree(svg, prefix) {
+    const idMap = new Map();
+    const classMap = new Map();
+
+    svg.querySelectorAll('[id]').forEach((element) => {
+        const previousId = element.getAttribute('id');
+        const nextId = `${prefix}-${previousId}`;
+        idMap.set(previousId, nextId);
+        element.setAttribute('id', nextId);
+    });
+
+    svg.querySelectorAll('[class]').forEach((element) => {
+        const previousClasses = element.getAttribute('class').split(/\s+/).filter(Boolean);
+        const nextClasses = previousClasses.map((className) => {
+            if (!classMap.has(className)) {
+                classMap.set(className, `${prefix}-${className}`);
+            }
+            return classMap.get(className);
+        });
+        element.setAttribute('class', nextClasses.join(' '));
+    });
+
+    svg.querySelectorAll('style').forEach((styleElement) => {
+        let nextStyle = styleElement.textContent;
+        Array.from(classMap.entries())
+            .sort((a, b) => b[0].length - a[0].length)
+            .forEach(([previousClass, nextClass]) => {
+                nextStyle = nextStyle.replaceAll(`.${previousClass}`, `.${nextClass}`);
+            });
+        styleElement.textContent = nextStyle;
+    });
+
+    svg.querySelectorAll('*').forEach((element) => {
+        Array.from(element.attributes).forEach(({ name, value }) => {
+            let nextValue = value;
+
+            idMap.forEach((nextId, previousId) => {
+                nextValue = nextValue.replaceAll(`url(#${previousId})`, `url(#${nextId})`);
+                if ((name === 'href' || name === 'xlink:href') && nextValue === `#${previousId}`) {
+                    nextValue = `#${nextId}`;
+                }
+            });
+
+            if (nextValue !== value) {
+                element.setAttribute(name, nextValue);
+            }
+        });
+    });
+
+    return svg;
+}
+
+function appendFullLayerStyles(defs) {
+    const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+    style.textContent = `
+        .fullstack-top-layer [class*="_fr4"],
+        .fullstack-bottom-layer [class*="_fr4"] { display: none !important; }
+
+        .fullstack-top-layer [class*="_cu"] {
+            color: #d3346e !important;
+            opacity: 0.48 !important;
+        }
+
+        .fullstack-bottom-layer [class*="_cu"] {
+            color: #0f9f73 !important;
+            opacity: 0.48 !important;
+        }
+
+        .fullstack-top-layer [class*="_cf"] {
+            color: #f59e0b !important;
+            opacity: 0.38 !important;
+        }
+
+        .fullstack-bottom-layer [class*="_cf"] {
+            color: #22c55e !important;
+            opacity: 0.38 !important;
+        }
+
+        .fullstack-top-layer [class*="_sm"] {
+            color: #f472b6 !important;
+            opacity: 0.2 !important;
+        }
+
+        .fullstack-bottom-layer [class*="_sm"] {
+            color: #38bdf8 !important;
+            opacity: 0.2 !important;
+        }
+
+        .fullstack-top-layer [class*="_ss"] {
+            color: #f8fafc !important;
+            opacity: 0.88 !important;
+        }
+
+        .fullstack-bottom-layer [class*="_ss"] {
+            color: #93c5fd !important;
+            opacity: 0.88 !important;
+        }
+
+        .fullstack-top-layer [class*="_sp"] {
+            color: #f9a8d4 !important;
+            opacity: 0.55 !important;
+        }
+
+        .fullstack-bottom-layer [class*="_sp"] {
+            color: #86efac !important;
+            opacity: 0.55 !important;
+        }
+
+        .fullstack-top-layer [class*="_out"],
+        .fullstack-bottom-layer [class*="_out"] {
+            color: #ffffff !important;
+            opacity: 0.7 !important;
+        }
+    `;
+    defs.appendChild(style);
 }
 
 

@@ -206,12 +206,6 @@ export const GerberProvider = ({ children }) => {
             return;
         }
 
-        if (mode === 'double') {
-            setMainSvg({ id: 'all', svg: fullLayers });
-            setSide('all');
-            return;
-        }
-
         setMainSvg({ id: 'top', svg: topstack.svg });
         setSide('top');
     }, [bottomstack.svg, fullLayers, topstack.svg])

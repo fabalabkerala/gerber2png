@@ -141,7 +141,7 @@ const MainView = () => {
                     {({ zoomIn, zoomOut, resetTransform, centerView }) => (
                         <>
                             {mainSvg.svg && (
-                                <div className="absolute right-3 top-3 z-20 flex items-center gap-1.5 rounded-xl border border-slate-200/90 bg-white/94 p-1.5 shadow-[0_12px_28px_rgba(15,23,42,0.12)] backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/90 dark:shadow-[0_18px_34px_rgba(2,6,23,0.46)]">
+                                <div className="absolute left-1/2 -translate-x-1/2 bottom-3 z-20 flex items-center gap-1.5 rounded-xl border border-slate-200/90 bg-white/94 p-1.5 shadow-[0_12px_28px_rgba(15,23,42,0.12)] backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/90 dark:shadow-[0_18px_34px_rgba(2,6,23,0.46)]">
                                     <button
                                         type="button"
                                         className={cn(

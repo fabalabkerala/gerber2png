@@ -16,7 +16,7 @@ const ImageLayout = ({
         <>
             <div className="max-w-[550px] h-[300px] mx-auto pb-6 pr-5 my-5">
                 <div
-                    className="relative grid my-auto border w-fit"
+                    className="relative grid my-auto w-fit border border-slate-200 dark:border-slate-700"
                     style={{
                         gridTemplateColumns: `repeat(${column}, auto)`,
                         gridTemplateRows: `repeat(${row}, auto)`,
@@ -53,7 +53,7 @@ const ImageLayout = ({
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
                                     <EyeSlashIcon className="text-white w-3.5 h-3.5" />
                                 </div>
-                                <span className="absolute bottom-1 right-1 text-[10px] text-gray-400">
+                                <span className="absolute bottom-1 right-1 rounded bg-white/80 px-1 py-0.5 text-[10px] text-gray-500 shadow-sm dark:bg-slate-900/80 dark:text-slate-300">
                                     #{i + 1}
                                 </span>
                             </>
@@ -61,17 +61,17 @@ const ImageLayout = ({
                         </div>
                     ))}
 
-                    <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 w-full h-px bg-zinc-300 my-3" />
-                    <p className="text-nowrap absolute -bottom-6 left-1/2 -translate-x-1/2 bg-white px-2 text-xs font-medium">
+                    <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 w-full h-px bg-zinc-300 my-3 dark:bg-slate-700" />
+                    <p className="text-nowrap absolute -bottom-6 left-1/2 -translate-x-1/2 rounded bg-white px-2 text-xs font-medium text-slate-800 shadow-sm dark:bg-slate-900 dark:text-slate-200">
                         {dimension.width * column + spacing * (column - 1)}
-                        <span className="text-gray-500 font-normal"> mm</span>
+                        <span className="text-gray-500 font-normal dark:text-slate-400"> mm</span>
                     </p>
 
-                    <div className="absolute top-0 -right-7 w-px h-full bg-zinc-300 mx-3" />
-                        <p className="text-nowrap absolute top-1/2 -translate-y-1/2 -right-[50px] bg-white px-2 text-xs -rotate-90 origin-center font-medium">
-                            {dimension.height * row + spacing * (row - 1)}
-                            <span className="text-gray-500 font-normal"> mm</span>
-                        </p>
+                    <div className="absolute top-0 -right-7 w-px h-full bg-zinc-300 mx-3 dark:bg-slate-700" />
+                    <p className="text-nowrap absolute top-1/2 -translate-y-1/2 -right-[50px] rounded bg-white px-2 text-xs -rotate-90 origin-center font-medium text-slate-800 shadow-sm dark:bg-slate-900 dark:text-slate-200">
+                        {dimension.height * row + spacing * (row - 1)}
+                        <span className="text-gray-500 font-normal dark:text-slate-400"> mm</span>
+                    </p>
                 </div>
             </div>
             
