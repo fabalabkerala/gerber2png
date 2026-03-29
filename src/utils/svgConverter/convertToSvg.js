@@ -87,6 +87,7 @@ function buildFullStackSvg({ topSvg, bottomSvg }) {
         fullLayerG.appendChild(topRootGroup);
     }
     if (bottomRootGroup) {
+        normalizeBottomOverlay(bottomRootGroup);
         bottomRootGroup.classList.add('fullstack-bottom-layer');
         fullLayerG.appendChild(bottomRootGroup);
     }
@@ -129,6 +130,16 @@ function buildLayerGroup(rootGroup, shouldKeep) {
     });
 
     return clonedRoot;
+}
+
+function normalizeBottomOverlay(rootGroup) {
+    rootGroup.querySelectorAll('[transform]').forEach((element) => {
+        const transform = element.getAttribute('transform') || '';
+
+        if (transform.includes('scale(-1,1)') || transform.includes('scale(-1 1)')) {
+            element.removeAttribute('transform');
+        }
+    });
 }
 
 function namespaceSvgTree(svg, prefix) {
