@@ -12,6 +12,26 @@ const GerberLayersContext = createContext();
 const GerberSettingsContext = createContext();
 const GerberViewContext = createContext();
 
+const DEFAULT_STACK_CONFIG = {
+    viewbox: { viewboxX: 0, viewboxY: 0, viewboxW: 0, viewboxH: 0 },
+    width: 0,
+    height: 0,
+};
+
+const DEFAULT_TOGGLED_STATE = {
+    toplayer: { trace: false, pads: false, silkscreen: false, soldermask: false },
+    bottomlayer: { trace: false, pads: false, silkscreen: false, soldermask: false },
+    commonlayer: { outline: false, drill: false, outlayer: true}
+};
+
+const createInitialToolConfig = () => {
+    const initial = {};
+    Object.keys(MACHINE_PRESETS).forEach(machine => {
+        initial[machine] = structuredClone(MACHINE_PRESETS[machine]);
+    });
+    return initial;
+};
+
 export const GerberProvider = ({ children }) => {
     const { setPngFiles } = useApp();
     // ------------------------
@@ -35,22 +55,12 @@ export const GerberProvider = ({ children }) => {
     const [layerType, setLayerType] = useState(null);
     const [canvasBg, setCanvasBg] = useState('black');
     const [changeSelect, setChangeSelect] = useState('generate-all');
-    const [stackConfig, setStackConfig] = useState({ viewbox: { viewboxX: 0, viewboxY: 0, viewboxW: 0, viewboxH: 0}, width: 0, height: 0 });
-    const [isToggled, setIsToggled] = useState({
-        toplayer: { trace: false, pads: false, silkscreen: false, soldermask: false },
-        bottomlayer: { trace: false, pads: false, silkscreen: false, soldermask: false },
-        commonlayer: { outline: false, drill: false, outlayer: true}
-    });
+    const [stackConfig, setStackConfig] = useState(DEFAULT_STACK_CONFIG);
+    const [isToggled, setIsToggled] = useState(DEFAULT_TOGGLED_STATE);
 
     const DEFAULT_MACHINE = Object.keys(MACHINE_PRESETS)[0];
     const [modsMachine, setModsMachine] = useState(DEFAULT_MACHINE);
-    const [toolConfig, setToolConfig] = useState(() => {
-        const initial = {};
-        Object.keys(MACHINE_PRESETS).forEach(machine => {
-            initial[machine] = structuredClone(MACHINE_PRESETS[machine]);
-        });
-        return initial;
-    });
+    const [toolConfig, setToolConfig] = useState(() => createInitialToolConfig());
 
     const handleToggleCick = useCallback((layertype, layerproperty) => {
         setIsToggled((prevState) => ({
@@ -278,6 +288,26 @@ export const GerberProvider = ({ children }) => {
 
     }, [bottomstack, canvasBg, fullLayers, layerType, mainSvg.id, mainSvg.svg, setPngFiles, topstack])
 
+    const handleReset = useCallback(() => {
+        setMainSvg({ id: null, svg: null });
+        setTopStack({ id: null, svg: null });
+        setBottomStack({ id: null, svg: null });
+        setFullLayers(null);
+        setSide(null);
+        setLoader(false);
+
+        setBoardSide('top');
+        setLayerType(null);
+        setCanvasBg('black');
+        setChangeSelect('generate-all');
+        setStackConfig(DEFAULT_STACK_CONFIG);
+        setIsToggled(DEFAULT_TOGGLED_STATE);
+
+        setModsMachine(DEFAULT_MACHINE);
+        setToolConfig(createInitialToolConfig());
+        setPngFiles([]);
+    }, [setPngFiles]);
+
 
 
     const viewValues = useMemo(() => ({
@@ -285,25 +315,9 @@ export const GerberProvider = ({ children }) => {
         side, setSide,
         loader, setLoader,
         setBoardMode,
-        handlePngConversion
-    }), [handlePngConversion, loader, mainSvg, setBoardMode, side])
-
-    // const handleReset = () => {
-    //     setMainSvg({id: null, svg: null});
-    //     setTopStack({id: null, svg: null});
-    //     setBottomStack({id: null, svg: null});
-    //     setFullLayers(null);
-    //     setLayerType(null);
-    //     setCanvasBg('black');
-    //     setPngUrls([]);
-    //     setChangeSelect('custom')
-    //     setStackConfig({ vewbox: { viewboxX: 0, viewboxY: 0, viewboxW: 0, viewboxH: 0}, width: 0, height: 0 });
-    //     setIsToggled({
-    //         toplayer: { trace: false, pads: false, silkscreen: false, soldermask: false },
-    //         bottomlayer: { trace: false, pads: false, silkscreen: false, soldermask: false },
-    //         commonlayer: { outline: false, drill: false, outlayer: true}
-    //     });
-    // }
+        handlePngConversion,
+        handleReset
+    }), [handlePngConversion, handleReset, loader, mainSvg, setBoardMode, side])
 
     // ------------------------
     // Sync side with current mainSvg

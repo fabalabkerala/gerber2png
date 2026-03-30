@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
-import { ArrowsPointingInIcon, MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { ArrowsPointingInIcon, ArrowPathIcon, MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 import FileDropZone from "../ui/FileDropZone";
 import { useGerberLayer, useGerberSettings, useGerberView } from "../context/GerberContext";
 import convertToSvg from "../../utils/svgConverter/convertToSvg";
@@ -12,11 +12,12 @@ import { useApp } from "../context/AppContext";
 import AppToaster from "../ui/AppToaster";
 
 const viewerControlButtonClass = "group flex h-6 w-6 items-center justify-center rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-0";
+const viewerTooltipClass = "pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border border-slate-200/90 bg-white/95 px-2 py-1 text-[10px] font-medium tracking-[0.01em] text-slate-700 opacity-0 shadow-[0_10px_24px_rgba(15,23,42,0.12)] transition-all duration-200 group-hover:-translate-y-0.5 group-hover:opacity-100 dark:border-slate-700/80 dark:bg-slate-900/95 dark:text-slate-100 dark:shadow-[0_14px_28px_rgba(2,6,23,0.45)]";
 
 const MainView = () => {
     const { setTopStack, setBottomStack, setFullLayers } = useGerberLayer();
     const { setLayerType, setStackConfig } = useGerberSettings();
-    const { mainSvg, setMainSvg, setSide } = useGerberView();
+    const { mainSvg, setMainSvg, setSide, handleReset } = useGerberView();
     const { theme } = useApp();
 
     const resultRef = useRef(null);
@@ -142,50 +143,72 @@ const MainView = () => {
                         <>
                             {mainSvg.svg && (
                                 <div className="absolute left-1/2 -translate-x-1/2 bottom-3 z-20 flex items-center gap-1.5 rounded-xl border border-slate-200/90 bg-white/94 p-1.5 shadow-[0_12px_28px_rgba(15,23,42,0.12)] backdrop-blur-md dark:border-slate-700/70 dark:bg-slate-900/90 dark:shadow-[0_18px_34px_rgba(2,6,23,0.46)]">
-                                    <button
-                                        type="button"
-                                        className={cn(
-                                            viewerControlButtonClass,
-                                            "border-slate-200/80 bg-slate-50/95 text-slate-700 hover:-translate-y-0.5 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 focus:ring-rose-300/30",
-                                            "dark:border-slate-700/80 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-white dark:focus:ring-slate-500/35"
-                                        )}
-                                        onClick={() => zoomIn(0.2, 180)}
-                                        aria-label="Zoom in"
-                                        title="Zoom in"
-                                    >
-                                        <PlusIcon className="h-3 w-3 transition-transform duration-200 group-hover:scale-110" />
-                                    </button>
+                                    <div className="group relative flex">
+                                        <span className={viewerTooltipClass}>Zoom in</span>
+                                        <button
+                                            type="button"
+                                            className={cn(
+                                                viewerControlButtonClass,
+                                                "border-slate-200/80 bg-slate-50/95 text-slate-700 hover:-translate-y-0.5 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 focus:ring-rose-300/30",
+                                                "dark:border-slate-700/80 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-white dark:focus:ring-slate-500/35"
+                                            )}
+                                            onClick={() => zoomIn(0.2, 180)}
+                                            aria-label="Zoom in"
+                                        >
+                                            <PlusIcon className="h-3 w-3 transition-transform duration-200 group-hover:scale-110" />
+                                        </button>
+                                    </div>
                                     <div className="h-3 w-px bg-gradient-to-b from-transparent via-slate-200 to-transparent dark:via-slate-700" />
-                                    <button
-                                        type="button"
-                                        className={cn(
-                                            viewerControlButtonClass,
-                                            "border-slate-200/80 bg-slate-50/95 text-slate-700 hover:-translate-y-0.5 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 focus:ring-rose-300/30",
-                                            "dark:border-slate-700/80 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-white dark:focus:ring-slate-500/35"
-                                        )}
-                                        onClick={() => zoomOut(0.2, 180)}
-                                        aria-label="Zoom out"
-                                        title="Zoom out"
-                                    >
-                                        <MinusIcon className="h-3 w-3 transition-transform duration-200 group-hover:scale-110" />
-                                    </button>
+                                    <div className="group relative flex">
+                                        <span className={viewerTooltipClass}>Zoom out</span>
+                                        <button
+                                            type="button"
+                                            className={cn(
+                                                viewerControlButtonClass,
+                                                "border-slate-200/80 bg-slate-50/95 text-slate-700 hover:-translate-y-0.5 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 focus:ring-rose-300/30",
+                                                "dark:border-slate-700/80 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-white dark:focus:ring-slate-500/35"
+                                            )}
+                                            onClick={() => zoomOut(0.2, 180)}
+                                            aria-label="Zoom out"
+                                        >
+                                            <MinusIcon className="h-3 w-3 transition-transform duration-200 group-hover:scale-110" />
+                                        </button>
+                                    </div>
                                     <div className="h-3 w-px bg-gradient-to-b from-transparent via-slate-200 to-transparent dark:via-slate-700" />
-                                    <button
-                                        type="button"
-                                        className={cn(
-                                            viewerControlButtonClass,
-                                            "border-slate-200/80 bg-slate-50/95 text-slate-700 hover:-translate-y-0.5 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 focus:ring-rose-300/30",
-                                            "dark:border-slate-700/80 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-white dark:focus:ring-slate-500/35"
-                                        )}
-                                        onClick={() => {
-                                            resetTransform(180);
-                                            window.requestAnimationFrame(() => centerView(1, 180));
-                                        }}
-                                        aria-label="Fit to window"
-                                        title="Fit to window"
-                                    >
-                                        <ArrowsPointingInIcon className="h-3 w-3 transition-transform duration-200 group-hover:scale-110" />
-                                    </button>
+                                    <div className="group relative flex">
+                                        <span className={viewerTooltipClass}>Fit to view</span>
+                                        <button
+                                            type="button"
+                                            className={cn(
+                                                viewerControlButtonClass,
+                                                "border-slate-200/80 bg-slate-50/95 text-slate-700 hover:-translate-y-0.5 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 focus:ring-rose-300/30",
+                                                "dark:border-slate-700/80 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-white dark:focus:ring-slate-500/35"
+                                            )}
+                                            onClick={() => {
+                                                resetTransform(180);
+                                                window.requestAnimationFrame(() => centerView(1, 180));
+                                            }}
+                                            aria-label="Fit to view"
+                                        >
+                                            <ArrowsPointingInIcon className="h-3 w-3 transition-transform duration-200 group-hover:scale-110" />
+                                        </button>
+                                    </div>
+                                    <div className="h-3 w-px bg-gradient-to-b from-transparent via-slate-200 to-transparent dark:via-slate-700" />
+                                    <div className="group relative flex">
+                                        <span className={viewerTooltipClass}>Reset viewer</span>
+                                        <button
+                                            type="button"
+                                            className={cn(
+                                                viewerControlButtonClass,
+                                                "border-slate-200/80 bg-slate-50/95 text-slate-700 hover:-translate-y-0.5 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 focus:ring-rose-300/30",
+                                                "dark:border-slate-700/80 dark:bg-slate-800/95 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700 dark:hover:text-white dark:focus:ring-slate-500/35"
+                                            )}
+                                            onClick={handleReset}
+                                            aria-label="Reset viewer"
+                                        >
+                                            <ArrowPathIcon className="h-3 w-3 transition-transform duration-200 group-hover:scale-110" />
+                                        </button>
+                                    </div>
                                 </div>
                             )}
 
