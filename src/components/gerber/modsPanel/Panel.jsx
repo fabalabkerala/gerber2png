@@ -1,7 +1,6 @@
 import {
     ArrowRightEndOnRectangleIcon,
     CheckBadgeIcon,
-    DocumentArrowUpIcon,
     DocumentCheckIcon,
     LinkIcon,
     PhotoIcon,
@@ -37,12 +36,82 @@ const CUSTOM_PROGRAM_STORAGE_KEY = 'modsCustomPrograms';
 const LEGACY_CUSTOM_PROGRAM_STORAGE_KEY = 'modsCustomProgram';
 const PREFERRED_MACHINE_STORAGE_KEY = 'modsPreferredMachine';
 
-const buildCustomProgramUrl = (customProgram) => {
-    if (!customProgram) return null;
-    if (customProgram.type === 'url') return customProgram.value;
+const extractJsonSourceUrl = (rawUrl) => {
+    try {
+        const parsedUrl = new URL(rawUrl);
+        if (parsedUrl.origin === 'https://modsproject.org' && parsedUrl.searchParams.has('json')) {
+            return (parsedUrl.searchParams.get('json') || '').trim();
+        }
+    } catch (error) {
+        return rawUrl;
+    }
 
-    const dataUrl = `data:application/json;charset=utf-8,${encodeURIComponent(customProgram.value)}`;
-    return `https://modsproject.org/?program=${encodeURIComponent(dataUrl)}`;
+    return rawUrl;
+};
+
+const buildCustomProgramUrl = (customProgram) => {
+    if (!customProgram || customProgram.type !== 'url') return null;
+
+    try {
+        const sourceUrl = extractJsonSourceUrl(customProgram.value);
+        new URL(sourceUrl);
+        return `https://modsproject.org/?json=${sourceUrl}`;
+    } catch (error) {
+        return null;
+    }
+};
+
+const hasFileTarget = (rawUrl) => {
+    try {
+        const parsedUrl = new URL(extractJsonSourceUrl(rawUrl));
+        const lastSegment = parsedUrl.pathname.split('/').filter(Boolean).pop();
+        return Boolean(lastSegment && lastSegment.includes('.'));
+    } catch (error) {
+        return false;
+    }
+};
+
+const deriveProgramNameFromUrl = (rawUrl) => {
+    try {
+        const parsedUrl = new URL(extractJsonSourceUrl(rawUrl));
+        const lastSegment = parsedUrl.pathname.split('/').filter(Boolean).pop();
+        if (!lastSegment) return '';
+
+        const decodedName = decodeURIComponent(lastSegment);
+        return decodedName.replace(/\.[^/.]+$/, '').trim();
+    } catch (error) {
+        return '';
+    }
+};
+
+const verifyRemoteFile = async (url, signal) => {
+    const request = async (method) => fetch(url, {
+        method,
+        signal,
+        headers: method === 'GET' ? { Range: 'bytes=0-0' } : undefined,
+    });
+
+    try {
+        const headResponse = await request('HEAD');
+        if (headResponse.ok) return { ok: true };
+        if (![403, 405, 501].includes(headResponse.status)) {
+            return { ok: false, message: `The file could not be reached (${headResponse.status}).` };
+        }
+    } catch (error) {
+        if (error.name === 'AbortError') throw error;
+    }
+
+    try {
+        const getResponse = await request('GET');
+        if (getResponse.ok) return { ok: true };
+        return { ok: false, message: `The file could not be reached (${getResponse.status}).` };
+    } catch (error) {
+        if (error.name === 'AbortError') throw error;
+        return {
+            ok: false,
+            message: 'The browser could not verify this file. Make sure the link is public and allows direct access.',
+        };
+    }
 };
 
 const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng}) => {
@@ -52,22 +121,23 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
     const [currentStep, setCurrentStep] = useState(0);
     const [completedSteps, setCompletedSteps] = useState([]);
     const [customName, setCustomName] = useState('');
-    const [customMode, setCustomMode] = useState('url');
     const [customUrl, setCustomUrl] = useState('');
-    const [customJsonName, setCustomJsonName] = useState('');
-    const [customJsonContent, setCustomJsonContent] = useState('');
+    const [customUrlCheckState, setCustomUrlCheckState] = useState('idle');
+    const [customUrlCheckError, setCustomUrlCheckError] = useState('');
+    const [isCustomNameManuallyEdited, setIsCustomNameManuallyEdited] = useState(false);
     const [customPrograms, setCustomPrograms] = useState([]);
     const [isCustomProgramModalOpen, setIsCustomProgramModalOpen] = useState(false);
 
     const modsWindowRef = useRef(null);
     const lastSelectedMachineRef = useRef(machineOption[0].id);
+    const lastNormalizedCustomUrlRef = useRef('');
 
     const resetCustomProgramDraft = () => {
         setCustomName('');
-        setCustomMode('url');
         setCustomUrl('');
-        setCustomJsonName('');
-        setCustomJsonContent('');
+        setCustomUrlCheckState('idle');
+        setCustomUrlCheckError('');
+        setIsCustomNameManuallyEdited(false);
     };
 
     const closeCustomProgramModal = () => {
@@ -131,23 +201,30 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
             id: program.id,
             label: `Custom · ${program.label}`,
             url: buildCustomProgramUrl(program),
-            icon: program.type === 'json' ? DocumentArrowUpIcon : LinkIcon,
+            icon: LinkIcon,
         }))
     ), [customPrograms]);
 
-    const customProgramName = useMemo(() => (
-        customName.trim() || (customMode === 'json'
-            ? (customJsonName ? customJsonName.replace(/\.json$/i, '') : 'Custom JSON Program')
-            : 'Custom Program')
-    ), [customJsonName, customMode, customName]);
-
     const trimmedCustomUrl = customUrl.trim();
+    const normalizedCustomUrl = useMemo(() => extractJsonSourceUrl(trimmedCustomUrl), [trimmedCustomUrl]);
+    const derivedCustomProgramName = useMemo(() => deriveProgramNameFromUrl(normalizedCustomUrl), [normalizedCustomUrl]);
+    const customProgramName = useMemo(
+        () => customName.trim() || derivedCustomProgramName || 'Custom Program',
+        [customName, derivedCustomProgramName]
+    );
+
+    useEffect(() => {
+        if (lastNormalizedCustomUrlRef.current === normalizedCustomUrl) return;
+        lastNormalizedCustomUrlRef.current = normalizedCustomUrl;
+        setIsCustomNameManuallyEdited(false);
+    }, [normalizedCustomUrl]);
 
     const customUrlError = useMemo(() => {
-        if (customMode !== 'url' || !trimmedCustomUrl) return '';
+        if (!trimmedCustomUrl) return '';
 
+        let parsedUrl;
         try {
-            const parsedUrl = new URL(trimmedCustomUrl);
+            parsedUrl = new URL(normalizedCustomUrl);
             if (!parsedUrl.protocol.startsWith('http')) {
                 return 'Enter a valid http or https URL.';
             }
@@ -155,40 +232,79 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
             return 'Enter a valid program URL.';
         }
 
-        if (customPrograms.some((program) => program.type === 'url' && program.value === trimmedCustomUrl)) {
+        if (!hasFileTarget(normalizedCustomUrl)) {
+            return 'Use a direct file link, such as a hosted .json file, not just a folder or site URL.';
+        }
+
+        if (customPrograms.some((program) => program.type === 'url' && extractJsonSourceUrl(program.value) === normalizedCustomUrl)) {
             return 'This Mods URL is already saved.';
         }
 
         return '';
-    }, [customMode, customPrograms, trimmedCustomUrl]);
+    }, [customPrograms, normalizedCustomUrl, trimmedCustomUrl]);
 
-    const customJsonError = useMemo(() => {
-        if (customMode !== 'json' || !customJsonContent.trim()) return '';
-
-        try {
-            JSON.parse(customJsonContent);
-        } catch (error) {
-            return 'Upload a valid JSON program file.';
+    useEffect(() => {
+        if (!trimmedCustomUrl || customUrlError) {
+            setCustomUrlCheckState('idle');
+            setCustomUrlCheckError('');
+            return;
         }
 
-        if (customPrograms.some((program) => program.type === 'json' && program.value === customJsonContent)) {
-            return 'This JSON program is already saved.';
+        let isActive = true;
+        const controller = new AbortController();
+
+        const timeoutId = window.setTimeout(async () => {
+            setCustomUrlCheckState('checking');
+            setCustomUrlCheckError('');
+
+            try {
+                const result = await verifyRemoteFile(normalizedCustomUrl, controller.signal);
+                if (!isActive) return;
+
+                if (result.ok) {
+                    setCustomUrlCheckState('valid');
+                    return;
+                }
+
+                setCustomUrlCheckState('invalid');
+                setCustomUrlCheckError(result.message);
+            } catch (error) {
+                if (!isActive || error.name === 'AbortError') return;
+                setCustomUrlCheckState('invalid');
+                setCustomUrlCheckError('The file check was interrupted. Try again.');
+            }
+        }, 350);
+
+        return () => {
+            isActive = false;
+            window.clearTimeout(timeoutId);
+            controller.abort();
+        };
+    }, [customUrlError, normalizedCustomUrl, trimmedCustomUrl]);
+
+    useEffect(() => {
+        if (customUrlCheckState !== 'valid' || customName.trim() || isCustomNameManuallyEdited) return;
+
+        if (derivedCustomProgramName) {
+            setCustomName(derivedCustomProgramName);
         }
+    }, [customName, customUrlCheckState, derivedCustomProgramName, isCustomNameManuallyEdited]);
 
-        return '';
-    }, [customJsonContent, customMode, customPrograms]);
+    const handleCustomNameChange = (value) => {
+        setCustomName(value);
+        setIsCustomNameManuallyEdited(true);
+    };
 
-    const customProgramHelper = customMode === 'url'
-        ? (trimmedCustomUrl
-            ? 'Save this Mods link and use it as a selectable machine preset.'
-            : 'Paste any Mods program URL to save it as a reusable preset.')
-        : (customJsonName
-            ? 'Your JSON program is loaded and ready to save.'
-            : 'Upload a Mods JSON program file to store it locally.');
+    const customProgramHelper = !trimmedCustomUrl
+        ? 'Paste the public URL of your hosted JSON program. We will verify that the file is reachable before saving it.'
+        : customUrlCheckState === 'checking'
+            ? 'Checking whether the hosted JSON file is reachable...'
+            : customUrlCheckState === 'valid'
+                ? 'File found. This link will open in Mods using the ?json=<link> format.'
+                : 'This hosted JSON link will open in Mods as ?json=<your-link> once the file check passes.';
 
-    const isCustomProgramReady = customMode === 'url'
-        ? Boolean(trimmedCustomUrl) && !customUrlError
-        : Boolean(customJsonContent.trim()) && !customJsonError;
+    const customProgramValidationError = customUrlError || customUrlCheckError;
+    const isCustomProgramReady = Boolean(trimmedCustomUrl) && !customProgramValidationError && customUrlCheckState === 'valid';
 
     const machineOptions = useMemo(() => {
         const createOption = {
@@ -197,7 +313,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
             url: null,
             icon: PlusCircleIcon,
         };
-        return [...machineOption, ...customProgramOptions, createOption];
+        return [createOption, ...machineOption, ...customProgramOptions];
     }, [customProgramOptions]);
 
     const activeMachine = useMemo(
@@ -242,44 +358,16 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
     const saveCustomProgram = () => {
         if (!isCustomProgramReady) return;
 
-        if (customMode === 'url') {
-            const payload = {
-                id: `custom-program-${Date.now()}`,
-                type: 'url',
-                value: trimmedCustomUrl,
-                label: customProgramName,
-            };
-
-            setCustomPrograms((prev) => [...prev, payload]);
-            setModsMachine(payload.id);
-            closeCustomProgramModal();
-            return;
-        }
-
         const payload = {
             id: `custom-program-${Date.now()}`,
-            type: 'json',
-            value: customJsonContent,
+            type: 'url',
+            value: normalizedCustomUrl,
             label: customProgramName,
         };
 
         setCustomPrograms((prev) => [...prev, payload]);
         setModsMachine(payload.id);
         closeCustomProgramModal();
-    };
-
-    const handleJsonUpload = async (event) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
-
-        const text = await file.text();
-        setCustomMode('json');
-        setCustomJsonName(file.name);
-        console.log(
-                text
-        )
-        setCustomJsonContent(text);
-        setCustomName(file.name.replace(/\.json$/i, ''));
     };
 
     const removeCustomProgram = (programId) => {
@@ -311,6 +399,8 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
         const machine = machineOptions.find(opt => opt.id === modsMachine);
         if (!machine) return;
         if (!machine.url) return;
+
+        console.log('Opening Mods with machine', machine, 'and file', file);
 
         if (!modsWindow || modsWindow.closed) {
             modsWindow = window.open(machine.url, '_blank');
@@ -430,7 +520,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
 
                                         <div className="flex-1 flex flex-col min-w-96">
                                             <div className={cn(
-                                                "mb-3 flex items-center justify-between rounded-xl border px-3 py-3 transition",
+                                                "mb-3 flex items-center justify-between rounded-xl border pl-5 pr-3 py-3 transition",
                                                 isModsConnected
                                                     ? "border-emerald-200 bg-gradient-to-br from-emerald-50 to-white dark:border-emerald-500/20 dark:from-slate-950 dark:to-slate-900"
                                                     : "border-slate-200 bg-gradient-to-br from-slate-50 to-white dark:border-slate-800 dark:from-slate-950 dark:to-slate-900"
@@ -588,20 +678,15 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                         <CustomProgramModal
                             isOpen={isCustomProgramModalOpen}
                             onClose={closeCustomProgramModal}
-                            customMode={customMode}
-                            setCustomMode={setCustomMode}
                             customName={customName}
-                            setCustomName={setCustomName}
+                            setCustomName={handleCustomNameChange}
                             customUrl={customUrl}
                             setCustomUrl={setCustomUrl}
-                            customJsonName={customJsonName}
                             customPrograms={customPrograms}
                             customProgramHelper={customProgramHelper}
-                            customUrlError={customUrlError}
-                            customJsonError={customJsonError}
+                            customUrlError={customProgramValidationError}
                             customProgramName={customProgramName}
                             isCustomProgramReady={isCustomProgramReady}
-                            handleJsonUpload={handleJsonUpload}
                             saveCustomProgram={saveCustomProgram}
                             removeCustomProgram={removeCustomProgram}
                             useCustomProgram={useCustomProgram}

@@ -12,20 +12,15 @@ import { cn } from "../../../utils/cn";
 const CustomProgramModal = ({
     isOpen,
     onClose,
-    customMode,
-    setCustomMode,
     customName,
     setCustomName,
     customUrl,
     setCustomUrl,
-    customJsonName,
     customPrograms,
     customProgramHelper,
     customUrlError,
-    customJsonError,
     customProgramName,
     isCustomProgramReady,
-    handleJsonUpload,
     saveCustomProgram,
     removeCustomProgram,
     useCustomProgram,
@@ -58,38 +53,9 @@ const CustomProgramModal = ({
                                     <div>
                                         <p className="text-xs font-semibold text-slate-800 dark:text-slate-100">Program Details</p>
                                         <p className="mt-1 text-[10px] text-slate-500 dark:text-slate-400">
-                                            Save a direct Mods program URL or upload a JSON program file. Saved programs will appear in the machine selector.
+                                            Add a hosted JSON program link and we will open it in Mods through the `?json=` entry point.
                                         </p>
                                     </div>
-                                </div>
-
-                                <div className="mt-4 grid grid-cols-2 gap-2">
-                                    <button
-                                        type="button"
-                                        className={cn(
-                                            "flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-[10px] font-medium transition",
-                                            customMode === 'url'
-                                                ? "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-400/30 dark:bg-rose-500/10 dark:text-rose-300"
-                                                : "border-slate-200 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
-                                        )}
-                                        onClick={() => setCustomMode('url')}
-                                    >
-                                        <LinkIcon className="h-3.5 w-3.5" />
-                                        URL
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className={cn(
-                                            "flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-[10px] font-medium transition",
-                                            customMode === 'json'
-                                                ? "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-400/30 dark:bg-rose-500/10 dark:text-rose-300"
-                                                : "border-slate-200 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
-                                        )}
-                                        onClick={() => setCustomMode('json')}
-                                    >
-                                        <DocumentArrowUpIcon className="h-3.5 w-3.5" />
-                                        JSON File
-                                    </button>
                                 </div>
 
                                 <div className="mt-3 flex flex-col gap-2">
@@ -97,56 +63,30 @@ const CustomProgramModal = ({
                                         type="text"
                                         value={customName}
                                         onChange={(event) => setCustomName(event.target.value)}
-                                        placeholder={customMode === 'url' ? 'Program name' : 'Program name (optional)'}
+                                        placeholder="Program name"
                                         className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-rose-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:ring-slate-500"
                                     />
 
-                                    {customMode === 'url' ? (
-                                        <div className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
-                                            <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 dark:border-slate-700 dark:bg-slate-950/70">
-                                                <LinkIcon className="h-4 w-4 text-slate-400 dark:text-slate-500" />
-                                                <input
-                                                    type="url"
-                                                    value={customUrl}
-                                                    onChange={(event) => setCustomUrl(event.target.value)}
-                                                    placeholder="https://modsproject.org/?program=..."
-                                                    className="w-full bg-transparent text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none dark:text-slate-100 dark:placeholder:text-slate-500"
-                                                />
-                                            </div>
-                                            <p className="mt-2 text-[10px] text-slate-500 dark:text-slate-400">
-                                                {customProgramHelper}
-                                            </p>
-                                            {customUrlError && (
-                                                <p className="mt-2 text-[10px] font-medium text-red-600 dark:text-red-300">
-                                                    {customUrlError}
-                                                </p>
-                                            )}
+                                    <div className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
+                                        <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2 dark:border-slate-700 dark:bg-slate-950/70">
+                                            <LinkIcon className="h-4 w-4 text-slate-400 dark:text-slate-500" />
+                                            <input
+                                                type="url"
+                                                value={customUrl}
+                                                onChange={(event) => setCustomUrl(event.target.value)}
+                                                placeholder="https://example.com/custom-program.json"
+                                                className="w-full bg-transparent text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none dark:text-slate-100 dark:placeholder:text-slate-500"
+                                            />
                                         </div>
-                                    ) : (
-                                        <div className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
-                                            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-3 text-xs font-medium text-slate-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-300 dark:hover:border-rose-400/30 dark:hover:bg-rose-500/10 dark:hover:text-rose-300">
-                                                <input
-                                                    type="file"
-                                                    accept=".json,application/json"
-                                                    className="hidden"
-                                                    onChange={handleJsonUpload}
-                                                />
-                                                <DocumentArrowUpIcon className="h-4 w-4" />
-                                                {customJsonName ? `Replace ${customJsonName}` : 'Upload JSON program'}
-                                            </label>
-                                            <p className="mt-2 text-[10px] text-slate-500 dark:text-slate-400">
-                                                {customProgramHelper}
+                                        <p className="mt-2 text-[10px] text-slate-500 dark:text-slate-400">
+                                            {customProgramHelper}
+                                        </p>
+                                        {customUrlError && (
+                                            <p className="mt-2 text-[10px] font-medium text-red-600 dark:text-red-300">
+                                                {customUrlError}
                                             </p>
-                                            {customJsonName && (
-                                                <p className="mt-2 text-[10px] text-slate-500 dark:text-slate-400">{customJsonName}</p>
-                                            )}
-                                            {customJsonError && (
-                                                <p className="mt-2 text-[10px] font-medium text-red-600 dark:text-red-300">
-                                                    {customJsonError}
-                                                </p>
-                                            )}
-                                        </div>
-                                    )}
+                                        )}
+                                    </div>
 
                                     <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 px-3 py-2 dark:border-emerald-500/20 dark:bg-emerald-500/10">
                                         <p className="text-[10px] font-medium text-emerald-700 dark:text-emerald-300">
@@ -240,20 +180,15 @@ const CustomProgramModal = ({
 CustomProgramModal.propTypes = {
     isOpen: PropTypes.bool.isRequired,
     onClose: PropTypes.func.isRequired,
-    customMode: PropTypes.oneOf(['url', 'json']).isRequired,
-    setCustomMode: PropTypes.func.isRequired,
     customName: PropTypes.string.isRequired,
     setCustomName: PropTypes.func.isRequired,
     customUrl: PropTypes.string.isRequired,
     setCustomUrl: PropTypes.func.isRequired,
-    customJsonName: PropTypes.string.isRequired,
     customPrograms: PropTypes.array.isRequired,
     customProgramHelper: PropTypes.string.isRequired,
     customUrlError: PropTypes.string.isRequired,
-    customJsonError: PropTypes.string.isRequired,
     customProgramName: PropTypes.string.isRequired,
     isCustomProgramReady: PropTypes.bool.isRequired,
-    handleJsonUpload: PropTypes.func.isRequired,
     saveCustomProgram: PropTypes.func.isRequired,
     removeCustomProgram: PropTypes.func.isRequired,
     useCustomProgram: PropTypes.func.isRequired,
