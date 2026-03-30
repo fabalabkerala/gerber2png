@@ -6,6 +6,8 @@ import PropTypes from 'prop-types';
 const Select = ({ options, selected, setSelected, variant = "bottom", onSelect, getOptionClass }) => {
 
     const optionsPosition = variant === "top" ?  "mb-1 bottom-full origin-bottom" :  "mt-1 top-full origin-top";
+    const selectedOption = options.find((option) => option.id === selected);
+    const SelectedIcon = selectedOption?.icon;
 
     const handleSelect = (value) => {
         setSelected(value)
@@ -22,7 +24,10 @@ const Select = ({ options, selected, setSelected, variant = "bottom", onSelect, 
                             'focus:outline-none focus:ring-1 focus:ring-gray-400 dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700 dark:focus:ring-slate-500'
                         )}
                     >
-                        {options.find(option => option.id === selected)?.label || selected}
+                        <div className="flex items-center gap-2 pr-6">
+                            {SelectedIcon && <SelectedIcon className="h-3.5 w-3.5 text-slate-500 dark:text-slate-300" />}
+                            <span>{selectedOption?.label || selected}</span>
+                        </div>
                         <ChevronDownIcon
                             className="absolute top-1/2 -translate-y-1/2 right-0.5 size-6 py-0.5 w-fit px-0.5 fill-black bg-slate-100 rounded-md dark:fill-slate-100 dark:bg-slate-800"
                             aria-hidden="true"
@@ -35,7 +40,7 @@ const Select = ({ options, selected, setSelected, variant = "bottom", onSelect, 
                             optionsPosition
                         )} 
                     >
-                        { options.map(({id, label}) => (
+                        { options.map(({id, label, icon: Icon}) => (
                             <ListboxOption
                                 key={id}
                                 value={id}
@@ -45,7 +50,8 @@ const Select = ({ options, selected, setSelected, variant = "bottom", onSelect, 
                                     getOptionClass?.(id)
                                 )}
                             >
-                                <div className="text-xs/6 ">{label}</div>
+                                {Icon && <Icon className="h-3.5 w-3.5 text-slate-500 dark:text-slate-300" />}
+                                <div className="text-xs/6 flex-1">{label}</div>
                                 <CheckIcon className={cn(
                                     "size-2 fill-black visible dark:fill-slate-100",
                                     selected === id ? 'visible' : 'invisible'
