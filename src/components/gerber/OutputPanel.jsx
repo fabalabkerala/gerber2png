@@ -101,12 +101,12 @@ const OutputPanel = () => {
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 disabled={!hasFiles || isExporting}
                 onClick={() => {
-                setIsExporting(true);
-                setTimeout(() => {
-                    setSelectedPng(pngFiles[0]);
-                    setShowModsPanel(true);
-                    setIsExporting(false);
-                }, 200);
+                  setIsExporting(true);
+                  setTimeout(() => {
+                      setSelectedPng(pngFiles[0]);
+                      setShowModsPanel(true);
+                      setIsExporting(false);
+                  }, 200);
                 }}
                 className={`
                 flex items-center gap-2 px-2 py-2 text-xs font-semibold rounded-xl transition border

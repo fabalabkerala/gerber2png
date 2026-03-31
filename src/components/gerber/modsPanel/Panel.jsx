@@ -428,27 +428,37 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
         closeCustomProgramModal();
     };
 
-    // const handleInitialOpenMods = async () => {
-    //     if (!selectedPng?.url) return;
+    const resetModsWorkflow = () => {
+        setModsStatus('initial');
+        setCurrentStep(0);
+        setCompletedSteps([]);
 
-    //     const isFirstLaunch = !modsWindowRef.current?.window || modsWindowRef.current.window.closed;
-    //     await openMods(modsMachine, selectedPng);
+        if (processSteps[0]?.file) {
+            setSelectedPng(processSteps[0].file);
+        }
+    };
 
-    //     if (!isFirstLaunch || !processSteps.length) return;
+    const handleInitialOpenMods = async () => {
+        if (!selectedPng?.url) return;
 
-    //     const currentIndex = processSteps.findIndex((step) => step.file?.url === selectedPng.url);
-    //     if (currentIndex < 0) return;
+        const isFirstLaunch = !modsWindowRef.current?.window || modsWindowRef.current.window.closed;
+        await openMods(modsMachine, selectedPng);
 
-    //     setCompletedSteps((prev) => (prev.includes(currentIndex) ? prev : [...prev, currentIndex]));
+        if (!isFirstLaunch || !processSteps.length) return;
 
-    //     if (currentIndex < processSteps.length - 1) {
-    //         setCurrentStep(currentIndex + 1);
-    //         setSelectedPng(processSteps[currentIndex + 1].file);
-    //         return;
-    //     }
+        const currentIndex = processSteps.findIndex((step) => step.file?.url === selectedPng.url);
+        if (currentIndex < 0) return;
 
-    //     setCurrentStep(currentIndex);
-    // };
+        setCompletedSteps((prev) => (prev.includes(currentIndex) ? prev : [...prev, currentIndex]));
+
+        if (currentIndex < processSteps.length - 1) {
+            setCurrentStep(currentIndex + 1);
+            setSelectedPng(processSteps[currentIndex + 1].file);
+            return;
+        }
+
+        setCurrentStep(currentIndex);
+    };
 
     const MODS_ORIGIN = "https://modsproject.org";
 
@@ -470,7 +480,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                 clearInterval(sendInterval);
                 ref.isSending = false;
                 modsWindowRef.current = null;
-                setModsStatus("initial");
+                resetModsWorkflow();
                 return;
             }
 
@@ -490,7 +500,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                 clearInterval(sendInterval);
                 ref.sendInterval = null;
                 ref.isSending = false;
-
+                modsWindow.focus();
                 setModsStatus("connected");
                 window.removeEventListener("message", handler);
 
@@ -542,8 +552,8 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
         const sendInterval = setInterval(() => {
             if (!modsWindowRef.current || modsWindowRef.current.window.closed) {
                 clearInterval(sendInterval);
-                setModsStatus('initial');
                 modsWindowRef.current = null;
+                resetModsWorkflow();
                 return;
             } 
             modsWindowRef.current.window.postMessage(
@@ -575,11 +585,9 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
 
         const polling = setInterval(() => {
             if (modsWindow && modsWindow.closed) {
-                setModsStatus('initial');
-                setCurrentStep(0);
-                setCompletedSteps([]);
                 window.removeEventListener("message", handler);
                 modsWindowRef.current = null;
+                resetModsWorkflow();
                 clearInterval(polling);
             }
         }, 1000);
@@ -593,7 +601,6 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
         if (!file?.url) return;
 
         const ref = modsWindowRef.current;
-        setModsStatus("sending");
 
         if (!ref || !ref.window || ref.window.closed) {
             console.warn("Mods not open");
@@ -605,8 +612,10 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
             clearTimeout(ref.debounceTimer);
         }
 
+        setModsStatus("sending");
         ref.debounceTimer = setTimeout(async () => {
             try {
+
                 const buffer = await fetch(file.url).then(res => res.arrayBuffer());
                 ref.image = file.url;
 
@@ -615,15 +624,13 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                     ref.pendingFile = file;
                     return;
                 }
-
-                // setModsStatus("sending");
                 startSendingToMods(buffer);
 
             } catch (err) {
                 console.error(err);
                 setModsStatus("error");
             }
-        }, 300); // 🔧 tweak: 200–500ms depending on UX
+        }, 200); // 🔧 tweak: 200–500ms depending on UX
     };
     
     return (
@@ -784,7 +791,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                                     "flex justify-center items-center gap-2 px-2 py-1.5 rounded-lg shadow bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-500",
                                                 )} 
                                                 whileTap={{ scale: 0.98 }}
-                                                onClick={() => openMods(modsMachine, selectedPng)}
+                                                onClick={handleInitialOpenMods}
                                             >
                                                 <p className="font-medium text-xs ps-0.5 text-white tracking-wider ">Open Mods</p>
                                                 <ArrowRightEndOnRectangleIcon width={18} height={18} strokeWidth={2} stroke="white" />

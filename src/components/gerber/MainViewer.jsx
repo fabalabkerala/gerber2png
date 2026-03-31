@@ -218,7 +218,7 @@ const MainView = () => {
                             >
                                 <div 
                                     ref={resultRef}
-                                    className="flex items-center h-full justify-center relative dark:text-black"
+                                    className="flex items-center h-full justify-center relative text-black"
                                     style={{
                                         filter:
                                             theme === "dark"
