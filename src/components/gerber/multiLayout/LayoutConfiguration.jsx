@@ -17,7 +17,7 @@ const LayoutConfiguration = ({
     const [ selectedMachine, setSelectedMachine ] = useState('Choose Machine');
 
     const handleInput = (name, value) => {
-        const updatedVal = { ...machine, [name]: Number(value) < 400 ? Number(value) : 400 }
+        const updatedVal = { ...machine, [name]: Number(value) < 400 ? Number(value) < 1 ? 1 : Number(value) : 400 }
 
         const matchedMachine = machineOption.find(opt => opt.width === updatedVal.width && opt.height === updatedVal.height);
         const machineObj = matchedMachine || { id: 'custom', label: 'Custom', ...updatedVal };

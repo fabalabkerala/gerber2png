@@ -24,9 +24,9 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, gen
         const wThreshold = Math.floor(machine.width / selectedPng.width);
         const hThreshold = Math.floor(machine.height / selectedPng.height);
 
-        if (name === 'spacing') val = value > 5 ? 5 : value
-        else if (name === 'row') val = value > wThreshold ? wThreshold : value > 20 ? 20 : value;
-        else if (name === 'column') val = value > hThreshold ? hThreshold : value > 20 ? 20 : value;
+        if (name === 'spacing') val = value > 5 ? 5 : value < 0 ? 0 : value;
+        else if (name === 'row') val = value > wThreshold ? wThreshold : value > 20 ? 20 : value < 1 ? 1 : value;
+        else if (name === 'column') val = value > hThreshold ? hThreshold : value > 20 ? 20 : value < 1 ? 1 : value;
         
         setConfig(prev => ({ 
             ...prev, 
