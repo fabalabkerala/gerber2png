@@ -21,7 +21,7 @@ function App() {
           <GerberProvider>
             <GCodeProvider>
             
-              <Router>
+              <Router basename={import.meta.env.BASE_URL}>
                 <Navbar />
 
                 <Routes>
