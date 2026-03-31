@@ -14,6 +14,7 @@ import ModalHeader from "../../ui/ModalHeader";
 import Select from "../../ui/Select";
 import { cn } from "../../../utils/cn";
 import { useGerberSettings } from "../../context/GerberContext";
+import { useApp } from "../../context/AppContext";
 import ProcessSteps from "./ProcessSteps";
 import CustomProgramModal from "./CustomProgramModal";
 
@@ -36,11 +37,17 @@ const CUSTOM_PROGRAM_STORAGE_KEY = 'modsCustomPrograms';
 const LEGACY_CUSTOM_PROGRAM_STORAGE_KEY = 'modsCustomProgram';
 const PREFERRED_MACHINE_STORAGE_KEY = 'modsPreferredMachine';
 
-const extractJsonSourceUrl = (rawUrl) => {
+const extractProgramSourceUrl = (rawUrl) => {
     try {
         const parsedUrl = new URL(rawUrl);
-        if (parsedUrl.origin === 'https://modsproject.org' && parsedUrl.searchParams.has('json')) {
-            return (parsedUrl.searchParams.get('json') || '').trim();
+        if (parsedUrl.origin === 'https://modsproject.org') {
+            if (parsedUrl.searchParams.has('program')) {
+                return (parsedUrl.searchParams.get('program') || '').trim();
+            }
+
+            if (parsedUrl.searchParams.has('json')) {
+                return (parsedUrl.searchParams.get('json') || '').trim();
+            }
         }
     } catch (error) {
         return rawUrl;
@@ -52,10 +59,11 @@ const extractJsonSourceUrl = (rawUrl) => {
 const buildCustomProgramUrl = (customProgram) => {
     if (!customProgram || customProgram.type !== 'url') return null;
 
+    console.log('Building custom program URL for:', customProgram); 
     try {
-        const sourceUrl = extractJsonSourceUrl(customProgram.value);
-        new URL(sourceUrl);
-        return `https://modsproject.org/?json=${sourceUrl}`;
+        const sourceUrl = extractProgramSourceUrl(customProgram.value);
+        return `https://modsproject.org/?program=${sourceUrl}`;
+
     } catch (error) {
         return null;
     }
@@ -63,7 +71,7 @@ const buildCustomProgramUrl = (customProgram) => {
 
 const hasFileTarget = (rawUrl) => {
     try {
-        const parsedUrl = new URL(extractJsonSourceUrl(rawUrl));
+        const parsedUrl = new URL(extractProgramSourceUrl(rawUrl));
         const lastSegment = parsedUrl.pathname.split('/').filter(Boolean).pop();
         return Boolean(lastSegment && lastSegment.includes('.'));
     } catch (error) {
@@ -73,7 +81,7 @@ const hasFileTarget = (rawUrl) => {
 
 const deriveProgramNameFromUrl = (rawUrl) => {
     try {
-        const parsedUrl = new URL(extractJsonSourceUrl(rawUrl));
+        const parsedUrl = new URL(extractProgramSourceUrl(rawUrl));
         const lastSegment = parsedUrl.pathname.split('/').filter(Boolean).pop();
         if (!lastSegment) return '';
 
@@ -114,9 +122,35 @@ const verifyRemoteFile = async (url, signal) => {
     }
 };
 
+const buildProcessSteps = (pngFiles) => {
+    const ORDER = [
+        "toplayer_trace",
+        "toplayer_drill",
+        "toplayer_outline",
+        "bottomlayer_trace",
+        "bottomlayer_drill",
+        "bottomlayer_outline",
+    ];
+
+    const map = {};
+
+    pngFiles.forEach((file) => {
+        const key = `${file.directory}_${file.job}`;
+        map[key] = {
+            label: file.job,
+            sub: file.directory,
+            key: file.job,
+            file,
+        };
+    });
+
+    return ORDER.map((key) => map[key]).filter(Boolean);
+};
+
 const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng}) => {
     const [ modsStatus, setModsStatus ] = useState('initial');
     const { modsMachine, setModsMachine } = useGerberSettings();
+    const { pngFiles } = useApp();
 
     const [currentStep, setCurrentStep] = useState(0);
     const [completedSteps, setCompletedSteps] = useState([]);
@@ -195,6 +229,8 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
         localStorage.setItem(CUSTOM_PROGRAM_STORAGE_KEY, JSON.stringify(customPrograms));
     }, [customPrograms]);
 
+    const processSteps = useMemo(() => buildProcessSteps(pngFiles), [pngFiles]);
+
     const customProgramOptions = useMemo(() => (
         customPrograms.map((program) => ({
             ...program,
@@ -206,7 +242,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
     ), [customPrograms]);
 
     const trimmedCustomUrl = customUrl.trim();
-    const normalizedCustomUrl = useMemo(() => extractJsonSourceUrl(trimmedCustomUrl), [trimmedCustomUrl]);
+    const normalizedCustomUrl = useMemo(() => extractProgramSourceUrl(trimmedCustomUrl), [trimmedCustomUrl]);
     const derivedCustomProgramName = useMemo(() => deriveProgramNameFromUrl(normalizedCustomUrl), [normalizedCustomUrl]);
     const customProgramName = useMemo(
         () => customName.trim() || derivedCustomProgramName || 'Custom Program',
@@ -236,7 +272,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
             return 'Use a direct file link, such as a hosted .json file, not just a folder or site URL.';
         }
 
-        if (customPrograms.some((program) => program.type === 'url' && extractJsonSourceUrl(program.value) === normalizedCustomUrl)) {
+        if (customPrograms.some((program) => program.type === 'url' && extractProgramSourceUrl(program.value) === normalizedCustomUrl)) {
             return 'This Mods URL is already saved.';
         }
 
@@ -300,8 +336,8 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
         : customUrlCheckState === 'checking'
             ? 'Checking whether the hosted JSON file is reachable...'
             : customUrlCheckState === 'valid'
-                ? 'File found. This link will open in Mods using the ?json=<link> format.'
-                : 'This hosted JSON link will open in Mods as ?json=<your-link> once the file check passes.';
+                ? 'File found. This link will open in Mods using the ?program=<link> format.'
+                : 'This hosted JSON link will open in Mods as ?program=<your-link> once the file check passes.';
 
     const customProgramValidationError = customUrlError || customUrlCheckError;
     const isCustomProgramReady = Boolean(trimmedCustomUrl) && !customProgramValidationError && customUrlCheckState === 'valid';
@@ -392,30 +428,116 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
         closeCustomProgramModal();
     };
 
+    // const handleInitialOpenMods = async () => {
+    //     if (!selectedPng?.url) return;
+
+    //     const isFirstLaunch = !modsWindowRef.current?.window || modsWindowRef.current.window.closed;
+    //     await openMods(modsMachine, selectedPng);
+
+    //     if (!isFirstLaunch || !processSteps.length) return;
+
+    //     const currentIndex = processSteps.findIndex((step) => step.file?.url === selectedPng.url);
+    //     if (currentIndex < 0) return;
+
+    //     setCompletedSteps((prev) => (prev.includes(currentIndex) ? prev : [...prev, currentIndex]));
+
+    //     if (currentIndex < processSteps.length - 1) {
+    //         setCurrentStep(currentIndex + 1);
+    //         setSelectedPng(processSteps[currentIndex + 1].file);
+    //         return;
+    //     }
+
+    //     setCurrentStep(currentIndex);
+    // };
+
+    const MODS_ORIGIN = "https://modsproject.org";
+
+    const startSendingToMods = (buffer) => {
+        const ref = modsWindowRef.current;
+        if (!ref?.window || ref.window.closed) return;
+
+        const modsWindow = ref.window;
+
+        // 🔴 Clear any existing interval
+        if (ref.sendInterval) {
+            clearInterval(ref.sendInterval);
+        }
+
+        ref.isSending = true;
+
+        const sendInterval = setInterval(() => {
+            if (!modsWindow || modsWindow.closed) {
+                clearInterval(sendInterval);
+                ref.isSending = false;
+                modsWindowRef.current = null;
+                setModsStatus("initial");
+                return;
+            }
+
+            modsWindow.postMessage(
+                { type: "png", data: buffer },
+                MODS_ORIGIN
+            );
+
+        }, 1000);
+
+        ref.sendInterval = sendInterval;
+
+        const handler = (event) => {
+            if (event.origin !== MODS_ORIGIN) return;
+
+            if (event.data === "ready") {
+                clearInterval(sendInterval);
+                ref.sendInterval = null;
+                ref.isSending = false;
+
+                setModsStatus("connected");
+                window.removeEventListener("message", handler);
+
+                // 🔥 Process queued update
+                if (ref.pendingFile) {
+                    const next = ref.pendingFile;
+                    ref.pendingFile = null;
+                    updateMods(next); // recursive trigger
+                }
+            }
+        };
+
+        window.addEventListener("message", handler);
+    };
+
+
     const openMods = async (modsMachine, file) => {
         if (!file?.url) return;
 
         let modsWindow = modsWindowRef.current?.window;
         const machine = machineOptions.find(opt => opt.id === modsMachine);
-        if (!machine) return;
-        if (!machine.url) return;
 
-        console.log('Opening Mods with machine', machine, 'and file', file);
+        if (!machine || !machine.url) return;
 
         if (!modsWindow || modsWindow.closed) {
-            modsWindow = window.open(machine.url, '_blank');
-            setModsStatus('opening');
+            modsWindow = window.open(machine.url, "_blank");
+            setModsStatus("opening");
 
             if (!modsWindow) {
-                setModsStatus('error');
+                setModsStatus("error");
                 return;
             }
         }
 
-        modsWindowRef.current = { window: modsWindow, machine: machine, image: file.url };
-
         const buffer = await fetch(file.url).then(res => res.arrayBuffer());
-        setModsStatus('sending');
+
+        modsWindowRef.current = {
+            window: modsWindow,
+            machine,
+            image: file.url,
+            sendInterval: null,
+            isSending: false,
+            pendingFile: null,
+            debounceTimer: null,
+        };
+
+                setModsStatus('sending');
 
         const sendInterval = setInterval(() => {
             if (!modsWindowRef.current || modsWindowRef.current.window.closed) {
@@ -461,7 +583,48 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                 clearInterval(polling);
             }
         }, 1000);
-    }
+
+        setModsStatus("sending");
+
+        startSendingToMods(buffer);
+    };
+
+    const updateMods = (file) => {
+        if (!file?.url) return;
+
+        const ref = modsWindowRef.current;
+        setModsStatus("sending");
+
+        if (!ref || !ref.window || ref.window.closed) {
+            console.warn("Mods not open");
+            return;
+        }
+
+        // 🔴 Debounce (collapse rapid updates)
+        if (ref.debounceTimer) {
+            clearTimeout(ref.debounceTimer);
+        }
+
+        ref.debounceTimer = setTimeout(async () => {
+            try {
+                const buffer = await fetch(file.url).then(res => res.arrayBuffer());
+                ref.image = file.url;
+
+                // 🔥 If currently sending → replace pending
+                if (ref.isSending) {
+                    ref.pendingFile = file;
+                    return;
+                }
+
+                // setModsStatus("sending");
+                startSendingToMods(buffer);
+
+            } catch (err) {
+                console.error(err);
+                setModsStatus("error");
+            }
+        }, 300); // 🔧 tweak: 200–500ms depending on UX
+    };
     
     return (
         <>
@@ -608,7 +771,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                     </div>
 
                                     { !hasModsWindow && (
-                                        <div className={cn("flex gap-2 items-center mx-2 bg-gradient-to-br from-slate-50 to-teal-100 rounded-xl flex-1 px-3 py-3 dark:from-slate-950/70 dark:to-emerald-500/10", selectedPng.url ? "opacity-100 pointer-events-auto" : "opacity-60 pointer-events-none")}>
+                                        <div className={cn("flex gap-2 items-center mx-2 bg-gradient-to-br from-slate-50 to-teal-100 rounded-xl flex-1 px-3 py-3 dark:from-slate-950/70 dark:to-emerald-500/10")}>
                                             <div className={cn(
                                                 "flex items-end justify-center gap-1 py-1 rounded h-fit mr-auto pr-20",
                                                 selectedPng.url ? "opacity-100" : "opacity-0"
@@ -619,7 +782,6 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                             <motion.button
                                                 className={cn(
                                                     "flex justify-center items-center gap-2 px-2 py-1.5 rounded-lg shadow bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-500",
-                                                    modsMachine === CUSTOM_PROGRAM_CREATE_ID ? "opacity-60 pointer-events-none" : ""
                                                 )} 
                                                 whileTap={{ scale: 0.98 }}
                                                 onClick={() => openMods(modsMachine, selectedPng)}
@@ -633,7 +795,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                     <ProcessSteps 
                                         isConnected={isModsConnected}
                                         selectedPng={selectedPng} 
-                                        openMods={openMods} 
+                                        updateMods={updateMods} 
                                         currentStep={currentStep} 
                                         completedSteps={completedSteps} 
                                         setCurrentStep={setCurrentStep} 

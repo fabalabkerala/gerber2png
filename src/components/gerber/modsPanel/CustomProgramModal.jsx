@@ -53,7 +53,7 @@ const CustomProgramModal = ({
                                     <div>
                                         <p className="text-xs font-semibold text-slate-800 dark:text-slate-100">Program Details</p>
                                         <p className="mt-1 text-[10px] text-slate-500 dark:text-slate-400">
-                                            Add a hosted JSON program link and we will open it in Mods through the `?json=` entry point.
+                                            Add a hosted JSON program link and we will open it in Mods through the `?program=` entry point.
                                         </p>
                                     </div>
                                 </div>

@@ -1,20 +1,18 @@
 import { useEffect } from "react";
 import { motion } from "motion/react";
-import { useGerberSettings } from "../../context/GerberContext";
 import { cn } from "../../../utils/cn";
 import { useApp } from "../../context/AppContext";
 
 const ProcessSteps = ({ 
     isConnected,
     selectedPng, 
-    openMods, 
+    updateMods, 
     currentStep, 
     completedSteps, 
     setCurrentStep, 
     setCompletedSteps ,
     setSelectedPng
 }) => {
-    const { modsMachine } = useGerberSettings();
     const { pngFiles } = useApp()
 
     // ------------------------
@@ -57,7 +55,7 @@ const ProcessSteps = ({
     // const config = toolConfig?.[modsMachine]?.[configKey];
 
     const handleMods = () => {
-        openMods(modsMachine, selectedPng)
+        updateMods(selectedPng)
         setCompletedSteps(prev => [...prev, currentStep]);
         if (currentStep < steps.length - 1) {
             setCurrentStep(prev => prev + 1);
