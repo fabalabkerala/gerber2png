@@ -1,0 +1,350 @@
+/* eslint-disable react-refresh/only-export-components */
+import PropTypes from "prop-types";
+import {createContext, useCallback, useContext, useEffect, useMemo, useState} from "react";
+import { updateSvg } from "../../utils/svgConverter/svgUtils";
+import setUpConfig from "../../utils/svgConverter/quickSetup";
+import handleColorChange from "../../utils/svgConverter/svgColorChange";
+import generatePNG from "../../utils/svgConverter/svg2png";
+import { useApp } from "./AppContext";
+import { MACHINE_PRESETS } from "../../config/defaults";
+
+const GerberLayersContext = createContext();
+const GerberSettingsContext = createContext();
+const GerberViewContext = createContext();
+
+const DEFAULT_STACK_CONFIG = {
+    viewbox: { viewboxX: 0, viewboxY: 0, viewboxW: 0, viewboxH: 0 },
+    width: 0,
+    height: 0,
+};
+
+const DEFAULT_TOGGLED_STATE = {
+    toplayer: { trace: false, pads: false, silkscreen: false, soldermask: false },
+    bottomlayer: { trace: false, pads: false, silkscreen: false, soldermask: false },
+    commonlayer: { outline: false, drill: false, outlayer: true}
+};
+
+const createInitialToolConfig = () => {
+    const initial = {};
+    Object.keys(MACHINE_PRESETS).forEach(machine => {
+        initial[machine] = structuredClone(MACHINE_PRESETS[machine]);
+    });
+    return initial;
+};
+
+export const GerberProvider = ({ children }) => {
+    const { setPngFiles } = useApp();
+    // ------------------------
+    // Layers
+    // ------------------------
+    const [topstack, setTopStack] = useState({id: null, svg: null});
+    const [bottomstack, setBottomStack] = useState({id: null, svg: null});
+    const [fullLayers, setFullLayers] = useState(null);
+
+    const layerValues = useMemo(() => ({
+        topstack, setTopStack, 
+        bottomstack, setBottomStack, 
+        fullLayers, setFullLayers
+    }), [topstack, bottomstack, fullLayers]);
+
+    // ------------------------
+    // Settings / Flags
+    // ------------------------
+    const [boardSide, setBoardSide] = useState('top');
+    const doubleSide = boardSide === 'double';
+    const [layerType, setLayerType] = useState(null);
+    const [canvasBg, setCanvasBg] = useState('black');
+    const [changeSelect, setChangeSelect] = useState('generate-all');
+    const [stackConfig, setStackConfig] = useState(DEFAULT_STACK_CONFIG);
+    const [isToggled, setIsToggled] = useState(DEFAULT_TOGGLED_STATE);
+
+    const DEFAULT_MACHINE = Object.keys(MACHINE_PRESETS)[0];
+    const [modsMachine, setModsMachine] = useState(DEFAULT_MACHINE);
+    const [toolConfig, setToolConfig] = useState(() => createInitialToolConfig());
+
+    const handleToggleCick = useCallback((layertype, layerproperty) => {
+        setIsToggled((prevState) => ({
+            ...prevState,
+            [layertype]: {
+                ...prevState[layertype],
+                [layerproperty]: !prevState[layertype][layerproperty],
+            }
+        }));
+    }, [])
+
+    const updateToolConfig = useCallback((step, key, value) => {
+        setToolConfig(prev => ({
+            ...prev,
+            [modsMachine]: {
+                ...prev[modsMachine],
+                [step]: {
+                    ...prev[modsMachine][step],
+                    [key]: value
+                }
+            }
+        }));
+    }, [modsMachine]);
+
+    const resetToolConfig = useCallback(() => {
+        setToolConfig(prev => ({
+            ...prev,
+            [modsMachine]: structuredClone(MACHINE_PRESETS[modsMachine])
+        }));
+    }, [modsMachine]);
+
+    const saveSettings = useCallback(() => {
+        localStorage.setItem("gerberSettings", JSON.stringify({
+            toolConfig,
+            modsMachine
+        }));
+    }, [toolConfig, modsMachine]);
+
+    const applyQuickSetup = useCallback((option) => {
+
+        const setupConfig = setUpConfig(topstack, bottomstack)
+        const setup = setupConfig[option];
+        const toggleButtons = setupConfig[option].toggleButtons;
+
+        setIsToggled(prevObject => {
+            let updatedState = { ...prevObject };
+
+            // Update the state of the selected button
+            updatedState = {
+                ...updatedState,
+                [setup.side]: {
+                    ...updatedState[setup.side],
+                    [setup.button]: false,
+                }
+            }
+
+            if (doubleSide) {
+                updatedState = {
+                    ...updatedState,
+                    commonlayer: {
+                        ...updatedState.commonlayer,
+                        outlayer: option === 'top-outline' ? false : true
+                    }
+                }
+            }
+
+            // Update the state of the buttons to be toggled
+            toggleButtons.forEach(button => {
+                updatedState = {
+                    ...updatedState,
+                    [button.side]: {
+                        ...updatedState[button.side],
+                        [button.button]: true,
+                    }
+                }
+            })
+
+            return updatedState;
+        });
+        
+        setCanvasBg(setup.canvas);
+        setMainSvg({ id: setup.id, svg: setup.stack.svg });
+        setLayerType(setup.color);
+
+
+        setTimeout(() => {
+            updateSvg(setup.stack.svg, option, setup, 'general', topstack, doubleSide);
+            handleColorChange({ color: setup.color, id: topstack.id, svgs: [topstack.svg, bottomstack.svg] }); 
+        }, 300);  
+    }, [bottomstack, doubleSide, topstack])
+
+    useEffect(() => {
+        const saved = localStorage.getItem("gerberSettings");
+
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+
+                if (parsed.toolConfig) setToolConfig(parsed.toolConfig);
+                if (parsed.selectedMachine) setSelectedMachine(parsed.selectedMachine);
+
+            } catch (e) {
+                console.warn("Invalid gerber settings");
+            }
+        }
+    }, []);
+    
+
+    const settingValues = {
+        boardSide, setBoardSide,
+        doubleSide,
+        layerType, setLayerType,
+        canvasBg, setCanvasBg,
+        changeSelect, setChangeSelect,
+        stackConfig, setStackConfig,
+        isToggled, setIsToggled,
+        handleToggleCick,
+        applyQuickSetup,
+        modsMachine, setModsMachine,
+        toolConfig, setToolConfig,
+        updateToolConfig,
+        resetToolConfig,
+        saveSettings
+    }
+
+    // ------------------------
+    // View / UI
+    // ------------------------
+    const [mainSvg, setMainSvg] = useState({id: null, svg: null});
+    const [side, setSide] = useState(null);
+    const [loader, setLoader] = useState(false);
+
+    const setBoardMode = useCallback((mode) => {
+        setBoardSide(mode);
+        setIsToggled((prev) => ({
+            ...prev,
+            commonlayer: {
+                ...prev.commonlayer,
+                outlayer: mode !== 'double'
+            }
+        }));
+
+        if (!topstack.svg || !bottomstack.svg || !fullLayers) return;
+
+        const showOuter = mode === 'double' ? 'block' : 'none';
+        topstack.svg.querySelector('#toplayerouter').style.display = showOuter;
+        bottomstack.svg.querySelector('#bottomlayerouter').style.display = showOuter;
+        fullLayers.querySelector('#fullstackouter').style.display = showOuter;
+
+        if (mode === 'bottom') {
+            setMainSvg({ id: 'bottom', svg: bottomstack.svg });
+            setSide('bottom');
+            return;
+        }
+
+        setMainSvg({ id: 'top', svg: topstack.svg });
+        setSide('top');
+    }, [bottomstack.svg, fullLayers, topstack.svg])
+
+    
+    const handlePngConversion = useCallback(async (method, mode) => {
+        setLoader(true);
+
+        try {
+            const isDoubleside = mode === 'double';
+            const isCarvera = method === 'generate-for-carvera';
+            const generateAll = method === 'generate-all' || isCarvera;
+            const newUrls = [];
+
+            if (generateAll) {
+                const setups = setUpConfig(topstack, bottomstack);
+
+                for (const option in setups) {
+                    const setup = setups[option];
+                    if (mode === 'top' && option.startsWith('bottom')) continue;
+                    if (mode === 'bottom' && option.startsWith('top')) continue;
+                    if (isCarvera && option.includes('drill')) continue;
+                    if ((isCarvera || generateAll) && isDoubleside && option === 'bottom-drill') continue;
+
+                    const svg = setup.stack.svg.cloneNode(true);
+                    const machine = isCarvera ? 'carvera' : 'general';
+
+                    updateSvg(svg, option, setup, machine, topstack, isDoubleside);
+                    handleColorChange({ color: setup.color, id: topstack.id, svgs:[svg] });
+
+                    const newUrl = await generatePNG(svg, isDoubleside, setup.id, setup.canvas, setup.color);
+                    const directory = option.includes('top') ? 'toplayer' : option.includes('bottom') ? 'bottomlayer' : 'others';
+                    newUrls.push({ 
+                        name: newUrl.name, 
+                        url: newUrl.url, 
+                        width: newUrl.width, 
+                        height: newUrl.height,
+                        directory: directory,
+                        job: setup.button
+                    });
+                }
+                // setPngUrls(prev => [ ...prev, ...newUrls ]);
+                setPngFiles(prev => [ ...prev, ...newUrls ]);
+                return;
+            }
+            const targetSvg = mainSvg.svg === fullLayers ? topstack.svg.cloneNode(true) : mainSvg.svg.cloneNode(true); 
+            const blob = await generatePNG(targetSvg, isDoubleside, mainSvg.id, canvasBg, layerType);
+
+            const directory = method.includes('top') ? 'toplayer' : method.includes('bottom') ? 'bottomlayer' : 'others';
+            const jobs = ['trace', 'drill', 'outline'];
+            const job = jobs.find(job => method.includes(job)) || 'custom';
+
+            // setPngUrls(prev => [ ...prev, { name: blob.name, url: blob.url, width: blob.width, height: blob.height }])
+            setPngFiles(prev => [ 
+                ...prev, 
+                { 
+                    name: blob.name, 
+                    url: blob.url, 
+                    width: blob.width, 
+                    height: blob.height,
+                    directory: directory,
+                    job: job
+                }
+            ])
+        } catch (error) {
+            console.error('Failed PNG Conversion ++++++', error)
+        } finally {
+            setLoader(false);
+        }
+
+    }, [bottomstack, canvasBg, fullLayers, layerType, mainSvg.id, mainSvg.svg, setPngFiles, topstack])
+
+    const handleReset = useCallback(() => {
+        setMainSvg({ id: null, svg: null });
+        setTopStack({ id: null, svg: null });
+        setBottomStack({ id: null, svg: null });
+        setFullLayers(null);
+        setSide(null);
+        setLoader(false);
+
+        setBoardSide('top');
+        setLayerType(null);
+        setCanvasBg('black');
+        setChangeSelect('generate-all');
+        setStackConfig(DEFAULT_STACK_CONFIG);
+        setIsToggled(DEFAULT_TOGGLED_STATE);
+
+        setModsMachine(DEFAULT_MACHINE);
+        setToolConfig(createInitialToolConfig());
+        setPngFiles([]);
+    }, [setPngFiles]);
+
+
+
+    const viewValues = useMemo(() => ({
+        mainSvg, setMainSvg,
+        side, setSide,
+        loader, setLoader,
+        setBoardMode,
+        handlePngConversion,
+        handleReset
+    }), [handlePngConversion, handleReset, loader, mainSvg, setBoardMode, side])
+
+    // ------------------------
+    // Sync side with current mainSvg
+    // ------------------------
+    useEffect(() => {
+        if (mainSvg.svg === null) return;
+
+        if (mainSvg.svg === fullLayers) setSide('all')
+        else if (mainSvg.svg === topstack.svg) setSide('top')
+        else if (mainSvg.svg === bottomstack.svg) setSide('bottom')
+    }, [bottomstack.svg, fullLayers, mainSvg.svg, topstack.svg])
+
+    return (
+        <GerberLayersContext.Provider value={layerValues}>
+            <GerberSettingsContext.Provider value={settingValues}>
+                <GerberViewContext.Provider value={viewValues}>
+                    { children }
+                </GerberViewContext.Provider>
+            </GerberSettingsContext.Provider>
+        </GerberLayersContext.Provider>
+    )
+};
+
+GerberProvider.propTypes = {
+    children: PropTypes.node.isRequired
+}
+
+export const useGerberLayer = () => useContext(GerberLayersContext);
+export const useGerberSettings = () => useContext(GerberSettingsContext);
+export const useGerberView = () => useContext(GerberViewContext);

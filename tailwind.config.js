@@ -1,4 +1,5 @@
 export default {
+    darkMode: "class",
     content: [
         "./index.html",
         "./src/**/*.{js,ts,jsx,tsx}",
@@ -6,5 +7,7 @@ export default {
     theme: {
         extend: {},
     },
-    plugins: [],
+    plugins: [
+        require('@butterfail/tailwindcss-inverted-radius'),
+    ],
 }
