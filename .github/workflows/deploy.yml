@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main
+      - v2
   workflow_dispatch:
 
 permissions:
@@ -35,6 +35,8 @@ jobs:
         run: npm ci
 
       - name: Build app
+        env:
+          DEPLOY_TARGET: github-pages
         run: npm run build
 
       - name: Prepare Pages artifact
