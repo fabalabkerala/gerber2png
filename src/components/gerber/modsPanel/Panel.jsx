@@ -1,6 +1,7 @@
 import {
     ArrowRightEndOnRectangleIcon,
     CheckBadgeIcon,
+    DocumentArrowUpIcon,
     DocumentCheckIcon,
     LinkIcon,
     PhotoIcon,
@@ -36,6 +37,8 @@ const CUSTOM_PROGRAM_CREATE_ID = 'custom-program-create';
 const CUSTOM_PROGRAM_STORAGE_KEY = 'modsCustomPrograms';
 const LEGACY_CUSTOM_PROGRAM_STORAGE_KEY = 'modsCustomProgram';
 const PREFERRED_MACHINE_STORAGE_KEY = 'modsPreferredMachine';
+const DEFAULT_MODS_URL = 'https://modsproject.org/';
+const DEFAULT_MODS_ORIGIN = 'https://modsproject.org';
 
 const extractProgramSourceUrl = (rawUrl) => {
     try {
@@ -57,12 +60,17 @@ const extractProgramSourceUrl = (rawUrl) => {
 };
 
 const buildCustomProgramUrl = (customProgram) => {
-    if (!customProgram || customProgram.type !== 'url') return null;
-
-    console.log('Building custom program URL for:', customProgram); 
+    if (!customProgram) return null;
     try {
+        if (customProgram.type === 'json') {
+            return CUSTOM_JSON_MODS_URL;
+        }
+
+        const modsUrl = new URL(DEFAULT_MODS_URL);
         const sourceUrl = extractProgramSourceUrl(customProgram.value);
-        return `https://modsproject.org/?program=${sourceUrl}`;
+        new URL(sourceUrl);
+        modsUrl.searchParams.set('program', sourceUrl);
+        return modsUrl.toString();
 
     } catch (error) {
         return null;
@@ -122,6 +130,21 @@ const verifyRemoteFile = async (url, signal) => {
     }
 };
 
+const hasPostMessageOption = (value, visited = new WeakSet()) => {
+    if (!value || typeof value !== 'object') return false;
+    if (visited.has(value)) return false;
+    visited.add(value);
+
+    if (Array.isArray(value)) {
+        return value.some((item) => hasPostMessageOption(item, visited));
+    }
+
+    return Object.entries(value).some(([key, nestedValue]) => {
+        if (key === 'postMessage') return true;
+        return hasPostMessageOption(nestedValue, visited);
+    });
+};
+
 const buildProcessSteps = (pngFiles) => {
     const ORDER = [
         "toplayer_trace",
@@ -147,6 +170,22 @@ const buildProcessSteps = (pngFiles) => {
     return ORDER.map((key) => map[key]).filter(Boolean);
 };
 
+const getMachineRuntimeConfig = (machine) => {
+    if (machine?.type === 'json') {
+        return {
+            url: DEFAULT_MODS_URL,
+            origin: DEFAULT_MODS_ORIGIN,
+            requiresProgramBootstrap: true,
+        };
+    }
+
+    return {
+        url: machine?.url,
+        origin: machine?.url ? new URL(machine.url).origin : DEFAULT_MODS_ORIGIN,
+        requiresProgramBootstrap: false,
+    };
+};
+
 const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng}) => {
     const [ modsStatus, setModsStatus ] = useState('initial');
     const { modsMachine, setModsMachine } = useGerberSettings();
@@ -154,10 +193,14 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
 
     const [currentStep, setCurrentStep] = useState(0);
     const [completedSteps, setCompletedSteps] = useState([]);
+    const [customMode, setCustomMode] = useState('url');
     const [customName, setCustomName] = useState('');
     const [customUrl, setCustomUrl] = useState('');
     const [customUrlCheckState, setCustomUrlCheckState] = useState('idle');
     const [customUrlCheckError, setCustomUrlCheckError] = useState('');
+    const [customJsonName, setCustomJsonName] = useState('');
+    const [customJsonContent, setCustomJsonContent] = useState('');
+    const [customJsonError, setCustomJsonError] = useState('');
     const [isCustomNameManuallyEdited, setIsCustomNameManuallyEdited] = useState(false);
     const [customPrograms, setCustomPrograms] = useState([]);
     const [isCustomProgramModalOpen, setIsCustomProgramModalOpen] = useState(false);
@@ -167,10 +210,14 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
     const lastNormalizedCustomUrlRef = useRef('');
 
     const resetCustomProgramDraft = () => {
+        setCustomMode('url');
         setCustomName('');
         setCustomUrl('');
         setCustomUrlCheckState('idle');
         setCustomUrlCheckError('');
+        setCustomJsonName('');
+        setCustomJsonContent('');
+        setCustomJsonError('');
         setIsCustomNameManuallyEdited(false);
     };
 
@@ -237,13 +284,18 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
             id: program.id,
             label: `Custom · ${program.label}`,
             url: buildCustomProgramUrl(program),
-            icon: LinkIcon,
+            icon: program.type === 'json' ? DocumentArrowUpIcon : LinkIcon,
         }))
     ), [customPrograms]);
 
     const trimmedCustomUrl = customUrl.trim();
     const normalizedCustomUrl = useMemo(() => extractProgramSourceUrl(trimmedCustomUrl), [trimmedCustomUrl]);
-    const derivedCustomProgramName = useMemo(() => deriveProgramNameFromUrl(normalizedCustomUrl), [normalizedCustomUrl]);
+    const derivedCustomProgramName = useMemo(
+        () => customMode === 'json'
+            ? (customJsonName ? customJsonName.replace(/\.[^/.]+$/, '').trim() : '')
+            : deriveProgramNameFromUrl(normalizedCustomUrl),
+        [customJsonName, customMode, normalizedCustomUrl]
+    );
     const customProgramName = useMemo(
         () => customName.trim() || derivedCustomProgramName || 'Custom Program',
         [customName, derivedCustomProgramName]
@@ -280,6 +332,12 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
     }, [customPrograms, normalizedCustomUrl, trimmedCustomUrl]);
 
     useEffect(() => {
+        if (customMode !== 'url') {
+            setCustomUrlCheckState('idle');
+            setCustomUrlCheckError('');
+            return;
+        }
+
         if (!trimmedCustomUrl || customUrlError) {
             setCustomUrlCheckState('idle');
             setCustomUrlCheckError('');
@@ -316,31 +374,45 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
             window.clearTimeout(timeoutId);
             controller.abort();
         };
-    }, [customUrlError, normalizedCustomUrl, trimmedCustomUrl]);
+    }, [customMode, customUrlError, normalizedCustomUrl, trimmedCustomUrl]);
 
     useEffect(() => {
-        if (customUrlCheckState !== 'valid' || customName.trim() || isCustomNameManuallyEdited) return;
+        if (customMode === 'url' && customUrlCheckState !== 'valid') return;
+        if (customMode === 'json' && (!customJsonContent || customJsonError)) return;
+        if (customName.trim() || isCustomNameManuallyEdited) return;
 
         if (derivedCustomProgramName) {
             setCustomName(derivedCustomProgramName);
         }
-    }, [customName, customUrlCheckState, derivedCustomProgramName, isCustomNameManuallyEdited]);
+    }, [customMode, customName, customUrlCheckState, customJsonContent, customJsonError, derivedCustomProgramName, isCustomNameManuallyEdited]);
 
     const handleCustomNameChange = (value) => {
         setCustomName(value);
         setIsCustomNameManuallyEdited(true);
     };
 
-    const customProgramHelper = !trimmedCustomUrl
-        ? 'Paste the public URL of your hosted JSON program. We will verify that the file is reachable before saving it.'
-        : customUrlCheckState === 'checking'
-            ? 'Checking whether the hosted JSON file is reachable...'
-            : customUrlCheckState === 'valid'
-                ? 'File found. This link will open in Mods using the ?program=<link> format.'
-                : 'This hosted JSON link will open in Mods as ?program=<your-link> once the file check passes.';
+    const handleCustomModeChange = (value) => {
+        setCustomMode(value);
+    };
 
-    const customProgramValidationError = customUrlError || customUrlCheckError;
-    const isCustomProgramReady = Boolean(trimmedCustomUrl) && !customProgramValidationError && customUrlCheckState === 'valid';
+    const customProgramHelper = customMode === 'json'
+        ? (customJsonName
+            ? 'JSON file loaded. We will verify that it exposes a postMessage option before using it in Mods.'
+            : 'Upload a Mods JSON program file to store it locally and reuse it later.')
+        : (!trimmedCustomUrl
+            ? 'Paste the public URL of your hosted JSON program. We will verify that the file is reachable before saving it.'
+            : customUrlCheckState === 'checking'
+                ? 'Checking whether the hosted JSON file is reachable...'
+                : customUrlCheckState === 'valid'
+                    ? 'File found. This link will open in Mods using the ?program=<link> format.'
+                    : 'This hosted JSON link will open in Mods as ?program=<your-link> once the file check passes.');
+
+    const customProgramValidationError = customMode === 'json'
+        ? customJsonError
+        : customUrlError || customUrlCheckError;
+    const isCustomProgramReady = customMode === 'json'
+        ? Boolean(customJsonContent) && !customJsonError
+        : Boolean(trimmedCustomUrl) && !customProgramValidationError && customUrlCheckState === 'valid';
 
     const machineOptions = useMemo(() => {
         const createOption = {
@@ -349,7 +421,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
             url: null,
             icon: PlusCircleIcon,
         };
-        return [createOption, ...machineOption, ...customProgramOptions];
+        return [createOption, ...customProgramOptions, ...machineOption,];
     }, [customProgramOptions]);
 
     const activeMachine = useMemo(
@@ -396,14 +468,49 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
 
         const payload = {
             id: `custom-program-${Date.now()}`,
-            type: 'url',
-            value: normalizedCustomUrl,
+            type: customMode,
+            value: customMode === 'json' ? customJsonContent : normalizedCustomUrl,
             label: customProgramName,
         };
 
         setCustomPrograms((prev) => [...prev, payload]);
         setModsMachine(payload.id);
         closeCustomProgramModal();
+    };
+
+    const handleCustomJsonUpload = async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        try {
+            const text = await file.text();
+            const parsedProgram = JSON.parse(text);
+
+            if (!hasPostMessageOption(parsedProgram)) {
+                setCustomJsonName(file.name);
+                setCustomJsonContent('');
+                setCustomJsonError('This JSON does not expose a `postMessage` option, so the app cannot send PNG data into it.');
+                return;
+            }
+
+            setCustomMode('json');
+            setCustomJsonName(file.name);
+            setCustomJsonContent(text);
+            setCustomJsonError('');
+            setCustomUrl('');
+            setCustomUrlCheckState('idle');
+            setCustomUrlCheckError('');
+
+            if (!isCustomNameManuallyEdited && !customName.trim()) {
+                setCustomName(file.name.replace(/\.[^/.]+$/, '').trim());
+            }
+        } catch (error) {
+            setCustomJsonName(file.name);
+            setCustomJsonContent('');
+            setCustomJsonError('Upload a valid JSON program file with a `postMessage` option.');
+        } finally {
+            event.target.value = '';
+        }
     };
 
     const removeCustomProgram = (programId) => {
@@ -460,20 +567,99 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
         setCurrentStep(currentIndex);
     };
 
-    const MODS_ORIGIN = "https://modsproject.org";
+    const sendProgramToMods = (modsWindow, machine, origin) => {
+        const rawProgram = machine?.value;
+        if (!rawProgram) {
+            return Promise.reject(new Error('Missing program payload'));
+        }
 
-    const startSendingToMods = (buffer) => {
+        let programData = rawProgram;
+        try {
+            programData = JSON.parse(rawProgram);
+        } catch (error) {
+            programData = rawProgram;
+        }
+
+        return new Promise((resolve, reject) => {
+            const sendInterval = setInterval(() => {
+                if (!modsWindow || modsWindow.closed) {
+                    clearInterval(sendInterval);
+                    window.removeEventListener('message', handleReady);
+                    reject(new Error('Mods window was closed before the program loaded.'));
+                    return;
+                }
+
+                modsWindow.postMessage({
+                    type: 'program',
+                    data: programData,
+                    name: machine.label,
+                }, origin);
+            }, 1000);
+
+            const handleReady = (event) => {
+                if (event.origin !== origin) return;
+                if (event.data !== 'ready') return;
+
+                clearInterval(sendInterval);
+                window.removeEventListener('message', handleReady);
+                resolve();
+            };
+
+            window.addEventListener('message', handleReady);
+        });
+    };
+
+    const startSendingToMods = (buffer, options = {}) => {
         const ref = modsWindowRef.current;
         if (!ref?.window || ref.window.closed) return;
 
         const modsWindow = ref.window;
+        const {
+            origin = ref.origin || DEFAULT_MODS_ORIGIN,
+            awaitReady = true,
+        } = options;
 
-        // 🔴 Clear any existing interval
         if (ref.sendInterval) {
             clearInterval(ref.sendInterval);
         }
 
         ref.isSending = true;
+
+        if (!awaitReady) {
+            let attempts = 0;
+            const sendInterval = setInterval(() => {
+                if (!modsWindow || modsWindow.closed) {
+                    clearInterval(sendInterval);
+                    ref.isSending = false;
+                    modsWindowRef.current = null;
+                    resetModsWorkflow();
+                    return;
+                }
+
+                modsWindow.postMessage(
+                    { type: "png", data: buffer },
+                    origin
+                );
+
+                attempts += 1;
+                if (attempts >= 4) {
+                    clearInterval(sendInterval);
+                    ref.sendInterval = null;
+                    ref.isSending = false;
+                    modsWindow.focus();
+                    setModsStatus("connected");
+
+                    if (ref.pendingFile) {
+                        const next = ref.pendingFile;
+                        ref.pendingFile = null;
+                        updateMods(next);
+                    }
+                }
+            }, 500);
+
+            ref.sendInterval = sendInterval;
+            return;
+        }
 
         const sendInterval = setInterval(() => {
             if (!modsWindow || modsWindow.closed) {
@@ -486,7 +672,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
 
             modsWindow.postMessage(
                 { type: "png", data: buffer },
-                MODS_ORIGIN
+                origin
             );
 
         }, 1000);
@@ -494,7 +680,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
         ref.sendInterval = sendInterval;
 
         const handler = (event) => {
-            if (event.origin !== MODS_ORIGIN) return;
+            if (event.origin !== origin) return;
 
             if (event.data === "ready") {
                 clearInterval(sendInterval);
@@ -522,11 +708,20 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
 
         let modsWindow = modsWindowRef.current?.window;
         const machine = machineOptions.find(opt => opt.id === modsMachine);
+        if (!machine) return;
 
-        if (!machine || !machine.url) return;
+        const runtime = getMachineRuntimeConfig(machine);
+        if (!runtime.url) return;
+
+        const currentOrigin = modsWindowRef.current?.origin;
+        if (modsWindow && !modsWindow.closed && currentOrigin && currentOrigin !== runtime.origin) {
+            modsWindow.close();
+            modsWindow = null;
+            modsWindowRef.current = null;
+        }
 
         if (!modsWindow || modsWindow.closed) {
-            modsWindow = window.open(machine.url, "_blank");
+            modsWindow = window.open(runtime.url, "_blank");
             setModsStatus("opening");
 
             if (!modsWindow) {
@@ -535,66 +730,44 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
             }
         }
 
-        const buffer = await fetch(file.url).then(res => res.arrayBuffer());
-
         modsWindowRef.current = {
             window: modsWindow,
             machine,
             image: file.url,
+            origin: runtime.origin,
+            awaitReady: !runtime.requiresProgramBootstrap,
             sendInterval: null,
             isSending: false,
             pendingFile: null,
             debounceTimer: null,
         };
 
-                setModsStatus('sending');
-
-        const sendInterval = setInterval(() => {
-            if (!modsWindowRef.current || modsWindowRef.current.window.closed) {
-                clearInterval(sendInterval);
+        if (runtime.requiresProgramBootstrap) {
+            try {
+                await sendProgramToMods(modsWindow, machine, runtime.origin);
+            } catch (error) {
+                console.error(error);
+                setModsStatus("error");
                 modsWindowRef.current = null;
-                resetModsWorkflow();
                 return;
-            } 
-            modsWindowRef.current.window.postMessage(
-                { type: 'png', data: buffer }, 
-                'https://modsproject.org'
-            );
-            modsWindowRef.current.window.focus();
-        }, 500);
-
-        const handler = (event) => {
-            if (event.origin !== "https://modsproject.org") return;
-
-            if (event.data === "ready") {
-                setModsStatus("connected");
-                clearInterval(sendInterval);
-                clearTimeout(timeout);
             }
-        };
-        window.addEventListener("message", handler);
+        }
 
-        const timeout = setTimeout(() => {
-            setModsStatus('error');
-            window.removeEventListener("message", handler);
-            if (modsWindowRef.current) {
-                modsWindowRef.current.window.close();
-                modsWindowRef.current = null;
-            }
-        }, 15000);
+        const buffer = await fetch(file.url).then(res => res.arrayBuffer());
+        setModsStatus('sending');
 
         const polling = setInterval(() => {
             if (modsWindow && modsWindow.closed) {
-                window.removeEventListener("message", handler);
                 modsWindowRef.current = null;
                 resetModsWorkflow();
                 clearInterval(polling);
             }
         }, 1000);
 
-        setModsStatus("sending");
-
-        startSendingToMods(buffer);
+        startSendingToMods(buffer, {
+            origin: runtime.origin,
+            awaitReady: !runtime.requiresProgramBootstrap,
+        });
     };
 
     const updateMods = (file) => {
@@ -619,12 +792,14 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                 const buffer = await fetch(file.url).then(res => res.arrayBuffer());
                 ref.image = file.url;
 
-                // 🔥 If currently sending → replace pending
                 if (ref.isSending) {
                     ref.pendingFile = file;
                     return;
                 }
-                startSendingToMods(buffer);
+                startSendingToMods(buffer, {
+                    origin: ref.origin || DEFAULT_MODS_ORIGIN,
+                    awaitReady: ref.awaitReady !== false,
+                });
 
             } catch (err) {
                 console.error(err);
@@ -680,7 +855,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                                 </div>
                                                 </>
                                                 
-                                            ): (
+                                            ):(
                                                 <>
                                                     <PhotoIcon width={20} height={20} strokeWidth={2} stroke="gray" />
                                                     <p className="text-xs font-medium dark:text-slate-300">No Preview Available</p>
@@ -847,15 +1022,20 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                         <CustomProgramModal
                             isOpen={isCustomProgramModalOpen}
                             onClose={closeCustomProgramModal}
+                            customMode={customMode}
+                            setCustomMode={handleCustomModeChange}
                             customName={customName}
                             setCustomName={handleCustomNameChange}
                             customUrl={customUrl}
                             setCustomUrl={setCustomUrl}
+                            customJsonName={customJsonName}
+                            customJsonError={customJsonError}
                             customPrograms={customPrograms}
                             customProgramHelper={customProgramHelper}
                             customUrlError={customProgramValidationError}
                             customProgramName={customProgramName}
                             isCustomProgramReady={isCustomProgramReady}
+                            handleCustomJsonUpload={handleCustomJsonUpload}
                             saveCustomProgram={saveCustomProgram}
                             removeCustomProgram={removeCustomProgram}
                             useCustomProgram={useCustomProgram}
