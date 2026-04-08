@@ -42,8 +42,6 @@ async function svg2png(svg, swidth, sheight, canvasBg) {
             }
             ctx.putImageData(imageData, 0, 0);
 
-            console.log('Canvas Created with dimensions :', canvas.width, canvas.height, canvas);
-
             (window.URL || window.webkitURL || window).revokeObjectURL(blobURL);
 
             resolve(canvas);

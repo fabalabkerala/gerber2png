@@ -18,6 +18,7 @@ import { useGerberSettings } from "../../context/GerberContext";
 import { useApp } from "../../context/AppContext";
 import ProcessSteps from "./ProcessSteps";
 import CustomProgramModal from "./CustomProgramModal";
+import useMods from "../../../hooks/useMods";
 
 const machineOption = [
     { id: 'carbide-nomad', label: 'Carbide Nomad', url: 'https://modsproject.org/?program=programs/machines/Carbide+Nomad/PCB' },
@@ -38,7 +39,6 @@ const CUSTOM_PROGRAM_STORAGE_KEY = 'modsCustomPrograms';
 const LEGACY_CUSTOM_PROGRAM_STORAGE_KEY = 'modsCustomProgram';
 const PREFERRED_MACHINE_STORAGE_KEY = 'modsPreferredMachine';
 const DEFAULT_MODS_URL = 'https://modsproject.org/';
-const DEFAULT_MODS_ORIGIN = 'https://modsproject.org';
 
 const extractProgramSourceUrl = (rawUrl) => {
     try {
@@ -145,54 +145,19 @@ const hasPostMessageOption = (value, visited = new WeakSet()) => {
     });
 };
 
-const buildProcessSteps = (pngFiles) => {
-    const ORDER = [
-        "toplayer_trace",
-        "toplayer_drill",
-        "toplayer_outline",
-        "bottomlayer_trace",
-        "bottomlayer_drill",
-        "bottomlayer_outline",
-    ];
-
-    const map = {};
-
-    pngFiles.forEach((file) => {
-        const key = `${file.directory}_${file.job}`;
-        map[key] = {
-            label: file.job,
-            sub: file.directory,
-            key: file.job,
-            file,
-        };
-    });
-
-    return ORDER.map((key) => map[key]).filter(Boolean);
-};
-
-const getMachineRuntimeConfig = (machine) => {
-    if (machine?.type === 'json') {
-        return {
-            url: DEFAULT_MODS_URL,
-            origin: DEFAULT_MODS_ORIGIN,
-            requiresProgramBootstrap: true,
-        };
-    }
-
-    return {
-        url: machine?.url,
-        origin: machine?.url ? new URL(machine.url).origin : DEFAULT_MODS_ORIGIN,
-        requiresProgramBootstrap: false,
-    };
-};
 
 const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng}) => {
-    const [ modsStatus, setModsStatus ] = useState('initial');
     const { modsMachine, setModsMachine } = useGerberSettings();
-    const { pngFiles } = useApp();
+    const { 
+        modsStatus, 
+        isConnected,
+        openMods, 
+        updateMods, 
+        modsImage ,
+        currentStep, setCurrentStep,
+        completedSteps, setCompletedSteps,
+    } = useMods({ selectedPng, setSelectedPng });
 
-    const [currentStep, setCurrentStep] = useState(0);
-    const [completedSteps, setCompletedSteps] = useState([]);
     const [customMode, setCustomMode] = useState('url');
     const [customName, setCustomName] = useState('');
     const [customUrl, setCustomUrl] = useState('');
@@ -205,7 +170,6 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
     const [customPrograms, setCustomPrograms] = useState([]);
     const [isCustomProgramModalOpen, setIsCustomProgramModalOpen] = useState(false);
 
-    const modsWindowRef = useRef(null);
     const lastSelectedMachineRef = useRef(machineOption[0].id);
     const lastNormalizedCustomUrlRef = useRef('');
 
@@ -276,7 +240,6 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
         localStorage.setItem(CUSTOM_PROGRAM_STORAGE_KEY, JSON.stringify(customPrograms));
     }, [customPrograms]);
 
-    const processSteps = useMemo(() => buildProcessSteps(pngFiles), [pngFiles]);
 
     const customProgramOptions = useMemo(() => (
         customPrograms.map((program) => ({
@@ -429,40 +392,6 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
         [machineOptions, modsMachine]
     );
 
-    const hasModsWindow = Boolean(modsWindowRef.current?.window);
-    const isModsConnected = modsStatus === 'connected' && hasModsWindow;
-    const previewImageUrl = modsWindowRef.current?.image || selectedPng?.url;
-
-    const modsStatusCopy = {
-        initial: {
-            label: 'Mods not connected',
-            tone: 'muted',
-            helper: 'Open Mods to unlock the workflow steps and send files.',
-        },
-        opening: {
-            label: 'Opening Mods window',
-            tone: 'pending',
-            helper: 'Waiting for the Mods program to open in a new tab.',
-        },
-        sending: {
-            label: 'Sending PNG to Mods',
-            tone: 'pending',
-            helper: 'The selected PNG is being transferred to the Mods workspace.',
-        },
-        connected: {
-            label: 'Mods is connected',
-            tone: 'connected',
-            helper: 'The workflow is ready. Continue sending each step to Mods.',
-        },
-        error: {
-            label: 'Connection failed',
-            tone: 'error',
-            helper: 'Mods did not respond in time. Try opening the program again.',
-        },
-    };
-
-    const currentModsStatus = modsStatusCopy[modsStatus] || modsStatusCopy.initial;
-
     const saveCustomProgram = () => {
         if (!isCustomProgramReady) return;
 
@@ -535,279 +464,6 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
         closeCustomProgramModal();
     };
 
-    const resetModsWorkflow = () => {
-        setModsStatus('initial');
-        setCurrentStep(0);
-        setCompletedSteps([]);
-
-        if (processSteps[0]?.file) {
-            setSelectedPng(processSteps[0].file);
-        }
-    };
-
-    const handleInitialOpenMods = async () => {
-        if (!selectedPng?.url) return;
-
-        const isFirstLaunch = !modsWindowRef.current?.window || modsWindowRef.current.window.closed;
-        await openMods(modsMachine, selectedPng);
-
-        if (!isFirstLaunch || !processSteps.length) return;
-
-        const currentIndex = processSteps.findIndex((step) => step.file?.url === selectedPng.url);
-        if (currentIndex < 0) return;
-
-        setCompletedSteps((prev) => (prev.includes(currentIndex) ? prev : [...prev, currentIndex]));
-
-        if (currentIndex < processSteps.length - 1) {
-            setCurrentStep(currentIndex + 1);
-            setSelectedPng(processSteps[currentIndex + 1].file);
-            return;
-        }
-
-        setCurrentStep(currentIndex);
-    };
-
-    const sendProgramToMods = (modsWindow, machine, origin) => {
-        const rawProgram = machine?.value;
-        if (!rawProgram) {
-            return Promise.reject(new Error('Missing program payload'));
-        }
-
-        let programData = rawProgram;
-        try {
-            programData = JSON.parse(rawProgram);
-        } catch (error) {
-            programData = rawProgram;
-        }
-
-        return new Promise((resolve, reject) => {
-            const sendInterval = setInterval(() => {
-                if (!modsWindow || modsWindow.closed) {
-                    clearInterval(sendInterval);
-                    window.removeEventListener('message', handleReady);
-                    reject(new Error('Mods window was closed before the program loaded.'));
-                    return;
-                }
-
-                modsWindow.postMessage({
-                    type: 'program',
-                    data: programData,
-                    name: machine.label,
-                }, origin);
-            }, 1000);
-
-            const handleReady = (event) => {
-                if (event.origin !== origin) return;
-                if (event.data !== 'ready') return;
-
-                clearInterval(sendInterval);
-                window.removeEventListener('message', handleReady);
-                resolve();
-            };
-
-            window.addEventListener('message', handleReady);
-        });
-    };
-
-    const startSendingToMods = (buffer, options = {}) => {
-        const ref = modsWindowRef.current;
-        if (!ref?.window || ref.window.closed) return;
-
-        const modsWindow = ref.window;
-        const {
-            origin = ref.origin || DEFAULT_MODS_ORIGIN,
-            awaitReady = true,
-        } = options;
-
-        if (ref.sendInterval) {
-            clearInterval(ref.sendInterval);
-        }
-
-        ref.isSending = true;
-
-        if (!awaitReady) {
-            let attempts = 0;
-            const sendInterval = setInterval(() => {
-                if (!modsWindow || modsWindow.closed) {
-                    clearInterval(sendInterval);
-                    ref.isSending = false;
-                    modsWindowRef.current = null;
-                    resetModsWorkflow();
-                    return;
-                }
-
-                modsWindow.postMessage(
-                    { type: "png", data: buffer },
-                    origin
-                );
-
-                attempts += 1;
-                if (attempts >= 4) {
-                    clearInterval(sendInterval);
-                    ref.sendInterval = null;
-                    ref.isSending = false;
-                    modsWindow.focus();
-                    setModsStatus("connected");
-
-                    if (ref.pendingFile) {
-                        const next = ref.pendingFile;
-                        ref.pendingFile = null;
-                        updateMods(next);
-                    }
-                }
-            }, 500);
-
-            ref.sendInterval = sendInterval;
-            return;
-        }
-
-        const sendInterval = setInterval(() => {
-            if (!modsWindow || modsWindow.closed) {
-                clearInterval(sendInterval);
-                ref.isSending = false;
-                modsWindowRef.current = null;
-                resetModsWorkflow();
-                return;
-            }
-
-            modsWindow.postMessage(
-                { type: "png", data: buffer },
-                origin
-            );
-
-        }, 1000);
-
-        ref.sendInterval = sendInterval;
-
-        const handler = (event) => {
-            if (event.origin !== origin) return;
-
-            if (event.data === "ready") {
-                clearInterval(sendInterval);
-                ref.sendInterval = null;
-                ref.isSending = false;
-                modsWindow.focus();
-                setModsStatus("connected");
-                window.removeEventListener("message", handler);
-
-                // 🔥 Process queued update
-                if (ref.pendingFile) {
-                    const next = ref.pendingFile;
-                    ref.pendingFile = null;
-                    updateMods(next); // recursive trigger
-                }
-            }
-        };
-
-        window.addEventListener("message", handler);
-    };
-
-
-    const openMods = async (modsMachine, file) => {
-        if (!file?.url) return;
-
-        let modsWindow = modsWindowRef.current?.window;
-        const machine = machineOptions.find(opt => opt.id === modsMachine);
-        if (!machine) return;
-
-        const runtime = getMachineRuntimeConfig(machine);
-        if (!runtime.url) return;
-
-        const currentOrigin = modsWindowRef.current?.origin;
-        if (modsWindow && !modsWindow.closed && currentOrigin && currentOrigin !== runtime.origin) {
-            modsWindow.close();
-            modsWindow = null;
-            modsWindowRef.current = null;
-        }
-
-        if (!modsWindow || modsWindow.closed) {
-            modsWindow = window.open(runtime.url, "_blank");
-            setModsStatus("opening");
-
-            if (!modsWindow) {
-                setModsStatus("error");
-                return;
-            }
-        }
-
-        modsWindowRef.current = {
-            window: modsWindow,
-            machine,
-            image: file.url,
-            origin: runtime.origin,
-            awaitReady: !runtime.requiresProgramBootstrap,
-            sendInterval: null,
-            isSending: false,
-            pendingFile: null,
-            debounceTimer: null,
-        };
-
-        if (runtime.requiresProgramBootstrap) {
-            try {
-                await sendProgramToMods(modsWindow, machine, runtime.origin);
-            } catch (error) {
-                console.error(error);
-                setModsStatus("error");
-                modsWindowRef.current = null;
-                return;
-            }
-        }
-
-        const buffer = await fetch(file.url).then(res => res.arrayBuffer());
-        setModsStatus('sending');
-
-        const polling = setInterval(() => {
-            if (modsWindow && modsWindow.closed) {
-                modsWindowRef.current = null;
-                resetModsWorkflow();
-                clearInterval(polling);
-            }
-        }, 1000);
-
-        startSendingToMods(buffer, {
-            origin: runtime.origin,
-            awaitReady: !runtime.requiresProgramBootstrap,
-        });
-    };
-
-    const updateMods = (file) => {
-        if (!file?.url) return;
-
-        const ref = modsWindowRef.current;
-
-        if (!ref || !ref.window || ref.window.closed) {
-            console.warn("Mods not open");
-            return;
-        }
-
-        // 🔴 Debounce (collapse rapid updates)
-        if (ref.debounceTimer) {
-            clearTimeout(ref.debounceTimer);
-        }
-
-        setModsStatus("sending");
-        ref.debounceTimer = setTimeout(async () => {
-            try {
-
-                const buffer = await fetch(file.url).then(res => res.arrayBuffer());
-                ref.image = file.url;
-
-                if (ref.isSending) {
-                    ref.pendingFile = file;
-                    return;
-                }
-                startSendingToMods(buffer, {
-                    origin: ref.origin || DEFAULT_MODS_ORIGIN,
-                    awaitReady: ref.awaitReady !== false,
-                });
-
-            } catch (err) {
-                console.error(err);
-                setModsStatus("error");
-            }
-        }, 200); // 🔧 tweak: 200–500ms depending on UX
-    };
-    
     return (
         <>
             <AnimatePresence>
@@ -866,11 +522,11 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                         <div className="flex-1 flex flex-col min-w-96">
                                             <div className={cn(
                                                 "mb-3 flex items-center justify-between rounded-xl border pl-5 pr-3 py-3 transition",
-                                                isModsConnected
+                                                isConnected
                                                     ? "border-emerald-200 bg-gradient-to-br from-emerald-50 to-white dark:border-emerald-500/20 dark:from-slate-950 dark:to-slate-900"
                                                     : "border-slate-200 bg-gradient-to-br from-slate-50 to-white dark:border-slate-800 dark:from-slate-950 dark:to-slate-900"
                                             )}>
-                                                <div className={cn("min-w-0", !isModsConnected && "opacity-70")}>
+                                                <div className={cn("min-w-0", !isConnected && "opacity-70")}>
                                                     <p className="truncate text-base font-semibold text-gray-800 dark:text-slate-100">
                                                         {activeMachine?.label || 'Select a machine'}
                                                     </p>
@@ -878,45 +534,45 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                                         <span
                                                             className={cn(
                                                                 "h-2.5 w-2.5 rounded-full",
-                                                                currentModsStatus.tone === 'connected' && "bg-emerald-500",
-                                                                currentModsStatus.tone === 'pending' && "bg-amber-400",
-                                                                currentModsStatus.tone === 'error' && "bg-rose-500",
-                                                                currentModsStatus.tone === 'muted' && "bg-slate-300 dark:bg-slate-600"
+                                                                modsStatus.tone === 'connected' && "bg-emerald-500",
+                                                                modsStatus.tone === 'pending' && "bg-amber-400",
+                                                                modsStatus.tone === 'error' && "bg-rose-500",
+                                                                modsStatus.tone === 'muted' && "bg-slate-300 dark:bg-slate-600"
                                                             )}
                                                         />
                                                         <CheckBadgeIcon
                                                             width={14}
                                                             height={14}
                                                             className={cn(
-                                                                currentModsStatus.tone === 'connected' ? "text-emerald-600 dark:text-emerald-300" : "text-slate-400 dark:text-slate-500"
+                                                                modsStatus.tone === 'connected' ? "text-emerald-600 dark:text-emerald-300" : "text-slate-400 dark:text-slate-500"
                                                             )}
                                                         />
                                                         <p
                                                             className={cn(
                                                                 "text-xs font-medium",
-                                                                currentModsStatus.tone === 'connected' && "text-emerald-700 dark:text-emerald-300",
-                                                                currentModsStatus.tone === 'pending' && "text-amber-700 dark:text-amber-300",
-                                                                currentModsStatus.tone === 'error' && "text-rose-700 dark:text-rose-300",
-                                                                currentModsStatus.tone === 'muted' && "text-slate-500 dark:text-slate-400"
+                                                                modsStatus.tone === 'connected' && "text-emerald-700 dark:text-emerald-300",
+                                                                modsStatus.tone === 'pending' && "text-amber-700 dark:text-amber-300",
+                                                                modsStatus.tone === 'error' && "text-rose-700 dark:text-rose-300",
+                                                                modsStatus.tone === 'muted' && "text-slate-500 dark:text-slate-400"
                                                             )}
                                                         >
-                                                            {currentModsStatus.label}
+                                                            {modsStatus.label}
                                                         </p>
                                                     </div>
                                                     <p className="mt-1 text-[10px] text-slate-500 dark:text-slate-400">
-                                                        {currentModsStatus.helper}
+                                                        {modsStatus.helper}
                                                     </p>
                                                 </div>
                                                 <div className={cn(
                                                     "flex items-center rounded-xl border border-slate-200 bg-white/80 px-4 py-4 shadow-sm transition dark:border-slate-700 dark:bg-slate-900/80",
-                                                    !isModsConnected && "opacity-50 saturate-0"
+                                                    !isConnected && "opacity-50 saturate-0"
                                                 )}>
                                                     <div className="flex items-center gap-3">
                                                         <div className="flex flex-col items-center justify-center gap-1">
                                                             <div className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-lg border bg-white p-1 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-                                                                {previewImageUrl ? (
-                                                                    <img src={previewImageUrl} className="h-full w-full object-contain" />
-                                                                ) : (
+                                                                {modsImage ? (
+                                                                    <img src={modsImage} className="h-full w-full object-contain" />
+                                                                ):(
                                                                     <PhotoIcon className="h-5 w-5 text-slate-400 dark:text-slate-500" />
                                                                 )}
                                                             </div>
@@ -938,7 +594,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                                 <div className="flex gap-3">
                                                     <div className="flex items-center gap-2 flex-1">
                                                         <p className="text-xs w-24 text-black text-nowrap dark:text-slate-200">Machine</p>
-                                                        <div className={cn("w-full", hasModsWindow ? "pointer-events-none opacity-60" : "")}>
+                                                        <div className={cn("w-full", isConnected ? "pointer-events-none opacity-60" : "")}>
                                                             <Select 
                                                                 options={machineOptions} 
                                                                 selected={modsMachine} 
@@ -952,7 +608,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                         </div> 
                                     </div>
 
-                                    { !hasModsWindow && (
+                                    { !isConnected && (
                                         <div className={cn("flex gap-2 items-center mx-2 bg-gradient-to-br from-slate-50 to-teal-100 rounded-xl flex-1 px-3 py-3 dark:from-slate-950/70 dark:to-emerald-500/10")}>
                                             <div className={cn(
                                                 "flex items-end justify-center gap-1 py-1 rounded h-fit mr-auto pr-20",
@@ -966,7 +622,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                                     "flex justify-center items-center gap-2 px-2 py-1.5 rounded-lg shadow bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-500",
                                                 )} 
                                                 whileTap={{ scale: 0.98 }}
-                                                onClick={handleInitialOpenMods}
+                                                onClick={() => openMods(modsMachine, machineOptions)}
                                             >
                                                 <p className="font-medium text-xs ps-0.5 text-white tracking-wider ">Open Mods</p>
                                                 <ArrowRightEndOnRectangleIcon width={18} height={18} strokeWidth={2} stroke="white" />
@@ -975,7 +631,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                     )}
 
                                     <ProcessSteps 
-                                        isConnected={isModsConnected}
+                                        isConnected={isConnected}
                                         selectedPng={selectedPng} 
                                         updateMods={updateMods} 
                                         currentStep={currentStep} 
@@ -987,7 +643,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                 </div>
                             </div>
                             <AnimatePresence>
-                                { modsStatus === 'sending' && (
+                                { modsStatus.tone === 'pending' && (
                                     <motion.div
                                         key="loader"
                                         initial={{ opacity: 0 }}
