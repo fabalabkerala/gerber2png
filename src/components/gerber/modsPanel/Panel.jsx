@@ -148,15 +148,6 @@ const hasPostMessageOption = (value, visited = new WeakSet()) => {
 
 const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng}) => {
     const { modsMachine, setModsMachine } = useGerberSettings();
-    const { 
-        modsStatus, 
-        isConnected,
-        openMods, 
-        updateMods, 
-        modsImage ,
-        currentStep, setCurrentStep,
-        completedSteps, setCompletedSteps,
-    } = useMods({ selectedPng, setSelectedPng });
 
     const [customMode, setCustomMode] = useState('url');
     const [customName, setCustomName] = useState('');
@@ -464,6 +455,16 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
         closeCustomProgramModal();
     };
 
+    const { 
+        modsStatus, 
+        isConnected,
+        openMods, 
+        updateMods, 
+        modsImage ,
+        currentStep, setCurrentStep,
+        completedSteps, setCompletedSteps,
+    } = useMods({ selectedPng, setSelectedPng, machineOptions });
+
     return (
         <>
             <AnimatePresence>
@@ -622,7 +623,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                                     "flex justify-center items-center gap-2 px-2 py-1.5 rounded-lg shadow bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-500",
                                                 )} 
                                                 whileTap={{ scale: 0.98 }}
-                                                onClick={() => openMods(modsMachine, machineOptions)}
+                                                onClick={() => openMods(selectedPng)}
                                             >
                                                 <p className="font-medium text-xs ps-0.5 text-white tracking-wider ">Open Mods</p>
                                                 <ArrowRightEndOnRectangleIcon width={18} height={18} strokeWidth={2} stroke="white" />

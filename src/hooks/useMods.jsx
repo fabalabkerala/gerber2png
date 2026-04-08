@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { useApp } from "../components/context/AppContext";
+import { useGerberSettings } from "../components/context/GerberContext";
 
 const machineOption = [
     { id: 'carbide-nomad', label: 'Carbide Nomad', url: 'https://modsproject.org/?program=programs/machines/Carbide+Nomad/PCB' },
@@ -61,13 +62,14 @@ const buildProcessSteps = (pngFiles) => {
 
 
 
-const useMods = ({ selectedPng, setSelectedPng }) => {
+const useMods = ({ selectedPng, setSelectedPng, machineOptions }) => {
     const modsWindowRef = useRef(null);
     const [ modsStatus, setModsStatus ] = useState('initial');
     const [currentStep, setCurrentStep] = useState(0);
     const [completedSteps, setCompletedSteps] = useState([]);
 
     const { pngFiles } = useApp();
+    const { modsMachine } = useGerberSettings();
     const processSteps = useMemo(() => buildProcessSteps(pngFiles), [pngFiles]);
 
     const modsStatusCopy = {
@@ -236,34 +238,12 @@ const useMods = ({ selectedPng, setSelectedPng }) => {
         });
     };
 
-    const handleInitialOpenMods = async (machine, machineOptions) => {
-        if (!selectedPng?.url) return;
+    const openMods = async (file) => {
+        if (!file?.url) return;
 
         const isFirstLaunch = !modsWindowRef.current?.window || modsWindowRef.current.window.closed;
-        const currentMachine = machineOptions.find(opt => opt.id === machine);
-        if (!currentMachine) return;
-
-        await openMods(currentMachine, selectedPng);
-
-        if (!isFirstLaunch || !processSteps.length) return;
-
-        const currentIndex = processSteps.findIndex((step) => step.file?.url === selectedPng.url);
-        if (currentIndex < 0) return;
-
-        setCompletedSteps((prev) => (prev.includes(currentIndex) ? prev : [...prev, currentIndex]));
-
-        if (currentIndex < processSteps.length - 1) {
-            setCurrentStep(currentIndex + 1);
-            setSelectedPng(processSteps[currentIndex + 1].file);
-            return;
-        }
-
-        setCurrentStep(currentIndex);
-    };
-
-
-    const openMods = async (machine, file) => {
-        if (!file?.url) return;
+        const machine = machineOptions.find(opt => opt.id === modsMachine);
+        if (!machine) return;
 
         let modsWindow = modsWindowRef.current?.window;
 
@@ -325,6 +305,21 @@ const useMods = ({ selectedPng, setSelectedPng }) => {
             origin: runtime.origin,
             awaitReady: !runtime.requiresProgramBootstrap,
         });
+
+        if (!isFirstLaunch || !processSteps.length) return;
+
+        const currentIndex = processSteps.findIndex((step) => step.file?.url === selectedPng.url);
+        if (currentIndex < 0) return;
+
+        setCompletedSteps((prev) => (prev.includes(currentIndex) ? prev : [...prev, currentIndex]));
+
+        if (currentIndex < processSteps.length - 1) {
+            setCurrentStep(currentIndex + 1);
+            setSelectedPng(processSteps[currentIndex + 1].file);
+            return;
+        }
+
+        setCurrentStep(currentIndex);
     };
 
 
@@ -380,7 +375,7 @@ const useMods = ({ selectedPng, setSelectedPng }) => {
         modsImage: modsWindowRef.current?.image || null,
         modsStatus: currentModsStatus,
         isConnected,
-        openMods: handleInitialOpenMods,
+        openMods,
         updateMods,
         currentStep, setCurrentStep,
         completedSteps, setCompletedSteps,
