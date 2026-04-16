@@ -2,20 +2,6 @@ import { useMemo, useRef, useState } from "react";
 import { useApp } from "../components/context/AppContext";
 import { useGerberSettings } from "../components/context/GerberContext";
 
-const machineOption = [
-    { id: 'carbide-nomad', label: 'Carbide Nomad', url: 'https://modsproject.org/?program=programs/machines/Carbide+Nomad/PCB' },
-    { id: 'carvera', label: 'Carvera', url: 'https://modsproject.org/?program=programs/machines/Carvera/mill+2D+PCB' },
-    { id: 'carvera-all', label: 'Carvera · PCB All', url: 'https://modsproject.org/?program=programs/machines/Carvera/mill+2D+PCB+all' },
-    { id: 'carvera-air', label: 'Carvera Air', url: 'https://modsproject.org/?program=programs/machines/Carvera+Air/PCB' },
-    { id: 'gcode', label: 'G-code', url: 'https://modsproject.org/?program=programs/machines/G-code/mill+2D+PCB' },
-    { id: 'gcode-leveler', label: 'G-code · PCB Leveler', url: 'https://modsproject.org/?program=programs/machines/G-code/mill+2D+PCB+leveler' },
-    { id: 'othermill-bantam', label: 'Othermill-Bantam Tools', url: 'https://modsproject.org/?program=programs/machines/Othermill-Bantam+Tools/PCB' },
-    { id: 'roland-mdx', label: 'Roland/MDX mill', url: 'https://modsproject.org/?program=programs/machines/Roland/MDX+mill/PCB' },
-    { id: 'mdx', label: 'Roland/SRM-20 mill', url: 'https://modsproject.org/?program=programs/machines/Roland/SRM-20+mill/mill+2D+PCB' },
-    { id: 'roland-imodela', label: 'Roland/iModela mill', url: 'https://modsproject.org/?program=programs/machines/Roland/iModela+mill/PCB' },
-    { id: 'shopbot', label: 'ShopBot', url: 'https://modsproject.org/?program=programs/machines/ShopBot/mill+2D+PCB' },
-]
-
 const DEFAULT_MODS_URL = 'https://modsproject.org/';
 const DEFAULT_MODS_ORIGIN = 'https://modsproject.org';
 

@@ -19,6 +19,7 @@ import { useApp } from "../../context/AppContext";
 import ProcessSteps from "./ProcessSteps";
 import CustomProgramModal from "./CustomProgramModal";
 import useMods from "../../../hooks/useMods";
+import useModsValidator from "../../../hooks/useModsValidator";
 
 const machineOption = [
     { id: 'carbide-nomad', label: 'Carbide Nomad', url: 'https://modsproject.org/?program=programs/machines/Carbide+Nomad/PCB' },
@@ -100,51 +101,6 @@ const deriveProgramNameFromUrl = (rawUrl) => {
     }
 };
 
-const verifyRemoteFile = async (url, signal) => {
-    const request = async (method) => fetch(url, {
-        method,
-        signal,
-        headers: method === 'GET' ? { Range: 'bytes=0-0' } : undefined,
-    });
-
-    try {
-        const headResponse = await request('HEAD');
-        if (headResponse.ok) return { ok: true };
-        if (![403, 405, 501].includes(headResponse.status)) {
-            return { ok: false, message: `The file could not be reached (${headResponse.status}).` };
-        }
-    } catch (error) {
-        if (error.name === 'AbortError') throw error;
-    }
-
-    try {
-        const getResponse = await request('GET');
-        if (getResponse.ok) return { ok: true };
-        return { ok: false, message: `The file could not be reached (${getResponse.status}).` };
-    } catch (error) {
-        if (error.name === 'AbortError') throw error;
-        return {
-            ok: false,
-            message: 'The browser could not verify this file. Make sure the link is public and allows direct access.',
-        };
-    }
-};
-
-const hasPostMessageOption = (value, visited = new WeakSet()) => {
-    if (!value || typeof value !== 'object') return false;
-    if (visited.has(value)) return false;
-    visited.add(value);
-
-    if (Array.isArray(value)) {
-        return value.some((item) => hasPostMessageOption(item, visited));
-    }
-
-    return Object.entries(value).some(([key, nestedValue]) => {
-        if (key === 'postMessage') return true;
-        return hasPostMessageOption(nestedValue, visited);
-    });
-};
-
 
 const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng}) => {
     const { modsMachine, setModsMachine } = useGerberSettings();
@@ -156,6 +112,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
     const [customUrlCheckError, setCustomUrlCheckError] = useState('');
     const [customJsonName, setCustomJsonName] = useState('');
     const [customJsonContent, setCustomJsonContent] = useState('');
+    const [customJsonCheckState, setCustomJsonCheckState] = useState('idle');
     const [customJsonError, setCustomJsonError] = useState('');
     const [isCustomNameManuallyEdited, setIsCustomNameManuallyEdited] = useState(false);
     const [customPrograms, setCustomPrograms] = useState([]);
@@ -163,6 +120,8 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
 
     const lastSelectedMachineRef = useRef(machineOption[0].id);
     const lastNormalizedCustomUrlRef = useRef('');
+
+    const { verifyRemoteFile, validateCustomProgram } = useModsValidator();
 
     const resetCustomProgramDraft = () => {
         setCustomMode('url');
@@ -172,6 +131,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
         setCustomUrlCheckError('');
         setCustomJsonName('');
         setCustomJsonContent('');
+        setCustomJsonCheckState('idle');
         setCustomJsonError('');
         setIsCustomNameManuallyEdited(false);
     };
@@ -306,7 +266,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
             setCustomUrlCheckError('');
 
             try {
-                const result = await verifyRemoteFile(normalizedCustomUrl, controller.signal);
+                const result = await verifyRemoteFile(normalizedCustomUrl, controller.signal, selectedPng);
                 if (!isActive) return;
 
                 if (result.ok) {
@@ -332,13 +292,13 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
 
     useEffect(() => {
         if (customMode === 'url' && customUrlCheckState !== 'valid') return;
-        if (customMode === 'json' && (!customJsonContent || customJsonError)) return;
+        if (customMode === 'json' && (customJsonCheckState !== 'valid' || !customJsonContent || customJsonError)) return;
         if (customName.trim() || isCustomNameManuallyEdited) return;
 
         if (derivedCustomProgramName) {
             setCustomName(derivedCustomProgramName);
         }
-    }, [customMode, customName, customUrlCheckState, customJsonContent, customJsonError, derivedCustomProgramName, isCustomNameManuallyEdited]);
+    }, [customMode, customName, customUrlCheckState, customJsonCheckState, customJsonContent, customJsonError, derivedCustomProgramName, isCustomNameManuallyEdited]);
 
     const handleCustomNameChange = (value) => {
         setCustomName(value);
@@ -350,9 +310,13 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
     };
 
     const customProgramHelper = customMode === 'json'
-        ? (customJsonName
-            ? 'JSON file loaded. We will verify that it exposes a postMessage option before using it in Mods.'
-            : 'Upload a Mods JSON program file to store it locally and reuse it later.')
+        ? (customJsonCheckState === 'checking'
+            ? 'Checking whether this JSON program can boot in Mods and acknowledge a PNG transfer...'
+            : customJsonCheckState === 'valid'
+                ? 'JSON file verified. This program responded to the test PNG transfer and is ready to save.'
+                : customJsonName
+                    ? 'We test the uploaded program in Mods before saving it, so only real message-compatible programs are accepted.'
+                    : 'Upload a Mods JSON program file and we will verify the actual Mods connection before saving it.')
         : (!trimmedCustomUrl
             ? 'Paste the public URL of your hosted JSON program. We will verify that the file is reachable before saving it.'
             : customUrlCheckState === 'checking'
@@ -365,7 +329,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
         ? customJsonError
         : customUrlError || customUrlCheckError;
     const isCustomProgramReady = customMode === 'json'
-        ? Boolean(customJsonContent) && !customJsonError
+        ? customJsonCheckState === 'valid' && Boolean(customJsonContent) && !customJsonError
         : Boolean(trimmedCustomUrl) && !customProgramValidationError && customUrlCheckState === 'valid';
 
     const machineOptions = useMemo(() => {
@@ -403,31 +367,40 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
         if (!file) return;
 
         try {
-            const text = await file.text();
-            const parsedProgram = JSON.parse(text);
-
-            if (!hasPostMessageOption(parsedProgram)) {
-                setCustomJsonName(file.name);
-                setCustomJsonContent('');
-                setCustomJsonError('This JSON does not expose a `postMessage` option, so the app cannot send PNG data into it.');
-                return;
-            }
+            // const text = await file.text();
+            // const parsedProgram = JSON.parse(text);
 
             setCustomMode('json');
             setCustomJsonName(file.name);
-            setCustomJsonContent(text);
+            setCustomJsonContent('');
+            setCustomJsonCheckState('checking');
             setCustomJsonError('');
             setCustomUrl('');
             setCustomUrlCheckState('idle');
             setCustomUrlCheckError('');
 
+            // const validationResult = await hasPostMessageOption(parsedProgram, selectedPng);
+            const validationResult = await validateCustomProgram(file, selectedPng);
+
+            if (!validationResult.ok) {
+                setCustomJsonCheckState('invalid');
+                setCustomJsonError(validationResult.message);
+                return;
+            }
+
+            const text = await file.text();
+            setCustomJsonContent(text);
+            setCustomJsonCheckState('valid');
+
             if (!isCustomNameManuallyEdited && !customName.trim()) {
                 setCustomName(file.name.replace(/\.[^/.]+$/, '').trim());
             }
         } catch (error) {
+            console.error('Error validating custom JSON program:', error);
             setCustomJsonName(file.name);
             setCustomJsonContent('');
-            setCustomJsonError('Upload a valid JSON program file with a `postMessage` option.');
+            setCustomJsonCheckState('invalid');
+            setCustomJsonError('Upload a valid JSON program file that Mods can open and acknowledge.');
         } finally {
             event.target.value = '';
         }
@@ -685,7 +658,9 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                             setCustomName={handleCustomNameChange}
                             customUrl={customUrl}
                             setCustomUrl={setCustomUrl}
+                            customUrlCheckState={customUrlCheckState}
                             customJsonName={customJsonName}
+                            customJsonCheckState={customJsonCheckState}
                             customJsonError={customJsonError}
                             customPrograms={customPrograms}
                             customProgramHelper={customProgramHelper}
