@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react";
-import { useApp } from "../components/context/AppContext";
-import { useGerberSettings } from "../components/context/GerberContext";
+import { useApp } from "../../../context/AppContext";
+import { useGerberSettings } from "../../../context/GerberContext";
 
 const DEFAULT_MODS_URL = 'https://modsproject.org/';
 const DEFAULT_MODS_ORIGIN = 'https://modsproject.org';
@@ -45,8 +45,6 @@ const buildProcessSteps = (pngFiles) => {
 
     return ORDER.map((key) => map[key]).filter(Boolean);
 };
-
-
 
 const useMods = ({ selectedPng, setSelectedPng, machineOptions }) => {
     const modsWindowRef = useRef(null);
@@ -224,16 +222,16 @@ const useMods = ({ selectedPng, setSelectedPng, machineOptions }) => {
         });
     };
 
-    const openMods = async (file) => {
+    const openMods = async (file, machine) => {
         if (!file?.url) return;
 
         const isFirstLaunch = !modsWindowRef.current?.window || modsWindowRef.current.window.closed;
-        const machine = machineOptions.find(opt => opt.id === modsMachine);
-        if (!machine) return;
+        const currentMachine = machineOptions.find(opt => opt.id === machine);
+        if (!currentMachine) return;
 
         let modsWindow = modsWindowRef.current?.window;
 
-        const runtime = getMachineRuntimeConfig(machine);
+        const runtime = getMachineRuntimeConfig(currentMachine);
         if (!runtime.url) return;
 
         const currentOrigin = modsWindowRef.current?.origin;
@@ -255,7 +253,7 @@ const useMods = ({ selectedPng, setSelectedPng, machineOptions }) => {
 
         modsWindowRef.current = {
             window: modsWindow,
-            machine,
+            machine: currentMachine ,
             image: file.url,
             origin: runtime.origin,
             awaitReady: !runtime.requiresProgramBootstrap,
@@ -267,7 +265,7 @@ const useMods = ({ selectedPng, setSelectedPng, machineOptions }) => {
 
         if (runtime.requiresProgramBootstrap) {
             try {
-                await sendProgramToMods(modsWindow, machine, runtime.origin);
+                await sendProgramToMods(modsWindow, currentMachine, runtime.origin);
             } catch (error) {
                 console.error(error);
                 setModsStatus("error");

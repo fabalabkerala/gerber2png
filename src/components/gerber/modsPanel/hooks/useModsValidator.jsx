@@ -71,7 +71,6 @@ const sendPayloadUntilReady = async ({ targetWindow, origin, payload, timeoutMs 
 
 
 const useModsValidator = () => {
-
     const verifyRemoteFile = async (url, signal, image) => {
         const request = async (method) => fetch(url, {
             method,

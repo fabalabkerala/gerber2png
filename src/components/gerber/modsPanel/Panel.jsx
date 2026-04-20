@@ -15,11 +15,12 @@ import ModalHeader from "../../ui/ModalHeader";
 import Select from "../../ui/Select";
 import { cn } from "../../../utils/cn";
 import { useGerberSettings } from "../../context/GerberContext";
-import { useApp } from "../../context/AppContext";
 import ProcessSteps from "./ProcessSteps";
 import CustomProgramModal from "./CustomProgramModal";
-import useMods from "../../../hooks/useMods";
-import useModsValidator from "../../../hooks/useModsValidator";
+import useMods from "./hooks/useMods";
+import useModsValidator from "./hooks/useModsValidator";
+import { buildCustomProgramUrl, deriveProgramNameFromUrl, validateJsonUrl } from "./utils/modsProgramUtils";
+import useCustomPrograms from "./hooks/useCustomPrograms";
 
 const machineOption = [
     { id: 'carbide-nomad', label: 'Carbide Nomad', url: 'https://modsproject.org/?program=programs/machines/Carbide+Nomad/PCB' },
@@ -39,72 +40,8 @@ const CUSTOM_PROGRAM_CREATE_ID = 'custom-program-create';
 const CUSTOM_PROGRAM_STORAGE_KEY = 'modsCustomPrograms';
 const LEGACY_CUSTOM_PROGRAM_STORAGE_KEY = 'modsCustomProgram';
 const PREFERRED_MACHINE_STORAGE_KEY = 'modsPreferredMachine';
-const DEFAULT_MODS_URL = 'https://modsproject.org/';
-
-const extractProgramSourceUrl = (rawUrl) => {
-    try {
-        const parsedUrl = new URL(rawUrl);
-        if (parsedUrl.origin === 'https://modsproject.org') {
-            if (parsedUrl.searchParams.has('program')) {
-                return (parsedUrl.searchParams.get('program') || '').trim();
-            }
-
-            if (parsedUrl.searchParams.has('json')) {
-                return (parsedUrl.searchParams.get('json') || '').trim();
-            }
-        }
-    } catch (error) {
-        return rawUrl;
-    }
-
-    return rawUrl;
-};
-
-const buildCustomProgramUrl = (customProgram) => {
-    if (!customProgram) return null;
-    try {
-        if (customProgram.type === 'json') {
-            return CUSTOM_JSON_MODS_URL;
-        }
-
-        const modsUrl = new URL(DEFAULT_MODS_URL);
-        const sourceUrl = extractProgramSourceUrl(customProgram.value);
-        new URL(sourceUrl);
-        modsUrl.searchParams.set('program', sourceUrl);
-        return modsUrl.toString();
-
-    } catch (error) {
-        return null;
-    }
-};
-
-const hasFileTarget = (rawUrl) => {
-    try {
-        const parsedUrl = new URL(extractProgramSourceUrl(rawUrl));
-        const lastSegment = parsedUrl.pathname.split('/').filter(Boolean).pop();
-        return Boolean(lastSegment && lastSegment.includes('.'));
-    } catch (error) {
-        return false;
-    }
-};
-
-const deriveProgramNameFromUrl = (rawUrl) => {
-    try {
-        const parsedUrl = new URL(extractProgramSourceUrl(rawUrl));
-        const lastSegment = parsedUrl.pathname.split('/').filter(Boolean).pop();
-        if (!lastSegment) return '';
-
-        const decodedName = decodeURIComponent(lastSegment);
-        return decodedName.replace(/\.[^/.]+$/, '').trim();
-    } catch (error) {
-        return '';
-    }
-};
-
 
 const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng}) => {
-    const { modsMachine, setModsMachine } = useGerberSettings();
-
     const [customMode, setCustomMode] = useState('url');
     const [customName, setCustomName] = useState('');
     const [customUrl, setCustomUrl] = useState('');
@@ -115,13 +52,19 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
     const [customJsonCheckState, setCustomJsonCheckState] = useState('idle');
     const [customJsonError, setCustomJsonError] = useState('');
     const [isCustomNameManuallyEdited, setIsCustomNameManuallyEdited] = useState(false);
-    const [customPrograms, setCustomPrograms] = useState([]);
     const [isCustomProgramModalOpen, setIsCustomProgramModalOpen] = useState(false);
 
     const lastSelectedMachineRef = useRef(machineOption[0].id);
     const lastNormalizedCustomUrlRef = useRef('');
 
     const { verifyRemoteFile, validateCustomProgram } = useModsValidator();
+    const { 
+        programs : customPrograms, 
+        preferredMachine, 
+        setPreferredMachine, 
+        addCustomProgram, 
+        removeCustomProgram
+    } = useCustomPrograms(machineOption[0].id);
 
     const resetCustomProgramDraft = () => {
         setCustomMode('url');
@@ -141,57 +84,6 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
         setIsCustomProgramModalOpen(false);
     };
 
-    useEffect(() => {
-        const savedCustomPrograms = localStorage.getItem(CUSTOM_PROGRAM_STORAGE_KEY);
-        const legacyCustomProgram = localStorage.getItem(LEGACY_CUSTOM_PROGRAM_STORAGE_KEY);
-        const savedPreferredMachine = localStorage.getItem(PREFERRED_MACHINE_STORAGE_KEY);
-
-        let parsedPrograms = [];
-
-        if (savedCustomPrograms) {
-            try {
-                const parsed = JSON.parse(savedCustomPrograms);
-                parsedPrograms = Array.isArray(parsed) ? parsed : [];
-            } catch (error) {
-                console.warn('Invalid saved Mods custom programs');
-            }
-        } else if (legacyCustomProgram) {
-            try {
-                const parsed = JSON.parse(legacyCustomProgram);
-                parsedPrograms = [{
-                    id: `custom-program-${Date.now()}`,
-                    label: parsed.label || 'Imported Custom Program',
-                    type: parsed.type,
-                    value: parsed.value,
-                }];
-            } catch (error) {
-                console.warn('Invalid legacy Mods custom program');
-            }
-        }
-
-        setCustomPrograms(parsedPrograms);
-
-        if (savedPreferredMachine) {
-            setModsMachine(savedPreferredMachine);
-            return;
-        }
-
-        if (parsedPrograms.length > 0) {
-            setModsMachine(parsedPrograms[0].id);
-        }
-    }, [setModsMachine]);
-
-    useEffect(() => {
-        if (!modsMachine || modsMachine === CUSTOM_PROGRAM_CREATE_ID) return;
-        localStorage.setItem(PREFERRED_MACHINE_STORAGE_KEY, modsMachine);
-        lastSelectedMachineRef.current = modsMachine;
-    }, [modsMachine]);
-
-    useEffect(() => {
-        localStorage.setItem(CUSTOM_PROGRAM_STORAGE_KEY, JSON.stringify(customPrograms));
-    }, [customPrograms]);
-
-
     const customProgramOptions = useMemo(() => (
         customPrograms.map((program) => ({
             ...program,
@@ -203,102 +95,64 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
     ), [customPrograms]);
 
     const trimmedCustomUrl = customUrl.trim();
-    const normalizedCustomUrl = useMemo(() => extractProgramSourceUrl(trimmedCustomUrl), [trimmedCustomUrl]);
-    const derivedCustomProgramName = useMemo(
-        () => customMode === 'json'
-            ? (customJsonName ? customJsonName.replace(/\.[^/.]+$/, '').trim() : '')
-            : deriveProgramNameFromUrl(normalizedCustomUrl),
-        [customJsonName, customMode, normalizedCustomUrl]
-    );
-    const customProgramName = useMemo(
-        () => customName.trim() || derivedCustomProgramName || 'Custom Program',
-        [customName, derivedCustomProgramName]
-    );
+    const derivedName = customMode === 'json' ? customJsonName.replace(/\.[^/.]+$/, '').trim() : deriveProgramNameFromUrl(trimmedCustomUrl);
+    const finalName = customName.trim() || derivedName || 'Custom Program';
 
     useEffect(() => {
-        if (lastNormalizedCustomUrlRef.current === normalizedCustomUrl) return;
-        lastNormalizedCustomUrlRef.current = normalizedCustomUrl;
+        if (lastNormalizedCustomUrlRef.current === trimmedCustomUrl) return;
+        lastNormalizedCustomUrlRef.current = trimmedCustomUrl;
         setIsCustomNameManuallyEdited(false);
-    }, [normalizedCustomUrl]);
+    }, [trimmedCustomUrl]);
 
-    const customUrlError = useMemo(() => {
-        if (!trimmedCustomUrl) return '';
-
-        let parsedUrl;
-        try {
-            parsedUrl = new URL(normalizedCustomUrl);
-            if (!parsedUrl.protocol.startsWith('http')) {
-                return 'Enter a valid http or https URL.';
-            }
-        } catch (error) {
-            return 'Enter a valid program URL.';
-        }
-
-        if (!hasFileTarget(normalizedCustomUrl)) {
-            return 'Use a direct file link, such as a hosted .json file, not just a folder or site URL.';
-        }
-
-        if (customPrograms.some((program) => program.type === 'url' && extractProgramSourceUrl(program.value) === normalizedCustomUrl)) {
-            return 'This Mods URL is already saved.';
-        }
-
-        return '';
-    }, [customPrograms, normalizedCustomUrl, trimmedCustomUrl]);
+    const urlError = validateJsonUrl(trimmedCustomUrl, customPrograms);
 
     useEffect(() => {
-        if (customMode !== 'url') {
-            setCustomUrlCheckState('idle');
-            setCustomUrlCheckError('');
-            return;
-        }
-
-        if (!trimmedCustomUrl || customUrlError) {
-            setCustomUrlCheckState('idle');
-            setCustomUrlCheckError('');
-            return;
-        }
+        if (customMode !== 'url') return
+        if (!trimmedCustomUrl || urlError) return;
 
         let isActive = true;
         const controller = new AbortController();
 
-        const timeoutId = window.setTimeout(async () => {
+        const run = async () => {
             setCustomUrlCheckState('checking');
             setCustomUrlCheckError('');
 
             try {
-                const result = await verifyRemoteFile(normalizedCustomUrl, controller.signal, selectedPng);
+                const result = await verifyRemoteFile(trimmedCustomUrl, controller.signal, selectedPng);
                 if (!isActive) return;
 
                 if (result.ok) {
                     setCustomUrlCheckState('valid');
-                    return;
+                } else {
+                    setCustomUrlCheckState('invalid');
+                    setCustomUrlCheckError(result.message);
                 }
 
-                setCustomUrlCheckState('invalid');
-                setCustomUrlCheckError(result.message);
             } catch (error) {
                 if (!isActive || error.name === 'AbortError') return;
                 setCustomUrlCheckState('invalid');
-                setCustomUrlCheckError('The file check was interrupted. Try again.');
+                setCustomUrlCheckError('An error occurred while checking the URL.');
             }
-        }, 350);
+        }
+
+        const timout = setTimeout(run, 350);
 
         return () => {
             isActive = false;
-            window.clearTimeout(timeoutId);
+            clearTimeout(timout);
             controller.abort();
-        };
-    }, [customMode, customUrlError, normalizedCustomUrl, trimmedCustomUrl]);
+        }
+    }, [customMode, urlError, trimmedCustomUrl]);
 
     useEffect(() => {
         if (customMode === 'url' && customUrlCheckState !== 'valid') return;
         if (customMode === 'json' && (customJsonCheckState !== 'valid' || !customJsonContent || customJsonError)) return;
         if (customName.trim() || isCustomNameManuallyEdited) return;
 
-        if (derivedCustomProgramName) {
-            setCustomName(derivedCustomProgramName);
+        if (derivedName) {
+            setCustomName(derivedName);
         }
-    }, [customMode, customName, customUrlCheckState, customJsonCheckState, customJsonContent, customJsonError, derivedCustomProgramName, isCustomNameManuallyEdited]);
+    }, [customMode, customName, customUrlCheckState, customJsonCheckState, customJsonContent, customJsonError, derivedName, isCustomNameManuallyEdited]);
 
     const handleCustomNameChange = (value) => {
         setCustomName(value);
@@ -327,7 +181,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
 
     const customProgramValidationError = customMode === 'json'
         ? customJsonError
-        : customUrlError || customUrlCheckError;
+        : urlError || customUrlCheckError;
     const isCustomProgramReady = customMode === 'json'
         ? customJsonCheckState === 'valid' && Boolean(customJsonContent) && !customJsonError
         : Boolean(trimmedCustomUrl) && !customProgramValidationError && customUrlCheckState === 'valid';
@@ -343,22 +197,18 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
     }, [customProgramOptions]);
 
     const activeMachine = useMemo(
-        () => machineOptions.find((option) => option.id === modsMachine) || machineOption[0],
-        [machineOptions, modsMachine]
+        () => machineOptions.find((option) => option.id === preferredMachine) || machineOption[0],
+        [machineOptions, preferredMachine]
     );
 
     const saveCustomProgram = () => {
         if (!isCustomProgramReady) return;
 
-        const payload = {
-            id: `custom-program-${Date.now()}`,
-            type: customMode,
-            value: customMode === 'json' ? customJsonContent : normalizedCustomUrl,
-            label: customProgramName,
-        };
-
-        setCustomPrograms((prev) => [...prev, payload]);
-        setModsMachine(payload.id);
+        addCustomProgram(
+            customMode, 
+            finalName, 
+            customMode === 'json' ? customJsonContent : trimmedCustomUrl
+        );
         closeCustomProgramModal();
     };
 
@@ -367,9 +217,6 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
         if (!file) return;
 
         try {
-            // const text = await file.text();
-            // const parsedProgram = JSON.parse(text);
-
             setCustomMode('json');
             setCustomJsonName(file.name);
             setCustomJsonContent('');
@@ -379,7 +226,6 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
             setCustomUrlCheckState('idle');
             setCustomUrlCheckError('');
 
-            // const validationResult = await hasPostMessageOption(parsedProgram, selectedPng);
             const validationResult = await validateCustomProgram(file, selectedPng);
 
             if (!validationResult.ok) {
@@ -406,25 +252,17 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
         }
     };
 
-    const removeCustomProgram = (programId) => {
-        setCustomPrograms((prev) => prev.filter((program) => program.id !== programId));
-
-        if (modsMachine === programId) {
-            setModsMachine(machineOption[0].id);
-            localStorage.setItem(PREFERRED_MACHINE_STORAGE_KEY, machineOption[0].id);
-        }
-    };
-
     const handleMachineSelect = (value) => {
-        if (value !== CUSTOM_PROGRAM_CREATE_ID) return;
-
-        setModsMachine(lastSelectedMachineRef.current || machineOption[0].id);
-        resetCustomProgramDraft();
-        setIsCustomProgramModalOpen(true);
+        if (value === CUSTOM_PROGRAM_CREATE_ID) {
+            resetCustomProgramDraft();
+            setIsCustomProgramModalOpen(true);
+            return;
+        }
+        setPreferredMachine(value);
     };
 
     const useCustomProgram = (programId) => {
-        setModsMachine(programId);
+        setPreferredMachine(programId);
         closeCustomProgramModal();
     };
 
@@ -571,9 +409,9 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                                         <div className={cn("w-full", isConnected ? "pointer-events-none opacity-60" : "")}>
                                                             <Select 
                                                                 options={machineOptions} 
-                                                                selected={modsMachine} 
-                                                                setSelected={setModsMachine} 
-                                                                onSelect={handleMachineSelect}
+                                                                selected={preferredMachine} 
+                                                                setSelected={handleMachineSelect} 
+                                                                // onSelect={handleMachineSelect}
                                                             />
                                                         </div>
                                                     </div>
@@ -596,7 +434,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                                     "flex justify-center items-center gap-2 px-2 py-1.5 rounded-lg shadow bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-500",
                                                 )} 
                                                 whileTap={{ scale: 0.98 }}
-                                                onClick={() => openMods(selectedPng)}
+                                                onClick={() => openMods(selectedPng, preferredMachine)}
                                             >
                                                 <p className="font-medium text-xs ps-0.5 text-white tracking-wider ">Open Mods</p>
                                                 <ArrowRightEndOnRectangleIcon width={18} height={18} strokeWidth={2} stroke="white" />
@@ -665,7 +503,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                             customPrograms={customPrograms}
                             customProgramHelper={customProgramHelper}
                             customUrlError={customProgramValidationError}
-                            customProgramName={customProgramName}
+                            customProgramName={finalName}
                             isCustomProgramReady={isCustomProgramReady}
                             handleCustomJsonUpload={handleCustomJsonUpload}
                             saveCustomProgram={saveCustomProgram}
