@@ -19,8 +19,9 @@ import ProcessSteps from "./ProcessSteps";
 import CustomProgramModal from "./CustomProgramModal";
 import useMods from "./hooks/useMods";
 import useModsValidator from "./hooks/useModsValidator";
-import { buildCustomProgramUrl, deriveProgramNameFromUrl, validateJsonUrl } from "./utils/modsProgramUtils";
+import { buildCustomProgramUrl, deriveProgramNameFromUrl, validateJsonUrl, getHelperText } from "./utils/modsProgramUtils";
 import useCustomPrograms from "./hooks/useCustomPrograms";
+import useCustomProgramForm from "./hooks/useCustomProgramForm";
 
 const machineOption = [
     { id: 'carbide-nomad', label: 'Carbide Nomad', url: 'https://modsproject.org/?program=programs/machines/Carbide+Nomad/PCB' },
@@ -42,22 +43,13 @@ const LEGACY_CUSTOM_PROGRAM_STORAGE_KEY = 'modsCustomProgram';
 const PREFERRED_MACHINE_STORAGE_KEY = 'modsPreferredMachine';
 
 const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng}) => {
-    const [customMode, setCustomMode] = useState('url');
-    const [customName, setCustomName] = useState('');
-    const [customUrl, setCustomUrl] = useState('');
-    const [customUrlCheckState, setCustomUrlCheckState] = useState('idle');
-    const [customUrlCheckError, setCustomUrlCheckError] = useState('');
-    const [customJsonName, setCustomJsonName] = useState('');
-    const [customJsonContent, setCustomJsonContent] = useState('');
-    const [customJsonCheckState, setCustomJsonCheckState] = useState('idle');
-    const [customJsonError, setCustomJsonError] = useState('');
-    const [isCustomNameManuallyEdited, setIsCustomNameManuallyEdited] = useState(false);
     const [isCustomProgramModalOpen, setIsCustomProgramModalOpen] = useState(false);
 
-    const lastSelectedMachineRef = useRef(machineOption[0].id);
-    const lastNormalizedCustomUrlRef = useRef('');
+    const { 
+        verifyRemoteFile, 
+        validateCustomProgram 
+    } = useModsValidator();
 
-    const { verifyRemoteFile, validateCustomProgram } = useModsValidator();
     const { 
         programs : customPrograms, 
         preferredMachine, 
@@ -65,24 +57,39 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
         addCustomProgram, 
         removeCustomProgram
     } = useCustomPrograms(machineOption[0].id);
-
-    const resetCustomProgramDraft = () => {
-        setCustomMode('url');
-        setCustomName('');
-        setCustomUrl('');
-        setCustomUrlCheckState('idle');
-        setCustomUrlCheckError('');
-        setCustomJsonName('');
-        setCustomJsonContent('');
-        setCustomJsonCheckState('idle');
-        setCustomJsonError('');
-        setIsCustomNameManuallyEdited(false);
-    };
+    
+    const { 
+        state, 
+        dispatch, 
+        isReady, 
+        derived,
+        handleJsonUpload, 
+    } = useCustomProgramForm({
+        verifyRemoteFile,
+        validateCustomProgram,
+        selectedPng,
+        customPrograms
+    });
 
     const closeCustomProgramModal = () => {
-        resetCustomProgramDraft();
+        dispatch({ type: 'RESET' });
         setIsCustomProgramModalOpen(false);
     };
+
+    const urlError = validateJsonUrl(derived.url, customPrograms) || state.urlError;
+
+    const handleCustomNameChange = (value) => {
+        dispatch({ type: 'SET_NAME', value });
+    };
+
+    const handleCustomModeChange = (value) => {
+        dispatch({ type: 'SET_MODE', value });
+    };
+
+    const customProgramHelper = getHelperText(state);
+    const customProgramValidationError = state.mode === 'json' ? state.jsonError : urlError;
+
+    const isCustomProgramReady = isReady;
 
     const customProgramOptions = useMemo(() => (
         customPrograms.map((program) => ({
@@ -93,98 +100,6 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
             icon: program.type === 'json' ? DocumentArrowUpIcon : LinkIcon,
         }))
     ), [customPrograms]);
-
-    const trimmedCustomUrl = customUrl.trim();
-    const derivedName = customMode === 'json' ? customJsonName.replace(/\.[^/.]+$/, '').trim() : deriveProgramNameFromUrl(trimmedCustomUrl);
-    const finalName = customName.trim() || derivedName || 'Custom Program';
-
-    useEffect(() => {
-        if (lastNormalizedCustomUrlRef.current === trimmedCustomUrl) return;
-        lastNormalizedCustomUrlRef.current = trimmedCustomUrl;
-        setIsCustomNameManuallyEdited(false);
-    }, [trimmedCustomUrl]);
-
-    const urlError = validateJsonUrl(trimmedCustomUrl, customPrograms);
-
-    useEffect(() => {
-        if (customMode !== 'url') return
-        if (!trimmedCustomUrl || urlError) return;
-
-        let isActive = true;
-        const controller = new AbortController();
-
-        const run = async () => {
-            setCustomUrlCheckState('checking');
-            setCustomUrlCheckError('');
-
-            try {
-                const result = await verifyRemoteFile(trimmedCustomUrl, controller.signal, selectedPng);
-                if (!isActive) return;
-
-                if (result.ok) {
-                    setCustomUrlCheckState('valid');
-                } else {
-                    setCustomUrlCheckState('invalid');
-                    setCustomUrlCheckError(result.message);
-                }
-
-            } catch (error) {
-                if (!isActive || error.name === 'AbortError') return;
-                setCustomUrlCheckState('invalid');
-                setCustomUrlCheckError('An error occurred while checking the URL.');
-            }
-        }
-
-        const timout = setTimeout(run, 350);
-
-        return () => {
-            isActive = false;
-            clearTimeout(timout);
-            controller.abort();
-        }
-    }, [customMode, urlError, trimmedCustomUrl]);
-
-    useEffect(() => {
-        if (customMode === 'url' && customUrlCheckState !== 'valid') return;
-        if (customMode === 'json' && (customJsonCheckState !== 'valid' || !customJsonContent || customJsonError)) return;
-        if (customName.trim() || isCustomNameManuallyEdited) return;
-
-        if (derivedName) {
-            setCustomName(derivedName);
-        }
-    }, [customMode, customName, customUrlCheckState, customJsonCheckState, customJsonContent, customJsonError, derivedName, isCustomNameManuallyEdited]);
-
-    const handleCustomNameChange = (value) => {
-        setCustomName(value);
-        setIsCustomNameManuallyEdited(true);
-    };
-
-    const handleCustomModeChange = (value) => {
-        setCustomMode(value);
-    };
-
-    const customProgramHelper = customMode === 'json'
-        ? (customJsonCheckState === 'checking'
-            ? 'Checking whether this JSON program can boot in Mods and acknowledge a PNG transfer...'
-            : customJsonCheckState === 'valid'
-                ? 'JSON file verified. This program responded to the test PNG transfer and is ready to save.'
-                : customJsonName
-                    ? 'We test the uploaded program in Mods before saving it, so only real message-compatible programs are accepted.'
-                    : 'Upload a Mods JSON program file and we will verify the actual Mods connection before saving it.')
-        : (!trimmedCustomUrl
-            ? 'Paste the public URL of your hosted JSON program. We will verify that the file is reachable before saving it.'
-            : customUrlCheckState === 'checking'
-                ? 'Checking whether the hosted JSON file is reachable...'
-                : customUrlCheckState === 'valid'
-                    ? 'File found. This link will open in Mods using the ?program=<link> format.'
-                    : 'This hosted JSON link will open in Mods as ?program=<your-link> once the file check passes.');
-
-    const customProgramValidationError = customMode === 'json'
-        ? customJsonError
-        : urlError || customUrlCheckError;
-    const isCustomProgramReady = customMode === 'json'
-        ? customJsonCheckState === 'valid' && Boolean(customJsonContent) && !customJsonError
-        : Boolean(trimmedCustomUrl) && !customProgramValidationError && customUrlCheckState === 'valid';
 
     const machineOptions = useMemo(() => {
         const createOption = {
@@ -203,58 +118,13 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
 
     const saveCustomProgram = () => {
         if (!isCustomProgramReady) return;
-
-        addCustomProgram(
-            customMode, 
-            finalName, 
-            customMode === 'json' ? customJsonContent : trimmedCustomUrl
-        );
-        closeCustomProgramModal();
-    };
-
-    const handleCustomJsonUpload = async (event) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
-
-        try {
-            setCustomMode('json');
-            setCustomJsonName(file.name);
-            setCustomJsonContent('');
-            setCustomJsonCheckState('checking');
-            setCustomJsonError('');
-            setCustomUrl('');
-            setCustomUrlCheckState('idle');
-            setCustomUrlCheckError('');
-
-            const validationResult = await validateCustomProgram(file, selectedPng);
-
-            if (!validationResult.ok) {
-                setCustomJsonCheckState('invalid');
-                setCustomJsonError(validationResult.message);
-                return;
-            }
-
-            const text = await file.text();
-            setCustomJsonContent(text);
-            setCustomJsonCheckState('valid');
-
-            if (!isCustomNameManuallyEdited && !customName.trim()) {
-                setCustomName(file.name.replace(/\.[^/.]+$/, '').trim());
-            }
-        } catch (error) {
-            console.error('Error validating custom JSON program:', error);
-            setCustomJsonName(file.name);
-            setCustomJsonContent('');
-            setCustomJsonCheckState('invalid');
-            setCustomJsonError('Upload a valid JSON program file that Mods can open and acknowledge.');
-        } finally {
-            event.target.value = '';
-        }
+        addCustomProgram(state.mode, derived.name, state.mode === 'json' ? state.jsonContent : derived.url);
+        setIsCustomProgramModalOpen(false);
     };
 
     const handleMachineSelect = (value) => {
         if (value === CUSTOM_PROGRAM_CREATE_ID) {
-            resetCustomProgramDraft();
+            dispatch({ type: 'RESET' });
             setIsCustomProgramModalOpen(true);
             return;
         }
@@ -263,7 +133,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
 
     const useCustomProgram = (programId) => {
         setPreferredMachine(programId);
-        closeCustomProgramModal();
+        setIsCustomProgramModalOpen(false);
     };
 
     const { 
@@ -411,7 +281,6 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                                                 options={machineOptions} 
                                                                 selected={preferredMachine} 
                                                                 setSelected={handleMachineSelect} 
-                                                                // onSelect={handleMachineSelect}
                                                             />
                                                         </div>
                                                     </div>
@@ -490,22 +359,22 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                         <CustomProgramModal
                             isOpen={isCustomProgramModalOpen}
                             onClose={closeCustomProgramModal}
-                            customMode={customMode}
+                            customMode={state.mode}
                             setCustomMode={handleCustomModeChange}
-                            customName={customName}
+                            customName={state.name}
                             setCustomName={handleCustomNameChange}
-                            customUrl={customUrl}
-                            setCustomUrl={setCustomUrl}
-                            customUrlCheckState={customUrlCheckState}
-                            customJsonName={customJsonName}
-                            customJsonCheckState={customJsonCheckState}
-                            customJsonError={customJsonError}
+                            customUrl={state.url}
+                            setCustomUrl={(value) => dispatch({ type: 'SET_URL', value })}
+                            customUrlCheckState={state.urlStatus}
+                            customJsonName={state.jsonName}
+                            customJsonCheckState={state.jsonStatus}
+                            customJsonError={state.jsonError}
                             customPrograms={customPrograms}
                             customProgramHelper={customProgramHelper}
                             customUrlError={customProgramValidationError}
-                            customProgramName={finalName}
+                            customProgramName={derived.name}
                             isCustomProgramReady={isCustomProgramReady}
-                            handleCustomJsonUpload={handleCustomJsonUpload}
+                            handleCustomJsonUpload={handleJsonUpload}
                             saveCustomProgram={saveCustomProgram}
                             removeCustomProgram={removeCustomProgram}
                             useCustomProgram={useCustomProgram}

@@ -46,3 +46,18 @@ export const validateJsonUrl = (url, existingPrograms) => {
         return 'Enter a valid URL.';
     }
 }
+
+export const getHelperText = (state) => {
+    if (state.mode === 'json') {
+        if (state.jsonStatus === 'checking') return 'Checking whether this JSON program can boot in Mods and acknowledge a PNG transfer...';
+        if (state.jsonStatus === 'valid') return 'JSON file verified. This program responded to the test PNG transfer and is ready to save.';
+        return 'Upload a Mods JSON program file and we will verify the actual Mods connection before saving it.';
+    }
+
+    if (state.mode === 'url') {
+        if (state.urlStatus === 'checking') return 'Checking whether this URL is valid and can boot in Mods...';
+        if (state.urlStatus === 'valid') return 'URL verified and ready to save.';
+        if (state.urlError) return state.urlError;
+        return 'Paste the public URL of your hosted JSON program. We will verify that the file is reachable before saving it.';
+    }
+}
