@@ -26,7 +26,7 @@ async function svg2png(svg, swidth, sheight, canvasBg) {
             ctx.fillRect(0, 0, scaledWidth + scaledToolWidth * 2, scaledHeight + scaledToolWidth * 2);
             ctx.drawImage(img, scaledToolWidth, scaledToolWidth, scaledWidth , scaledHeight );
 
-            // // Convert to binary: black and white only
+            // Convert to binary: black and white only
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const data = imageData.data;
             for (let i = 0; i < data.length; i += 4) {

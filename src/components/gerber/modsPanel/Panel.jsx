@@ -57,7 +57,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
         addCustomProgram, 
         removeCustomProgram
     } = useCustomPrograms(machineOption[0].id);
-    
+
     const { 
         state, 
         dispatch, 
@@ -356,6 +356,7 @@ const ModsPanel = ({showModsPanel, setShowModsPanel, selectedPng, setSelectedPng
                                 )}
                             </AnimatePresence>
                         </motion.div>
+                        
                         <CustomProgramModal
                             isOpen={isCustomProgramModalOpen}
                             onClose={closeCustomProgramModal}

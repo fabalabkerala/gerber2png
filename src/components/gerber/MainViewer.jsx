@@ -17,7 +17,7 @@ const viewerTooltipClass = "pointer-events-none absolute -top-9 left-1/2 -transl
 const MainView = () => {
     const { setTopStack, setBottomStack, setFullLayers } = useGerberLayer();
     const { setLayerType, setStackConfig } = useGerberSettings();
-    const { mainSvg, setMainSvg, setSide, handleReset } = useGerberView();
+    const { mainSvg, setMainSvg, handleReset } = useGerberView();
     const { theme } = useApp();
 
     const resultRef = useRef(null);
@@ -42,7 +42,6 @@ const MainView = () => {
     const handleInputFiles = (files) => {
         convertToSvg(files, setTopStack, setBottomStack, setFullLayers, setMainSvg, setStackConfig).then(() => {
             setLayerType('original');
-            setSide('top')
             dropAreaRef.current.style.display = 'none';
             resultRef.current.style.display = 'flex';
         })
