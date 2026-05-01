@@ -5,7 +5,7 @@ import { cn } from '../../utils/cn';
 import GitlabIcon from '../icons/GitlabIcon'
 import WikiIcon from '../icons/WikiIcon'
 import { useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 
 export default function Navbar() {
@@ -39,8 +39,8 @@ export default function Navbar() {
                             </span>
                         </div>
                     </div>
-                    {/* <div className="flex flex-1 items-end justify-start h-full">
-                        <Link
+                    <div className="flex flex-1 items-end justify-start h-full">
+                        {/* <Link
                             className={cn(
                                 "px-4 py-1.5 w-64 text-sm text-center hover:text-[#3647e0] transition-all duration-200 h-fit",
                                 activeTab === 'converter' ? 'bg-[#f5f6f8]  text-[#3647e0] border-t border-t-indigo-400 font-medium' : 'hover:bg-zinc-50 border-x text-black font-normal'
@@ -61,8 +61,8 @@ export default function Navbar() {
                         >
                             
                             G-Code Generator
-                        </Link>
-                    </div> */}
+                        </Link> */}
+                    </div>
                     <div className='flex gap-3 min-w-[280px] items-center justify-end px-4'>
                         <div className="flex items-center gap-2">
                             <SunIcon className={cn("h-3.5 w-3.5 transition-colors", theme === "dark" ? "text-slate-500" : "text-amber-500")} />
