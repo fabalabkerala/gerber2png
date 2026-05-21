@@ -20,7 +20,7 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
         row: 1,
         column: 1,
         spacing: 1,
-        pcb: 1,
+        // pcb: 1,
         background: 'black'
     });
     const [ machine, setMachine ] = useState({
@@ -33,6 +33,8 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
     const [visibleSlots, setVisibleSlots] = useState(
         Array(totalSlots).fill(true)
     );
+
+    const pcbCount = visibleSlots.filter(Boolean).length;
 
     const toggleSlot = (index) => {
         setVisibleSlots((prev) =>
@@ -67,7 +69,6 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                 ...prev,
                 row: maxRow,
                 column: maxCol,
-                pcb: maxRow * maxCol
             }));
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -139,7 +140,7 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                         </div>
 
                                         <div className="mt-auto flex flex-col justify-center items-center bg-slate-50 py-1.5 rounded-lg dark:bg-slate-950/60">
-                                            <p className="text-sm font-medium dark:text-slate-100">{ config.pcb }<span className="text-[11px] font-normal text-gray-500 dark:text-slate-400"> PCBs</span></p>
+                                            <p className="text-sm font-medium dark:text-slate-100">{ pcbCount }<span className="text-[11px] font-normal text-gray-500 dark:text-slate-400"> PCBs</span></p>
                                         </div>
                                     </div>
 
