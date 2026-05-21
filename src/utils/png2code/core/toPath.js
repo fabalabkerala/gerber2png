@@ -63,3 +63,5 @@ function polylinesToPath3(ordered, imgH, params) {
 
     return paths;
 }
+
+function sq(x) { return x * x; }

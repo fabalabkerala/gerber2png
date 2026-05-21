@@ -7,7 +7,7 @@ import {
     useState
 } from "react";
 import { useApp } from "./AppContext";
-import { png2gcode } from "../../utils/png2code/png2gcode";
+import { pathsToGcode, png2gcode } from "../../utils/png2code/png2gcode";
 
 const GCodeContext = createContext();
 
@@ -41,6 +41,7 @@ export const GCodeProvider = ({ children }) => {
     const handleGeneration = async (png) => {
         const tool = toolLib.find(tool => tool.id === png.tool) || null;
         console.log('Gnenre : ', png, tool, machineConf, pcbConf);
+
         const params = {
             dpi: 1000,               // realistic for PNG input
             invert: false,
@@ -51,7 +52,7 @@ export const GCodeProvider = ({ children }) => {
             toolDiameterMM: 0.4,   // common PCB engraving bit (0.2–0.5 range)
 
             // Isolation settings
-            offsetNumber: 3,       // number of passes
+            offsetNumber: 0,       // number of passes
             offsetStepOver: 0.5,   // 50% step-over
 
             // Cutting depth (VERY IMPORTANT)
@@ -61,7 +62,7 @@ export const GCodeProvider = ({ children }) => {
             safeZMM: 2,            // no need for 5mm in PCB
 
             // Feed rates (in mm/s)
-            xyFeedMMS: 5,          // = 300 mm/min (safe)
+            xyFeedMMS: 3,          // = 300 mm/min (safe)
             zFeedMMS: 2,           // = 120 mm/min
 
             // Origin
@@ -72,10 +73,10 @@ export const GCodeProvider = ({ children }) => {
         };
         
         const imgData = await loadImageDataFromUrl(png.url);
-        const resull = png2gcode(imgData, params);
-        console.log('Gcode result: ', resull);
+        const data = png2gcode(imgData, params);
+        const result = pathsToGcode(data.paths, params);
+        console.log('Gcode result: ', result);
     };
-
     
         // export interface CamParams {
         // // Image & scaling
@@ -99,7 +100,7 @@ export const GCodeProvider = ({ children }) => {
         // originXMM: number;
         // originYMM: number;
         // dryRun?: boolean;     // if true, do not go below safe Z
-        // }
+        // }`
 
 
     const layerValues = useMemo(() => ({

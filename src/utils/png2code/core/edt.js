@@ -1,73 +1,194 @@
+// ---------------------------------------------------------
+// Mods-style Euclidean Distance Transform
+//
+// mask:
+//   1 = trace / copper
+//   0 = background
+//
+// output:
+//   Float32Array distances
+// ---------------------------------------------------------
 
-// ---------------------------------------------------------
-// Euclidean Distance Transform (Felzenszwalb/Huttenlocher)
-// Distance to nearest KEEP (mask==0). Returns distance in pixels.
-// ---------------------------------------------------------
 export function edt(mask, w, h) {
-    const INF = 1e15;
 
-    // Sites at KEEP pixels (mask==0)
+    const INF = 1e20;
+
+    // -----------------------------------------------------
+    // Horizontal pass
+    // -----------------------------------------------------
+
     const g = new Float32Array(w * h);
-    for (let i = 0; i < g.length; i++) g[i] = (mask[i] === 0 ? 0 : INF);
 
-    const rowOut = new Float32Array(w * h);
-    const scratch = new Float32Array(Math.max(w, h));
-
-    // Row pass (squared)
     for (let y = 0; y < h; y++) {
-        for (let x = 0; x < w; x++) scratch[x] = g[y * w + x];
-        const d = edt1d(scratch);
-        for (let x = 0; x < w; x++) rowOut[y * w + x] = d[x];
+
+        // left -> right
+        let closest = -1;
+
+        for (let x = 0; x < w; x++) {
+
+            const idx = y * w + x;
+
+            if (mask[idx] !== 0) {
+
+                g[idx] = 0;
+                closest = x;
+
+            } else {
+
+                if (closest < 0) {
+                    g[idx] = INF;
+                } else {
+                    g[idx] = x - closest;
+                }
+            }
+        }
+
+        // right -> left
+        closest = -1;
+
+        for (let x = w - 1; x >= 0; x--) {
+
+            const idx = y * w + x;
+
+            if (mask[idx] !== 0) {
+
+                closest = x;
+
+            } else if (closest >= 0) {
+
+                const d = closest - x;
+
+                if (d < g[idx]) {
+                    g[idx] = d;
+                }
+            }
+        }
     }
 
-    // Column pass (squared -> sqrt)
+    // -----------------------------------------------------
+    // Vertical pass
+    // -----------------------------------------------------
+
     const out = new Float32Array(w * h);
+
+    const starts = new Int32Array(h);
+    const intersections = new Float32Array(h + 1);
+
     for (let x = 0; x < w; x++) {
-        for (let y = 0; y < h; y++) scratch[y] = rowOut[y * w + x];
-        const d = edt1d(scratch);
-        for (let y = 0; y < h; y++) out[y * w + x] = Math.sqrt(d[y]);
+
+        let k = 0;
+
+        starts[0] = 0;
+        intersections[0] = -INF;
+        intersections[1] = INF;
+
+        // build lower envelope
+        for (let q = 1; q < h; q++) {
+
+            let s;
+
+            while (true) {
+
+                const p = starts[k];
+
+                s =
+                    (
+                        (
+                            square(g[q * w + x]) + square(q)
+                        ) -
+                        (
+                            square(g[p * w + x]) + square(p)
+                        )
+                    ) /
+                    (2 * (q - p));
+
+                if (s <= intersections[k]) {
+
+                    k--;
+
+                    if (k < 0) {
+                        k = 0;
+                        starts[0] = q;
+                        intersections[0] = -INF;
+                        intersections[1] = INF;
+                        break;
+                    }
+
+                } else {
+                    break;
+                }
+            }
+
+            k++;
+
+            starts[k] = q;
+            intersections[k] = s;
+            intersections[k + 1] = INF;
+        }
+
+        // evaluate distance field
+        k = 0;
+
+        for (let y = 0; y < h; y++) {
+
+            while (intersections[k + 1] < y) {
+                k++;
+            }
+
+            const p = starts[k];
+
+            out[y * w + x] = Math.sqrt(
+                square(y - p) +
+                square(g[p * w + x])
+            );
+        }
     }
+
+    debugEDTBlob(out, w, h);
 
     return out;
 }
 
-// 1‑D EDT for array f where f[i]=0 at sites, INF elsewhere; returns squared distances
-function edt1d(f) {
-    const n = f.length;
-    const v = new Int32Array(n);
-    const z = new Float32Array(n + 1);
-    const d = new Float32Array(n);
+function square(x) {
+    return x * x;
+}
+export function debugEDTBlob(dist, w, h) {
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
 
-    let k = 0;
-    v[0] = 0;
-    z[0] = -Infinity;
-    z[1] = +Infinity;
+    const ctx = canvas.getContext("2d");
+    const img = ctx.createImageData(w, h);
 
-    for (let q = 1; q < n; q++) {
-        let s;
-        while (true) {
-        const p = v[k];
-        s = ((f[q] + q * q) - (f[p] + p * p)) / (2 * (q - p));
-        if (s <= z[k]) {
-            k--;
-            if (k < 0) {
-            k = 0; v[0] = q; z[0] = -Infinity; z[1] = +Infinity;
-            break;
-            }
-        } else break;
-        }
-        k++;
-        v[k] = q;
-        z[k] = s;
-        z[k + 1] = +Infinity;
+    // 🔹 Find max distance for normalization
+    let max = 0;
+    for (let i = 0; i < dist.length; i++) {
+        const d = dist[i];
+        if (isFinite(d) && d > max) max = d;
     }
 
-    k = 0;
-    for (let q = 0; q < n; q++) {
-        while (z[k + 1] < q) k++;
-        const p = v[k];
-        d[q] = (q - p) * (q - p) + f[p];
+    if (max === 0) max = 1;
+
+    // 🔹 Convert distance → grayscale
+    for (let i = 0; i < dist.length; i++) {
+        let d = dist[i];
+
+        if (!isFinite(d)) d = max; // clamp INF
+
+        const v = Math.floor((d / max) * 255);
+
+        img.data[i * 4 + 0] = v;
+        img.data[i * 4 + 1] = v;
+        img.data[i * 4 + 2] = v;
+        img.data[i * 4 + 3] = 255;
     }
 
-    return d;
+    ctx.putImageData(img, 0, 0);
+
+    canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+
+        console.log("EDT preview URL:", url);
+        window.open(url);
+    });
 }
