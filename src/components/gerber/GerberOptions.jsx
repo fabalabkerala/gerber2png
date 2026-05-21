@@ -1,5 +1,5 @@
 import ImageIcon from "../icons/ImageIcon"
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Select from "../ui/Select";
 import ThreeWaySlider from "../ui/ThreeWaySlider";
 import { motion } from "motion/react";
@@ -35,9 +35,16 @@ const copperModeOptions = [
 const GerberOptions = () => {
     const { topstack, bottomstack, fullLayers } = useGerberLayer();
     const { setBoardMode, handlePngConversion } = useGerberView();
-    const { boardSide, stackConfig, changeSelect, setChangeSelect, doubleSide, applyQuickSetup } = useGerberSettings()
-
-    const [ toolSelected, setToolSelected ] = useState(toolOption[0].id);
+    const {
+        boardSide,
+        stackConfig,
+        changeSelect,
+        setChangeSelect,
+        doubleSide,
+        applyQuickSetup,
+        outlineToolWidth,
+        setOutlineToolWidth,
+    } = useGerberSettings()
 
     useEffect(() => {
         if (boardSide === 'top' && changeSelect.startsWith('bottom')) {
@@ -66,7 +73,7 @@ const GerberOptions = () => {
     };
 
     const handleBoardModeChange = (mode) => {
-        handleToolWidth(mode === 'double' ? toolSelected : '0.0')
+        handleToolWidth(mode === 'double' ? outlineToolWidth : '0.0')
         setBoardMode(mode);
         setChangeSelect('generate-all');
     };
@@ -134,7 +141,12 @@ const GerberOptions = () => {
                             )}
                         >
                             <p className="text-xs text-nowrap dark:text-slate-200 w-64">Tool Width</p>
-                            <Select options={toolOption} setSelected={setToolSelected} selected={toolSelected} onSelect={handleToolWidth} />
+                            <Select
+                                options={toolOption}
+                                setSelected={setOutlineToolWidth}
+                                selected={outlineToolWidth}
+                                onSelect={handleToolWidth}
+                            />
                         </div>
                     </div>  
                 </div>

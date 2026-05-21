@@ -8,19 +8,29 @@ import ImageLayout from "../../ui/ImageLayout";
 import LayoutConfiguration from "./LayoutConfiguration";
 import LayoutSetup from "./LayoutSetup";
 import { useApp } from "../../context/AppContext";
+import { useGerberSettings } from "../../context/GerberContext";
+import SwitchToggle from "../../ui/Switch";
+
+const isTopOutlinePng = (png) =>
+    png?.job === "outline" &&
+    (
+        png?.directory === "toplayer" ||
+        png?.name === "outline_toplayer"
+    );
 
 const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
     const { pngFiles } = useApp()
+    const { doubleSide, outlineToolWidth } = useGerberSettings();
     const [ selectedPng, setSelectedPng ] = useState({
         name: 'Choose an Image',
         url: '',
     });
     const [ generating, setGenerating ] = useState(false);
+    const [ singleOutlineEnabled, setSingleOutlineEnabled ] = useState(false);
     const [ config, setConfig ] = useState({
         row: 1,
         column: 1,
         spacing: 1,
-        // pcb: 1,
         background: 'black'
     });
     const [ machine, setMachine ] = useState({
@@ -35,6 +45,8 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
     );
 
     const pcbCount = visibleSlots.filter(Boolean).length;
+    const isTopOutlineSelected = isTopOutlinePng(selectedPng);
+    const showSingleOutlineOption = doubleSide && isTopOutlineSelected;
 
     const toggleSlot = (index) => {
         setVisibleSlots((prev) =>
@@ -57,6 +69,12 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
             return newSlots;
         });
     }, [totalSlots]);
+
+    useEffect(() => {
+        if (!showSingleOutlineOption && singleOutlineEnabled) {
+            setSingleOutlineEnabled(false);
+        }
+    }, [showSingleOutlineOption, singleOutlineEnabled]);
 
     useEffect(() => {
         if (selectedPng.url) {
@@ -157,6 +175,7 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                             selectedPng={selectedPng}
                                             machine={machine}
                                             visibleSlots={visibleSlots}
+                                            singleOutlineEnabled={singleOutlineEnabled}
                                             generating={generating}
                                             setGenerating={setGenerating}
                                         />
@@ -169,6 +188,22 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                         <p className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-white px-2 text-sm text-gray-700 dark:bg-slate-900 dark:text-slate-200">Preview</p>
                                     </div>
 
+                                    {showSingleOutlineOption && (
+                                        <div className="mx-2 flex items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100">
+                                            <div className="flex flex-col gap-0.5">
+                                                <p className="font-medium">Generate single outline</p>
+                                                <p className="text-[11px] text-amber-700 dark:text-amber-200/80">
+                                                    Use one outline sized to the full layout instead of repeating each board cut.
+                                                </p>
+                                            </div>
+                                            <SwitchToggle
+                                                variant="secondary"
+                                                enabled={singleOutlineEnabled}
+                                                onChange={setSingleOutlineEnabled}
+                                            />
+                                        </div>
+                                    )}
+
                                     { selectedPng.url && config.row > 0 && config.column > 0 ? (
                                         <ImageLayout 
                                             count={totalSlots}
@@ -180,6 +215,8 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                             selected={selectedPng}
                                             visibleSlots={visibleSlots}
                                             onToggleSlot={(id) => toggleSlot(id)}
+                                            singleOutlineEnabled={showSingleOutlineOption && singleOutlineEnabled}
+                                            outlineToolWidth={outlineToolWidth}
                                         />
                                     ): (
                                         <div className="max-w-[550px] h-[300px] mx-auto pb-6 pr-5 my-5">

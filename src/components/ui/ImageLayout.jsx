@@ -1,5 +1,8 @@
+import { useMemo } from "react";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import PropTypes from "prop-types";
+import generateOuterSvg from "../../utils/svgConverter/generateOuter";
+import { OUTLINE_EXPORT_PADDING_MM } from "../../utils/svgConverter/svg2png";
 
 const ImageLayout = ({
     count,
@@ -11,6 +14,8 @@ const ImageLayout = ({
     visibleSlots,
     selected,
     onToggleSlot,
+    singleOutlineEnabled = false,
+    outlineToolWidth = 0,
 }) => {
     const previewWidth = 550;
     const previewHeight = 300;
@@ -29,10 +34,37 @@ const ImageLayout = ({
     const availableWidth = previewWidth - padding * 2;
     const availableHeight = previewHeight - padding * 2;
 
+    const outerPreview = useMemo(() => {
+        if (!singleOutlineEnabled) return null;
+
+        const toolWidth = Math.max(parseFloat(outlineToolWidth) || 0, 0);
+        const innerWidth = Math.max(totalWidthMM - toolWidth * 2, 0.01);
+        const innerHeight = Math.max(totalHeightMM - toolWidth * 2, 0.01);
+        const outer = generateOuterSvg(
+            innerWidth,
+            innerHeight,
+            toolWidth,
+            { viewboxX: toolWidth, viewboxY: toolWidth },
+            false
+        );
+
+        return {
+            path: outer.svg.querySelector("path")?.getAttribute("d") ?? "",
+            viewBox: outer.svg.getAttribute("viewBox"),
+            width: outer.width,
+            height: outer.height,
+            paddedWidth: outer.width + OUTLINE_EXPORT_PADDING_MM * 2,
+            paddedHeight: outer.height + OUTLINE_EXPORT_PADDING_MM * 2,
+        };
+    }, [outlineToolWidth, singleOutlineEnabled, totalHeightMM, totalWidthMM]);
+
+    const previewContentWidth = singleOutlineEnabled && outerPreview ? outerPreview.paddedWidth : totalWidthMM;
+    const previewContentHeight = singleOutlineEnabled && outerPreview ? outerPreview.paddedHeight : totalHeightMM;
+
     // Compute scale for cell size
     const fitScale = Math.min(
-        availableWidth / totalWidthMM,
-        availableHeight / totalHeightMM
+        availableWidth / previewContentWidth,
+        availableHeight / previewContentHeight
     );
 
     // Responsive cell size
@@ -45,53 +77,75 @@ const ImageLayout = ({
             <div className="relative h-[300px] overflow-auto rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-900">
                 <div className="flex items-center justify-center min-h-full p-6 pt-3">
                     <div
-                        className="relative grid border border-slate-200 dark:border-slate-700"
-                        style={{
-                            gridTemplateColumns: `repeat(${column}, ${cellWidth}px)`,
-                            gridTemplateRows: `repeat(${row}, ${cellHeight}px`,
-                            gap: `${scaledSpacing}px`,
-                            background,
-                        }}
+                        className="relative border border-slate-200 dark:border-slate-700"
+                        style={{ background }}
                     >
-                        {Array.from({ length: count }).map((_, i) => (
+                        {singleOutlineEnabled && outerPreview ? (
                             <div
-                                key={i}
-                                className="relative overflow-hidden cursor-pointer group"
-                                onClick={() => onToggleSlot(i)}
+                                className="relative flex items-center justify-center"
+                                style={{ padding: `${OUTLINE_EXPORT_PADDING_MM * fitScale}px` }}
                             >
-                                {visibleSlots[i] ? (
-                                    <>
-                                        <img
-                                            src={selected.url}
-                                            alt={`slot-${i}`}
-                                            className="w-full h-full object-contain select-none"
-                                            draggable={false}
-                                        />
-
-                                        <div className="absolute inset-0 flex items-center justify-center transition-opacity duration-200 opacity-0 bg-black/40 group-hover:opacity-100">
-                                            <EyeIcon className="w-4 h-4 text-white" />
-                                        </div>
-                                    </>
-                                ) : (
-                                    <>
-                                        <img
-                                            src={selected.url}
-                                            alt={`slot-${i}`}
-                                            className="w-full h-full object-contain opacity-0"
-                                            draggable={false}
-                                        />
-
-                                        <div className="absolute inset-0 flex items-center justify-center transition-opacity duration-200 bg-black/40 opacity-100">
-                                            <EyeSlashIcon className="w-6 h-6 text-white" />
-                                        </div>
-
-                                        <span className="absolute z-10 px-1 py-0.5 text-[10px] text-gray-500 rounded bg-white/90 shadow-sm bottom-1 right-1 dark:bg-slate-900/80 dark:text-slate-300">
-                                            #{i + 1}
-                                        </span>
-                                    </>
-                                )}
+                                <svg
+                                    viewBox={outerPreview.viewBox}
+                                    style={{
+                                        width: `${outerPreview.width * fitScale}px`,
+                                        height: `${outerPreview.height * fitScale}px`,
+                                        display: "block",
+                                    }}
+                                >
+                                    <path d={outerPreview.path} fill="#ffffff" />
+                                </svg>
                             </div>
-                        ))}
+                        ) : (
+                            <div
+                                className="relative grid"
+                                style={{
+                                    gridTemplateColumns: `repeat(${column}, ${cellWidth}px)`,
+                                    gridTemplateRows: `repeat(${row}, ${cellHeight}px`,
+                                    gap: `${scaledSpacing}px`,
+                                }}
+                            >
+                                {Array.from({ length: count }).map((_, i) => (
+                                    <div
+                                        key={i}
+                                        className="relative overflow-hidden cursor-pointer group"
+                                        onClick={() => onToggleSlot(i)}
+                                    >
+                                        {visibleSlots[i] ? (
+                                            <>
+                                                <img
+                                                    src={selected.url}
+                                                    alt={`slot-${i}`}
+                                                    className="w-full h-full object-contain select-none"
+                                                    draggable={false}
+                                                />
+
+                                                <div className="absolute inset-0 flex items-center justify-center transition-opacity duration-200 opacity-0 bg-black/40 group-hover:opacity-100">
+                                                    <EyeIcon className="w-4 h-4 text-white" />
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <img
+                                                    src={selected.url}
+                                                    alt={`slot-${i}`}
+                                                    className="w-full h-full object-contain opacity-0"
+                                                    draggable={false}
+                                                />
+
+                                                <div className="absolute inset-0 flex items-center justify-center transition-opacity duration-200 bg-black/40 opacity-100">
+                                                    <EyeSlashIcon className="w-6 h-6 text-white" />
+                                                </div>
+
+                                                <span className="absolute z-10 px-1 py-0.5 text-[10px] text-gray-500 rounded bg-white/90 shadow-sm bottom-1 right-1 dark:bg-slate-900/80 dark:text-slate-300">
+                                                    #{i + 1}
+                                                </span>
+                                            </>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
 
                         {/* Width dimension */}
                         <div className="absolute left-1/2 -bottom-3 w-full h-px -translate-x-1/2 bg-zinc-300 dark:bg-slate-700" />
@@ -137,6 +191,8 @@ ImageLayout.propTypes = {
     }),
     visibleSlots: PropTypes.array.isRequired,
     onToggleSlot: PropTypes.func,
+    singleOutlineEnabled: PropTypes.bool,
+    outlineToolWidth: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
 };
 
 export default ImageLayout;

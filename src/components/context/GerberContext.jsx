@@ -34,6 +34,7 @@ export const GerberProvider = ({ children }) => {
     const [layerType, setLayerType] = useState(null);
     const [canvasBg, setCanvasBg] = useState("black");
     const [changeSelect, setChangeSelect] = useState("generate-all");
+    const [outlineToolWidth, setOutlineToolWidth] = useState("0.8");
     const [stackConfig, setStackConfig] = useState(DEFAULT_STACK_CONFIG);
     const [isToggled, setIsToggled] = useState(DEFAULT_TOGGLED_STATE);
 
@@ -220,6 +221,7 @@ export const GerberProvider = ({ children }) => {
         setLayerType(null);
         setCanvasBg("black");
         setChangeSelect("generate-all");
+        setOutlineToolWidth("0.8");
         setStackConfig(DEFAULT_STACK_CONFIG);
         setIsToggled(DEFAULT_TOGGLED_STATE);
         setPngFiles([]);
@@ -243,6 +245,8 @@ export const GerberProvider = ({ children }) => {
         setCanvasBg,
         changeSelect,
         setChangeSelect,
+        outlineToolWidth,
+        setOutlineToolWidth,
         stackConfig,
         setStackConfig,
         isToggled,
@@ -257,6 +261,7 @@ export const GerberProvider = ({ children }) => {
         handleToggleCick,
         isToggled,
         layerType,
+        outlineToolWidth,
         stackConfig,
     ]);
 

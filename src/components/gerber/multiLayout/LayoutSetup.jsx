@@ -4,19 +4,33 @@ import PropTypes from "prop-types";
 import { DocumentDuplicateIcon, PhotoIcon } from "@heroicons/react/24/outline";
 import { motion } from "motion/react";
 import { cn } from "../../../utils/cn";
-import { generatePngLayout } from "../../../utils/svgConverter/svg2png";
+import { generatePngLayout, generateSingleOutlineLayout } from "../../../utils/svgConverter/svg2png";
 import { DocumentCheckIcon } from "@heroicons/react/24/outline";
 import JSZip from "jszip";
 import { useApp } from "../../context/AppContext";
+import { useGerberSettings } from "../../context/GerberContext";
 
 const options = [
     { id: 'black', label: 'Black' }, 
     { id: 'white', label: 'White' }, 
 ];
 
-const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, generating, setGenerating}) => {
+const isTopOutlinePng = (png) =>
+    png?.job === "outline" &&
+    (
+        png?.directory === "toplayer" ||
+        png?.name === "outline_toplayer"
+    );
+
+const getLayoutDimensions = (png, config) => ({
+    width: png.width * config.column + config.spacing * (config.column - 1),
+    height: png.height * config.row + config.spacing * (config.row - 1),
+});
+
+const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, singleOutlineEnabled, generating, setGenerating}) => {
     const [ layoutBg, setLayoutBg ] = useState('black');
     const { pngFiles } = useApp()
+    const { doubleSide, outlineToolWidth } = useGerberSettings();
 
 
     const handleInput = (name, value) => {
@@ -36,26 +50,49 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, gen
 
     // useEffect(() => setConfig(prev => ({ ...prev, pcb: prev.column * prev.row })), [config, setConfig])
 
-    const handleGeneration =  async (url) => {
+    const buildLayoutBlob = async (png) => {
+        const shouldGenerateSingleOutline =
+            singleOutlineEnabled &&
+            doubleSide &&
+            isTopOutlinePng(png);
+
+        if (shouldGenerateSingleOutline) {
+            const layoutDimension = getLayoutDimensions(png, config);
+            const toolWidth = Math.max(parseFloat(outlineToolWidth) || 0, 0);
+
+            return generateSingleOutlineLayout(
+                layoutDimension.width,
+                layoutDimension.height,
+                toolWidth,
+                layoutBg
+            );
+        }
+
+        const canvasBG = (png.job).includes('drill') ? 'white' : 'black';
+
+        return generatePngLayout(
+            png.url,
+            config.row,
+            config.column,
+            config.spacing,
+            png === selectedPng ? layoutBg : canvasBG,
+            visibleSlots
+        );
+    }
+
+    const handleGeneration =  async (png) => {
         try {
             setGenerating(true);
-            const blobUrl = await generatePngLayout(
-                url, 
-                config.row, 
-                config.column, 
-                config.spacing, 
-                layoutBg, 
-                visibleSlots
-            );
+            const blobUrl = await buildLayoutBlob(png);
 
             const link = document.createElement("a");
             link.href = blobUrl.url;
-            link.download = `layout_${config.row}x${config.column}_${selectedPng.name}.png`;
+            link.download = `layout_${config.row}x${config.column}_${png.name}.png`;
             document.body.appendChild(link);
             link.click()
 
             document.body.removeChild(link);
-            URL.revokeObjectURL(blobUrl)
+            URL.revokeObjectURL(blobUrl.url)
 
         } catch (error) {
             console.log('ERROR : Generating layout : ', error)
@@ -71,17 +108,7 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, gen
             const zip = new JSZip();
 
             const blobPromises = pngFiles.map(async (png) => {
-
-                const canvasBG = (png.job).includes('drill') ? 'white' : 'black';
-                
-                const { blob } = await generatePngLayout(
-                    png.url, 
-                    config.row, 
-                    config.column, 
-                    config.spacing, 
-                    canvasBG, 
-                    visibleSlots
-                );
+                const { blob } = await buildLayoutBlob(png);
 
                 const filename = `layout_${png.name}_${config.row}x${config.column}.png`;
 
@@ -189,7 +216,7 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, gen
                     <motion.button
                         className="flex justify-center items-center gap-1 px-2 py-1.5 rounded-lg shadow bg-gradient-to-r from-[#D3346E] to-[#B81D50] hover:from-[#B81D50] hover:to-[#D3346E]" 
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => handleGeneration(selectedPng.url)}
+                        onClick={() => handleGeneration(selectedPng)}
                     >
                         <PhotoIcon width={18} height={18} strokeWidth={2} stroke="white" />
                         <p className="font-medium text-xs ps-0.5 text-white tracking-wider ">{ generating ? 'Generating..' : 'Download PNG' }</p>

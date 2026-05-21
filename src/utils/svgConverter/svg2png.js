@@ -1,4 +1,7 @@
 import { changeDpiBlob } from "changedpi";
+import generateOuterSvg from "./generateOuter";
+
+export const OUTLINE_EXPORT_PADDING_MM = 0.82;
 
 async function svg2png(svg, swidth, sheight, canvasBg) {
     
@@ -14,9 +17,7 @@ async function svg2png(svg, swidth, sheight, canvasBg) {
             const scaledWidth = swidth * scaleFactor;
             const scaledHeight = sheight * scaleFactor;
 
-            const toolWidth = 0.8;
-            const toolWidthErr = 0.02;
-            const scaledToolWidth = (toolWidth + toolWidthErr) * scaleFactor;
+            const scaledToolWidth = OUTLINE_EXPORT_PADDING_MM * scaleFactor;
 
             canvas.width = scaledWidth + scaledToolWidth * 2;
             canvas.height = scaledHeight + scaledToolWidth * 2; 
@@ -172,4 +173,97 @@ export const generatePngLayout = async (url, rows, columns, spacing, background,
 
         image.src = url
     })
+}
+
+export const generateSingleOutlineLayout = async (
+    totalWidth,
+    totalHeight,
+    toolWidth = 0,
+    background = "black",
+    targetDPI = 1000
+) => {
+    const normalizedToolWidth = Number.isFinite(toolWidth) ? Math.max(toolWidth, 0) : 0;
+    const innerWidth = Math.max(totalWidth - normalizedToolWidth * 2, 0.01);
+    const innerHeight = Math.max(totalHeight - normalizedToolWidth * 2, 0.01);
+
+    const outer = generateOuterSvg(
+        innerWidth,
+        innerHeight,
+        normalizedToolWidth,
+        { viewboxX: normalizedToolWidth, viewboxY: normalizedToolWidth },
+        false
+    );
+
+    const outlinePath = outer.svg.querySelector("path");
+    outlinePath.setAttribute("fill", "#ffffff");
+    outlinePath.setAttribute("stroke", "none");
+    outer.svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    outer.svg.style.setProperty("shape-rendering", "crispEdges");
+
+    return new Promise((resolve, reject) => {
+        const scaleFactor = targetDPI / 25.4;
+        const svgString = new XMLSerializer().serializeToString(outer.svg);
+        const svgBlob = new Blob([svgString], { type: "image/svg+xml" });
+        const blobUrl = (window.URL || window.webkitURL || window).createObjectURL(svgBlob);
+        const image = new Image();
+
+        image.onload = () => {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            const paddedWidth = totalWidth + OUTLINE_EXPORT_PADDING_MM * 2;
+            const paddedHeight = totalHeight + OUTLINE_EXPORT_PADDING_MM * 2;
+            const paddingPx = OUTLINE_EXPORT_PADDING_MM * scaleFactor;
+
+            canvas.width = Math.round(paddedWidth * scaleFactor);
+            canvas.height = Math.round(paddedHeight * scaleFactor);
+
+            ctx.fillStyle = background;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(
+                image,
+                paddingPx,
+                paddingPx,
+                Math.round(totalWidth * scaleFactor),
+                Math.round(totalHeight * scaleFactor)
+            );
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                if (r !== 255 || g !== 255 || b !== 255) {
+                    data[i] = 0;
+                    data[i + 1] = 0;
+                    data[i + 2] = 0;
+                }
+            }
+
+            ctx.putImageData(imageData, 0, 0);
+            (window.URL || window.webkitURL || window).revokeObjectURL(blobUrl);
+
+            canvas.toBlob((pngBlob) => {
+                if (!pngBlob) {
+                    reject(new Error("Canvas creation failed"));
+                    return;
+                }
+
+                changeDpiBlob(pngBlob, targetDPI).then((changeBlob) => {
+                    const finalBlob = new Blob([changeBlob], { type: "image/png" });
+                    const finalUrl = (window.URL || window.webkitURL || window).createObjectURL(finalBlob);
+
+                    resolve({ url: finalUrl, blob: finalBlob });
+                }).catch(reject);
+            }, "image/png");
+        };
+
+        image.onerror = (error) => {
+            (window.URL || window.webkitURL || window).revokeObjectURL(blobUrl);
+            reject(error);
+        };
+
+        image.src = blobUrl;
+    });
 }
