@@ -2,6 +2,7 @@ import { changeDpiBlob } from "changedpi";
 import generateOuterSvg from "./generateOuter";
 
 export const OUTLINE_EXPORT_PADDING_MM = 0.82;
+export const CORRECTION_OFFSET_MM = 0.02;
 
 async function svg2png(svg, swidth, sheight, canvasBg) {
     
@@ -118,10 +119,22 @@ export const getPngDimensions = async (blobUrl, dpi = 1000) => {
     });
 };
  
-export const generatePngLayout = async (url, rows, columns, spacing, background, visible, targetDPI = 1000, inputDPI = 1000) => {
+export const generatePngLayout = async (
+    url, 
+    rows, 
+    columns, 
+    spacing, 
+    background, 
+    visible, 
+    singleOutlineEnabled = false,
+    toolWidth,
+    targetDPI = 1000, 
+    inputDPI = 1000,
+) => {
     const scaleRatio = targetDPI / inputDPI;
     const scaleFactor = targetDPI / 25.4;
     const scaledSpacing = spacing * scaleFactor;
+    const correctedToolWidth = Number(toolWidth) + CORRECTION_OFFSET_MM;
 
     return new Promise((resolve, reject) => {
         const image = new Image()
@@ -130,8 +143,10 @@ export const generatePngLayout = async (url, rows, columns, spacing, background,
             const imgW = image.width * scaleRatio;
             const imgH = image.height * scaleRatio;
 
-            const totalW = columns * imgW + (columns - 1) * scaledSpacing;
-            const totalH = rows * imgH + (rows - 1) * scaledSpacing;
+            const totalW = Math.round((columns * imgW + (columns - 1) * scaledSpacing) + (singleOutlineEnabled ? correctedToolWidth * scaleFactor * 2 : 0));
+            const totalH = Math.round((rows * imgH + (rows - 1) * scaledSpacing) + (singleOutlineEnabled ? correctedToolWidth * scaleFactor * 2 : 0));
+
+            console.log('Total Width ', totalW, 'total Height', totalH)
 
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
@@ -145,8 +160,8 @@ export const generatePngLayout = async (url, rows, columns, spacing, background,
 
             for (let row = 0; row < rows; row++) {
                 for (let column = 0; column < columns; column++) {
-                    const x = column * (imgW + scaledSpacing);
-                    const y = row * (imgH + scaledSpacing);
+                    const x = column * (imgW + scaledSpacing + (singleOutlineEnabled ? correctedToolWidth * scaleFactor : 0));
+                    const y = row * (imgH + scaledSpacing + (singleOutlineEnabled ? correctedToolWidth * scaleFactor : 0));
                     if (visible[identifier]) ctx.drawImage(image, x, y, imgW, imgH)
                     identifier++
 
@@ -183,14 +198,16 @@ export const generateSingleOutlineLayout = async (
     targetDPI = 1000
 ) => {
     const normalizedToolWidth = Number.isFinite(toolWidth) ? Math.max(toolWidth, 0) : 0;
-    const innerWidth = Math.max(totalWidth - normalizedToolWidth * 2, 0.01);
-    const innerHeight = Math.max(totalHeight - normalizedToolWidth * 2, 0.01);
+    const correctedToolWidth = normalizedToolWidth + CORRECTION_OFFSET_MM;
+
+    const innerWidth = Math.max(totalWidth - correctedToolWidth * 2, 0.01);
+    const innerHeight = Math.max(totalHeight - correctedToolWidth * 2, 0.01);
 
     const outer = generateOuterSvg(
         innerWidth,
         innerHeight,
-        normalizedToolWidth,
-        { viewboxX: normalizedToolWidth, viewboxY: normalizedToolWidth },
+        correctedToolWidth,
+        { viewboxX: correctedToolWidth, viewboxY: correctedToolWidth },
         false
     );
 
@@ -210,12 +227,12 @@ export const generateSingleOutlineLayout = async (
         image.onload = () => {
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
-            const paddedWidth = totalWidth + OUTLINE_EXPORT_PADDING_MM * 2;
-            const paddedHeight = totalHeight + OUTLINE_EXPORT_PADDING_MM * 2;
-            const paddingPx = OUTLINE_EXPORT_PADDING_MM * scaleFactor;
+            const paddedWidth = totalWidth + correctedToolWidth * 2;
+            const paddedHeight = totalHeight + correctedToolWidth * 2;
+            const paddingPx = correctedToolWidth * scaleFactor;
 
             canvas.width = Math.round(paddedWidth * scaleFactor);
-            canvas.height = Math.round(paddedHeight * scaleFactor);
+            canvas.height = Math.round(paddedHeight * scaleFactor); 
 
             ctx.fillStyle = background;
             ctx.fillRect(0, 0, canvas.width, canvas.height);

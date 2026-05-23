@@ -76,7 +76,9 @@ const LayoutSetup = ({config, setConfig, selectedPng, visibleSlots, machine, sin
             config.column,
             config.spacing,
             png === selectedPng ? layoutBg : canvasBG,
-            visibleSlots
+            visibleSlots,
+            singleOutlineEnabled,
+            outlineToolWidth
         );
     }
 

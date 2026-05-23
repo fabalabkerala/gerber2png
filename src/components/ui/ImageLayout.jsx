@@ -4,6 +4,13 @@ import PropTypes from "prop-types";
 import generateOuterSvg from "../../utils/svgConverter/generateOuter";
 import { OUTLINE_EXPORT_PADDING_MM } from "../../utils/svgConverter/svg2png";
 
+const isTopOutlinePng = (png) =>
+    png?.job === "outline" &&
+    (
+        png?.directory === "toplayer" ||
+        png?.name === "outline_toplayer"
+    );
+
 const ImageLayout = ({
     count,
     row,
@@ -22,9 +29,7 @@ const ImageLayout = ({
     const padding = 24;
 
     // Actual physical layout size (mm)
-    const totalWidthMM =
-        dimension.width * column +
-        spacing * (column - 1);
+    const totalWidthMM = dimension.width * column + spacing * (column - 1);
 
     const totalHeightMM =
         dimension.height * row +
@@ -35,7 +40,7 @@ const ImageLayout = ({
     const availableHeight = previewHeight - padding * 2;
 
     const outerPreview = useMemo(() => {
-        if (!singleOutlineEnabled) return null;
+        if (!singleOutlineEnabled || !isTopOutlinePng(selected)) return null;
 
         const toolWidth = Math.max(parseFloat(outlineToolWidth) || 0, 0);
         const innerWidth = Math.max(totalWidthMM - toolWidth * 2, 0.01);
@@ -56,10 +61,10 @@ const ImageLayout = ({
             paddedWidth: outer.width + OUTLINE_EXPORT_PADDING_MM * 2,
             paddedHeight: outer.height + OUTLINE_EXPORT_PADDING_MM * 2,
         };
-    }, [outlineToolWidth, singleOutlineEnabled, totalHeightMM, totalWidthMM]);
+    }, [outlineToolWidth, singleOutlineEnabled, totalHeightMM, totalWidthMM, selected]);
 
-    const previewContentWidth = singleOutlineEnabled && outerPreview ? outerPreview.paddedWidth : totalWidthMM;
-    const previewContentHeight = singleOutlineEnabled && outerPreview ? outerPreview.paddedHeight : totalHeightMM;
+    const previewContentWidth = singleOutlineEnabled && outerPreview ? outerPreview.paddedWidth : totalWidthMM + (singleOutlineEnabled ? outlineToolWidth * 2 : 0);
+    const previewContentHeight = singleOutlineEnabled && outerPreview ? outerPreview.paddedHeight : totalHeightMM + (singleOutlineEnabled ? outlineToolWidth * 2 : 0);
 
     // Compute scale for cell size
     const fitScale = Math.min(
@@ -73,9 +78,9 @@ const ImageLayout = ({
     const scaledSpacing = spacing * fitScale;
 
     return (
-        <div className="w-full my-5">
-            <div className="relative h-[300px] overflow-auto rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-900">
-                <div className="flex items-center justify-center min-h-full p-6 pt-3">
+        <div className="w-auto my-5 mx-2">
+            <div className="relative h-[300px] overflow-auto">
+                <div className="flex items-center justify-center min-h-full p-6 pt-0">
                     <div
                         className="relative border border-slate-200 dark:border-slate-700"
                         style={{ background }}
@@ -151,7 +156,7 @@ const ImageLayout = ({
                         <div className="absolute left-1/2 -bottom-3 w-full h-px -translate-x-1/2 bg-zinc-300 dark:bg-slate-700" />
 
                         <p className="absolute left-1/2 -bottom-5 -translate-x-1/2 rounded bg-white px-2 text-xs font-medium text-slate-800 shadow-sm dark:bg-slate-900 dark:text-slate-200">
-                            {totalWidthMM.toFixed(2)}
+                            {previewContentWidth.toFixed(2)}
                             <span className="font-normal text-gray-500 dark:text-slate-400">
                                 {" "}
                                 mm
@@ -162,7 +167,7 @@ const ImageLayout = ({
                         <div className="absolute top-0 -right-4 h-full w-px bg-zinc-300 dark:bg-slate-700" />
 
                         <p className="absolute top-1/2 -right-[50px] -translate-y-1/2 -rotate-90 rounded bg-white px-2 text-xs font-medium text-slate-800 shadow-sm dark:bg-slate-900 dark:text-slate-200">
-                            {totalHeightMM.toFixed(2)}
+                            {previewContentHeight.toFixed(2)}
                             <span className="font-normal text-gray-500 dark:text-slate-400">
                                 {" "}
                                 mm

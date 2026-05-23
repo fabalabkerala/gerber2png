@@ -11,13 +11,6 @@ import { useApp } from "../../context/AppContext";
 import { useGerberSettings } from "../../context/GerberContext";
 import SwitchToggle from "../../ui/Switch";
 
-const isTopOutlinePng = (png) =>
-    png?.job === "outline" &&
-    (
-        png?.directory === "toplayer" ||
-        png?.name === "outline_toplayer"
-    );
-
 const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
     const { pngFiles } = useApp()
     const { doubleSide, outlineToolWidth } = useGerberSettings();
@@ -45,8 +38,6 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
     );
 
     const pcbCount = visibleSlots.filter(Boolean).length;
-    const isTopOutlineSelected = isTopOutlinePng(selectedPng);
-    const showSingleOutlineOption = doubleSide && isTopOutlineSelected;
 
     const toggleSlot = (index) => {
         setVisibleSlots((prev) =>
@@ -69,12 +60,6 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
             return newSlots;
         });
     }, [totalSlots]);
-
-    useEffect(() => {
-        if (!showSingleOutlineOption && singleOutlineEnabled) {
-            setSingleOutlineEnabled(false);
-        }
-    }, [showSingleOutlineOption, singleOutlineEnabled]);
 
     useEffect(() => {
         if (selectedPng.url) {
@@ -169,6 +154,23 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                             config={config}
                                             setConfig={setConfig}
                                         />
+
+                                        {doubleSide && (
+                                            <div className="mx-2 mt-4 flex items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100">
+                                                <div className="flex flex-col gap-0.5">
+                                                    <p className="font-medium">Generate single outline</p>
+                                                    <p className="text-[11px] text-amber-700 dark:text-amber-200/80">
+                                                        Use one outline sized to the full layout instead of repeating each board cut.
+                                                    </p>
+                                                </div>
+                                                <SwitchToggle
+                                                    variant="secondary"
+                                                    enabled={singleOutlineEnabled}
+                                                    onChange={setSingleOutlineEnabled}
+                                                />
+                                            </div>
+                                        )}
+
                                         <LayoutSetup 
                                             config={config}
                                             setConfig={setConfig}
@@ -184,25 +186,9 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
 
                                 {/* Your bulk options go here */}
                                 <div className="flex flex-col gap-2 p-3 overflow-hidden">
-                                    <div className="relative border-t mx-2">
+                                    <div className="relative border-t border-gray-100 dark:border-slate-700 mx-2">
                                         <p className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-white px-2 text-sm text-gray-700 dark:bg-slate-900 dark:text-slate-200">Preview</p>
                                     </div>
-
-                                    {showSingleOutlineOption && (
-                                        <div className="mx-2 flex items-center justify-between gap-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100">
-                                            <div className="flex flex-col gap-0.5">
-                                                <p className="font-medium">Generate single outline</p>
-                                                <p className="text-[11px] text-amber-700 dark:text-amber-200/80">
-                                                    Use one outline sized to the full layout instead of repeating each board cut.
-                                                </p>
-                                            </div>
-                                            <SwitchToggle
-                                                variant="secondary"
-                                                enabled={singleOutlineEnabled}
-                                                onChange={setSingleOutlineEnabled}
-                                            />
-                                        </div>
-                                    )}
 
                                     { selectedPng.url && config.row > 0 && config.column > 0 ? (
                                         <ImageLayout 
@@ -215,10 +201,10 @@ const BulkLayoutPanel = ({showBulkModal, setShowBulkModal}) => {
                                             selected={selectedPng}
                                             visibleSlots={visibleSlots}
                                             onToggleSlot={(id) => toggleSlot(id)}
-                                            singleOutlineEnabled={showSingleOutlineOption && singleOutlineEnabled}
+                                            singleOutlineEnabled={singleOutlineEnabled}
                                             outlineToolWidth={outlineToolWidth}
                                         />
-                                    ): (
+                                    ):(
                                         <div className="max-w-[550px] h-[300px] mx-auto pb-6 pr-5 my-5">
                                             <div className="relative w-full h-full flex flex-col justify-center items-center">
                                                 <PhotoIcon width={25} height={25} strokeWidth={2} stroke={ config.row <= 0 && config.column <= 0 ? "red" : "gray"} />

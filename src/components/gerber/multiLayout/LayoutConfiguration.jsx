@@ -38,7 +38,7 @@ const LayoutConfiguration = ({
 
     return (
         <>
-            <p className="px-3 font-medium text-xs dark:text-slate-200">CONFIGURATION<span className="text-xs text-gray-600 font-normal dark:text-slate-400"></span></p>
+            {/* <p className="px-3 font-medium text-xs dark:text-slate-200">CONFIGURATION<span className="text-xs text-gray-600 font-normal dark:text-slate-400"></span></p> */}
             <div className="bg-slate-100 flex-1 p-4 mx-2 my-1 flex flex-col rounded-xl dark:bg-slate-950/60">
                 <div className="flex gap-3">
                     <div className="flex items-center gap-2 flex-1">
