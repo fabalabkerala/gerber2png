@@ -373,34 +373,59 @@ export const drawTabsOnOutlineCanvas = (
         id: tab.id ?? `tab-${index}`,
         side: tab.side,
         offset: typeof tab.offset === "number" ? Math.min(Math.max(tab.offset, 0), 1) : 0.5,
+        depthMm: typeof tab.depthMm === "number" ? tab.depthMm : undefined,
+        x: typeof tab.x === "number" ? Math.min(Math.max(tab.x, 0), 1) : undefined,
+        y: typeof tab.y === "number" ? Math.min(Math.max(tab.y, 0), 1) : undefined,
+        orientation: tab.orientation === "vertical" ? "vertical" : "horizontal",
     }));
 
     ctx.save();
     ctx.fillStyle = color;
 
     normalizedTabs.forEach((tab) => {
+        const safeTabDepthForTab = Math.max(tab.depthMm ?? tabDepthMm, safeToolWidth + 0.4);
+        const tabDepthPxForTab = safeTabDepthForTab * scaleFactor;
+
+        if (tab.side === "free") {
+            const centerX = (tab.x ?? 0.5) * canvasWidth;
+            const centerY = (tab.y ?? 0.5) * canvasHeight;
+            const isVertical = tab.orientation === "vertical";
+            const freeWidth = isVertical ? tabDepthPxForTab : tabWidthPx;
+            const freeHeight = isVertical ? tabWidthPx : tabDepthPxForTab;
+            const x = Math.max(0, Math.min(centerX - freeWidth / 2, canvasWidth - freeWidth));
+            const y = Math.max(0, Math.min(centerY - freeHeight / 2, canvasHeight - freeHeight));
+
+            ctx.fillRect(
+                Math.round(x),
+                Math.round(y),
+                Math.round(freeWidth),
+                Math.round(freeHeight)
+            );
+            return;
+        }
+
         if (tab.side === "top" || tab.side === "bottom") {
             const centerX = tab.offset * canvasWidth;
             const x = Math.max(0, Math.min(centerX - tabWidthPx / 2, canvasWidth - tabWidthPx));
-            const y = tab.side === "top" ? 0 : canvasHeight - (paddingPx + tabDepthPx);
+            const y = tab.side === "top" ? 0 : canvasHeight - (paddingPx + tabDepthPxForTab);
 
             ctx.fillRect(
                 Math.round(x),
                 Math.round(y),
                 Math.round(tabWidthPx),
-                Math.round(paddingPx + tabDepthPx)
+                Math.round(paddingPx + tabDepthPxForTab)
             );
             return;
         }
 
         const centerY = tab.offset * canvasHeight;
-        const x = tab.side === "left" ? 0 : canvasWidth - (paddingPx + tabDepthPx);
+        const x = tab.side === "left" ? 0 : canvasWidth - (paddingPx + tabDepthPxForTab);
         const y = Math.max(0, Math.min(centerY - tabWidthPx / 2, canvasHeight - tabWidthPx));
 
         ctx.fillRect(
             Math.round(x),
             Math.round(y),
-            Math.round(paddingPx + tabDepthPx),
+            Math.round(paddingPx + tabDepthPxForTab),
             Math.round(tabWidthPx)
         );
     });

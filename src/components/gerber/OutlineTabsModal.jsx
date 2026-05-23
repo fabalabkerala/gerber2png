@@ -49,14 +49,15 @@ const OutlineTabsModal = ({ png, outlineToolWidth, preset, onClose, onApply, onR
     ));
     const [hoveredTabId, setHoveredTabId] = useState(null);
     const [draggingTabId, setDraggingTabId] = useState(null);
+    const [placementMode, setPlacementMode] = useState(null);
 
-    useEffect(() => {
-        const nextTabs = initialConfig.tabs?.length ? initialConfig.tabs : DEFAULT_OUTLINE_TABS;
-        setTabWidth(initialConfig.tabWidthMm);
-        setTabDepth(initialConfig.tabDepthMm);
-        setTabs(nextTabs);
-        setActiveTabId(nextTabs[0]?.id ?? null);
-    }, [initialConfig]);
+    // useEffect(() => {
+    //     const nextTabs = initialConfig.tabs?.length ? initialConfig.tabs : DEFAULT_OUTLINE_TABS;
+    //     setTabWidth(initialConfig.tabWidthMm);
+    //     setTabDepth(initialConfig.tabDepthMm);
+    //     setTabs(nextTabs);
+    //     setActiveTabId(nextTabs[0]?.id ?? null);
+    // }, [initialConfig]);
 
     useEffect(() => {
         const image = new Image();
@@ -139,7 +140,7 @@ const OutlineTabsModal = ({ png, outlineToolWidth, preset, onClose, onApply, onR
                 drawWidth: renderModel.drawWidth,
                 drawHeight: renderModel.drawHeight,
                 tabWidthMm: tabWidth,
-                tabDepthMm: tabDepth,
+                tabDepthMm: tab.depthMm ?? tabDepth,
                 outlineToolWidth,
                 scale: renderModel.scale,
             });
@@ -196,6 +197,23 @@ const OutlineTabsModal = ({ png, outlineToolWidth, preset, onClose, onApply, onR
         if (!renderModel) return;
 
         const point = getCanvasPoint(event, canvasRef.current);
+
+        if (placementMode === "anywhere") {
+            const newTab = createTabFromPoint({
+                point,
+                renderModel,
+                fallbackDepthMm: tabDepth,
+            });
+
+            if (newTab) {
+                setTabs((prev) => [...prev, newTab]);
+                setActiveTabId(newTab.id);
+                setHoveredTabId(newTab.id);
+                setPlacementMode(null);
+            }
+            return;
+        }
+
         const clickedTab = findTabAtPoint({
             point,
             renderModel,
@@ -228,6 +246,14 @@ const OutlineTabsModal = ({ png, outlineToolWidth, preset, onClose, onApply, onR
             prev.map((tab) => {
                 if (tab.id !== dragStateRef.current.tabId) return tab;
 
+                if (tab.side === "free") {
+                    return {
+                        ...tab,
+                        x: clamp(localX / renderModel.drawWidth, 0, 1),
+                        y: clamp(localY / renderModel.drawHeight, 0, 1),
+                    };
+                }
+
                 if (tab.side === "top" || tab.side === "bottom") {
                     return { ...tab, offset: clamp(localX / renderModel.drawWidth, 0, 1) };
                 }
@@ -249,9 +275,10 @@ const OutlineTabsModal = ({ png, outlineToolWidth, preset, onClose, onApply, onR
 
     const handleAddTab = (side) => {
         const nextId = `${side}-${Date.now()}`;
-        setTabs((prev) => [...prev, { id: nextId, side, offset: 0.5 }]);
+        setTabs((prev) => [...prev, { id: nextId, side, offset: 0.5, depthMm: tabDepth }]);
         setActiveTabId(nextId);
         setHoveredTabId(nextId);
+        setPlacementMode(null);
     };
 
     const handleRemoveSelected = () => {
@@ -288,7 +315,7 @@ const OutlineTabsModal = ({ png, outlineToolWidth, preset, onClose, onApply, onR
                                         <div>
                                             <p className="text-sm font-semibold text-slate-900 dark:text-white">Quick Add Tabs</p>
                                             <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-                                                Add a new tab to any board edge, then drag it into place on the preview.
+                                                Add to a specific edge, or place a fully independent tab anywhere inside the image.
                                             </p>
                                         </div>
                                     </div>
@@ -309,17 +336,33 @@ const OutlineTabsModal = ({ png, outlineToolWidth, preset, onClose, onApply, onR
                                             </button>
                                         ))}
                                     </div>
+
+                                    <button
+                                        onClick={() => setPlacementMode((prev) => prev === "anywhere" ? null : "anywhere")}
+                                        className={`mt-3 w-full rounded-2xl border px-3 py-3 text-sm font-medium transition ${
+                                            placementMode === "anywhere"
+                                                ? "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-500/50 dark:bg-amber-500/10 dark:text-amber-200"
+                                                : "border-slate-200 bg-white text-slate-700 hover:border-cyan-300 hover:bg-cyan-50/70 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-cyan-500/40 dark:hover:bg-cyan-500/10"
+                                        }`}
+                                    >
+                                        {placementMode === "anywhere" ? "Click Preview To Place Independent Tab" : "Add Independent Tab Anywhere"}
+                                    </button>
                                 </section>
                             </aside>
 
                             <section className={`flex min-h-[600px] flex-col overflow-hidden`}>
-                                <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                                <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between relative">
                                     <div>
                                         <p className="text-base font-semibold text-slate-900 dark:text-white">Visual Preview</p>
-                                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                             Click a tab to select. Drag it along its edge to reposition it before applying.
                                         </p>
                                     </div>
+                                    {placementMode === "anywhere" && (
+                                        <div className="rounded-full right-0 top-0 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
+                                            Placement mode active: click anywhere in the image
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="relative mt-5 p-14 rounded-[28px] border border-slate-200 bg-slate-950 shadow-inner shadow-slate-950/50 dark:border-slate-800">
@@ -344,21 +387,21 @@ const OutlineTabsModal = ({ png, outlineToolWidth, preset, onClose, onApply, onR
 
                             <aside className="flex flex-col gap-4 xl:min-h-[600px]">
                                 <section className={`${panelClassName} flex flex-col justify-between p-0`}>
-                                    <div className="flex items-start justify-between gap-3 p-4 pb-0">
+                                    {/* <div className="flex items-start justify-between gap-3">
                                         <div>
                                             <p className="text-sm font-semibold text-slate-900 dark:text-white">Selected Tab</p>
                                             <p className="text-xs leading-5 text-slate-500 dark:text-slate-400">
                                                 Fine tune the active tab.
                                             </p>
                                         </div>
-                                    </div>
+                                    </div> */}
 
                                     {activeTab ? (
-                                        <div className="rounded-2xl m-3 border border-amber-200/80 bg-amber-50/70 p-4 dark:border-teal-500/30 dark:bg-teal-500/10">
+                                        <div className="rounded-2xl border border-amber-200/80 bg-amber-50/70 p-4 dark:border-slate-600/30 dark:bg-slate-950/50 h-full">
                                             <div className="flex items-center justify-between gap-3">
                                                 <div>
                                                     <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                                                        {sideOptions.find((side) => side.id === activeTab.side)?.label}
+                                                        {activeTab.side === "free" ? "Independent Tab" : sideOptions.find((side) => side.id === activeTab.side)?.label}
                                                     </p>
                                                 </div>
                                                 <button
@@ -369,22 +412,134 @@ const OutlineTabsModal = ({ png, outlineToolWidth, preset, onClose, onApply, onR
                                                 </button>
                                             </div>
 
+                                            {activeTab.side === "free" ? (
+                                                <>
+                                                    <div className="mt-4 flex items-center justify-between gap-3">
+
+                                                        <div className="relative grid w-full grid-cols-2 rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+                                                            <motion.div
+                                                                className="absolute inset-y-0 w-1/2 rounded-2xl bg-amber-100 shadow-sm dark:bg-teal-500/20"
+                                                                animate={{ x: (activeTab.orientation ?? "horizontal") === "vertical" ? "100%" : "0%" }}
+                                                                transition={{ type: "spring", stiffness: 320, damping: 28 }}
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setTabs((prev) => prev.map((tab) => (
+                                                                        tab.id === activeTab.id
+                                                                            ? { ...tab, orientation: "horizontal" }
+                                                                            : tab
+                                                                    )));
+                                                                }}
+                                                                className={`relative z-10 rounded-xl px-3 py-1 text-xs font-semibold transition ${
+                                                                    (activeTab.orientation ?? "horizontal") === "horizontal"
+                                                                        ? "text-teal-700 dark:text-teal-100"
+                                                                        : "text-slate-500 dark:text-slate-400"
+                                                                }`}
+                                                            >
+                                                                Horizontal
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setTabs((prev) => prev.map((tab) => (
+                                                                        tab.id === activeTab.id
+                                                                            ? { ...tab, orientation: "vertical" }
+                                                                            : tab
+                                                                    )));
+                                                                }}
+                                                                className={`relative z-10 rounded-xl px-3 py-1 text-xs font-semibold transition ${
+                                                                    (activeTab.orientation ?? "horizontal") === "vertical"
+                                                                        ? "text-teal-700 dark:text-teal-100"
+                                                                        : "text-slate-500 dark:text-slate-400"
+                                                                }`}
+                                                            >
+                                                                Vertical
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <label className="mt-4 block text-xs font-medium text-slate-600 dark:text-slate-300">
+                                                        <div className="flex justify-between">
+                                                            <span>X Position</span>
+                                                            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                                                {(((activeTab.x ?? 0.5) * 100)).toFixed(1)}%
+                                                            </span>
+                                                        </div>
+                                                        <input
+                                                            type="range"
+                                                            min="0"
+                                                            max="1"
+                                                            step="0.001"
+                                                            value={activeTab.x ?? 0.5}
+                                                            onChange={(event) => {
+                                                                const nextX = Number(event.target.value);
+                                                                setTabs((prev) => prev.map((tab) => tab.id === activeTab.id ? { ...tab, x: nextX } : tab));
+                                                            }}
+                                                            className={sliderClassName}
+                                                        />
+                                                    </label>
+
+                                                    <label className="mt-4 block text-xs font-medium text-slate-600 dark:text-slate-300">
+                                                        <div className="flex justify-between">
+                                                            <span>Y Position</span>
+                                                            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                                                {(((activeTab.y ?? 0.5) * 100)).toFixed(1)}%
+                                                            </span>
+                                                        </div>
+                                                        <input
+                                                            type="range"
+                                                            min="0"
+                                                            max="1"
+                                                            step="0.001"
+                                                            value={activeTab.y ?? 0.5}
+                                                            onChange={(event) => {
+                                                                const nextY = Number(event.target.value);
+                                                                setTabs((prev) => prev.map((tab) => tab.id === activeTab.id ? { ...tab, y: nextY } : tab));
+                                                            }}
+                                                            className={sliderClassName}
+                                                        />
+                                                    </label>
+                                                </>
+                                            ) : (
+                                                <label className="mt-4 block text-xs font-medium text-slate-600 dark:text-slate-300">
+                                                    <div className="flex justify-between">
+                                                        <span>Position</span>
+                                                        <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                                            {(activeTab.offset * 100).toFixed(1)}%
+                                                        </span>
+                                                    </div>
+                                                    <input
+                                                        type="range"
+                                                        min="0"
+                                                        max="1"
+                                                        step="0.001"
+                                                        value={activeTab.offset}
+                                                        onChange={(event) => {
+                                                            const nextOffset = Number(event.target.value);
+                                                            setTabs((prev) => prev.map((tab) => tab.id === activeTab.id ? { ...tab, offset: nextOffset } : tab));
+                                                        }}
+                                                        className={sliderClassName}
+                                                    />
+                                                </label>
+                                            )}
+
                                             <label className="mt-4 block text-xs font-medium text-slate-600 dark:text-slate-300">
                                                 <div className="flex justify-between">
-                                                    <span>Position</span>
+                                                    <span>Depth</span>
                                                     <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                                                        {(activeTab.offset * 100).toFixed(1)}%
+                                                        {((activeTab.depthMm ?? tabDepth)).toFixed(1)} mm
                                                     </span>
                                                 </div>
                                                 <input
                                                     type="range"
-                                                    min="0"
-                                                    max="1"
-                                                    step="0.001"
-                                                    value={activeTab.offset}
+                                                    min="0.8"
+                                                    max="8"
+                                                    step="0.1"
+                                                    value={activeTab.depthMm ?? tabDepth}
                                                     onChange={(event) => {
-                                                        const nextOffset = Number(event.target.value);
-                                                        setTabs((prev) => prev.map((tab) => tab.id === activeTab.id ? { ...tab, offset: nextOffset } : tab));
+                                                        const nextDepth = Math.max(Number(event.target.value) || 0, 0.8);
+                                                        setTabs((prev) => prev.map((tab) => tab.id === activeTab.id ? { ...tab, depthMm: nextDepth } : tab));
                                                     }}
                                                     className={sliderClassName}
                                                 />
@@ -395,62 +550,35 @@ const OutlineTabsModal = ({ png, outlineToolWidth, preset, onClose, onApply, onR
                                             Select a tab from the preview to edit its position here.
                                         </div>
                                     )}
-                                </section>
 
-                                <section className={`${panelClassName} flex flex-col justify-between`}>
-                                    <div className="flex flex-col items-start justify-between gap-1">
+                                    {/* <div className="flex flex-col items-start justify-between gap-1 mt-5">
                                         <p className="text-sm font-semibold text-slate-900 dark:text-white">Tab Geometry</p>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400">Span along the board edge</p>
-                                    </div>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400">Shared width for tabs in this outline</p>
+                                    </div> */}
 
-                                    <div className="mt-4 space-y-5">
-                                        <label className="block">
-                                            <div className="flex items-center justify-between gap-3">
-                                                <div>
-                                                    <p className="text-xs font-medium text-slate-700 dark:text-slate-100">Tab Width</p>
-                                                    {/* <p className="text-xs text-slate-500 dark:text-slate-400">Span along the board edge</p> */}
-                                                </div>
-                                                <div className="rounded-2xl flex items-end bg-slate-50  text-right dark:border-slate-700 dark:bg-slate-900">
-                                                    <p className="text-xs font-semibold text-slate-900 dark:text-white">{tabWidth.toFixed(1)}</p>
-                                                    <p className="ml-0.5 text-[10px] text-slate-500 dark:text-slate-400">mm</p>
-                                                </div>
+                                    <div className="mt-3 rounded-2xl border border-amber-200/80 bg-amber-50/70 p-4 dark:border-slate-600/30 dark:bg-slate-950/50">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <div>
+                                                <p className="text-xs font-medium text-slate-700 dark:text-slate-100">Tab Width</p>
                                             </div>
-                                            <input
-                                                type="range"
-                                                min="0.8"
-                                                max="8"
-                                                step="0.1"
-                                                value={tabWidth}
-                                                onChange={(event) => setTabWidth(Math.max(Number(event.target.value) || 0, 0.8))}
-                                                className={sliderClassName}
-                                            />
-                                        </label>
-
-                                        <label className="block">
-                                            <div className="flex items-center justify-between gap-3">
-                                                <div>
-                                                    <p className="text-xs font-medium text-slate-700 dark:text-slate-100">Tab Depth</p>
-                                                    {/* <p className="text-xs text-slate-500 dark:text-slate-400">Inset from the edge cut path</p> */}
-                                                </div>
-                                                <div className="rounded-2xl flex items-end bg-slate-50  text-right dark:border-slate-700 dark:bg-slate-900">
-                                                    <p className="text-xs font-semibold text-slate-900 dark:text-white">{tabDepth.toFixed(1)}</p>
-                                                    <p className="ml-0.5 text-[10px] text-slate-500 dark:text-slate-400">mm</p>
-                                                </div>
+                                            <div className="rounded-2xl flex items-end bg-slate-50  text-right dark:border-slate-700 dark:bg-slate-900">
+                                                <p className="text-xs font-semibold text-slate-900 dark:text-white">{tabWidth.toFixed(1)}</p>
+                                                <p className="ml-0.5 text-[10px] text-slate-500 dark:text-slate-400">mm</p>
                                             </div>
-                                            <input
-                                                type="range"
-                                                min="0.8"
-                                                max="8"
-                                                step="0.1"
-                                                value={tabDepth}
-                                                onChange={(event) => setTabDepth(Math.max(Number(event.target.value) || 0, 0.8))}
-                                                className={sliderClassName}
-                                            />
-                                        </label>
+                                        </div>
+                                        <input
+                                            type="range"
+                                            min="0.8"
+                                            max="8"
+                                            step="0.1"
+                                            value={tabWidth}
+                                            onChange={(event) => setTabWidth(Math.max(Number(event.target.value) || 0, 0.8))}
+                                            className={sliderClassName}
+                                        />
                                     </div>
                                 </section>
 
-                                <section className={`${panelClassName} flex flex-col justify-between`}>
+                                <section className={`${panelClassName} flex flex-col justify-between !h-fit`}>
                                     <div>
                                         <p className="text-sm font-semibold text-slate-900 dark:text-white">Defaults</p>
                                         <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
@@ -533,7 +661,7 @@ function findTabAtPoint({ point, renderModel, tabs, tabWidth, tabDepth, outlineT
             drawWidth: renderModel.drawWidth,
             drawHeight: renderModel.drawHeight,
             tabWidthMm: tabWidth,
-            tabDepthMm: tabDepth,
+            tabDepthMm: tab.depthMm ?? tabDepth,
             outlineToolWidth,
             scale: renderModel.scale,
         });
@@ -545,6 +673,20 @@ function findTabAtPoint({ point, renderModel, tabs, tabWidth, tabDepth, outlineT
             localY <= rect.y + rect.height
         );
     });
+}
+
+function createTabFromPoint({ point, renderModel, fallbackDepthMm }) {
+    const localX = clamp(point.x - renderModel.offsetX, 0, renderModel.drawWidth);
+    const localY = clamp(point.y - renderModel.offsetY, 0, renderModel.drawHeight);
+
+    return {
+        id: `free-${Date.now()}`,
+        side: "free",
+        x: clamp(localX / renderModel.drawWidth, 0, 1),
+        y: clamp(localY / renderModel.drawHeight, 0, 1),
+        orientation: "horizontal",
+        depthMm: fallbackDepthMm,
+    };
 }
 
 function getCanvasPoint(event, canvas) {
@@ -561,6 +703,21 @@ function getPreviewRect({ tab, drawWidth, drawHeight, tabWidthMm, tabDepthMm, ou
     const tabWidthPx = Math.max(tabWidthMm, correctedToolWidth) * pxPerMm;
     const tabDepthPx = Math.max(tabDepthMm, correctedToolWidth + 0.4) * pxPerMm;
     const paddingPx = 0.82 * pxPerMm;
+
+    if (tab.side === "free") {
+        const centerX = (tab.x ?? 0.5) * drawWidth;
+        const centerY = (tab.y ?? 0.5) * drawHeight;
+        const isVertical = tab.orientation === "vertical";
+        const width = isVertical ? tabDepthPx : tabWidthPx;
+        const height = isVertical ? tabWidthPx : tabDepthPx;
+
+        return {
+            x: Math.max(0, Math.min(centerX - width / 2, drawWidth - width)),
+            y: Math.max(0, Math.min(centerY - height / 2, drawHeight - height)),
+            width,
+            height,
+        };
+    }
 
     if (tab.side === "top" || tab.side === "bottom") {
         const centerX = tab.offset * drawWidth;
@@ -593,6 +750,10 @@ OutlineTabsModal.propTypes = {
                 id: PropTypes.string,
                 side: PropTypes.string,
                 offset: PropTypes.number,
+                depthMm: PropTypes.number,
+                x: PropTypes.number,
+                y: PropTypes.number,
+                orientation: PropTypes.oneOf(["horizontal", "vertical"]),
             })),
         }),
     }).isRequired,
@@ -604,6 +765,10 @@ OutlineTabsModal.propTypes = {
             id: PropTypes.string,
             side: PropTypes.string,
             offset: PropTypes.number,
+            depthMm: PropTypes.number,
+            x: PropTypes.number,
+            y: PropTypes.number,
+            orientation: PropTypes.oneOf(["horizontal", "vertical"]),
         })),
     }),
     onClose: PropTypes.func.isRequired,
