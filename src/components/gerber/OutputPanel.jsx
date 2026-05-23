@@ -83,6 +83,42 @@ const OutputPanel = () => {
   const handleApplyTabs = async ({ tabWidthMm, tabDepthMm, tabs }) => {
     if (!tabEditorPng) return;
     const targetPng = pngFiles.find((png) => png.url === tabEditorPng.url) || tabEditorPng;
+    const hasAnyTabs = Array.isArray(tabs) && tabs.length > 0;
+
+    if (!hasAnyTabs) {
+      if (targetPng.hasTabs && targetPng.originalUrl) {
+        setPngFiles((prev) =>
+          prev.map((png) =>
+            png.url === targetPng.url
+              ? {
+                  ...png,
+                  url: png.originalUrl,
+                  hasTabs: false,
+                  originalUrl: undefined,
+                  tabConfig: undefined,
+                }
+              : png
+          )
+        );
+
+        URL.revokeObjectURL(targetPng.url);
+      } else {
+        setPngFiles((prev) =>
+          prev.map((png) =>
+            png.url === targetPng.url
+              ? {
+                  ...png,
+                  hasTabs: false,
+                  tabConfig: undefined,
+                }
+              : png
+          )
+        );
+      }
+
+      setTabEditorPng(null);
+      return;
+    }
 
     if (targetPng.hasTabs && targetPng.originalUrl) {
       URL.revokeObjectURL(targetPng.url);

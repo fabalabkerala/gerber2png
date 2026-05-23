@@ -369,7 +369,7 @@ export const drawTabsOnOutlineCanvas = (
     const tabWidthPx = safeTabWidth * scaleFactor;
     const tabDepthPx = safeTabDepth * scaleFactor;
 
-    const normalizedTabs = (tabs?.length ? tabs : DEFAULT_OUTLINE_TABS).map((tab, index) => ({
+    const normalizedTabs = (Array.isArray(tabs) ? tabs : DEFAULT_OUTLINE_TABS).map((tab, index) => ({
         id: tab.id ?? `tab-${index}`,
         side: tab.side,
         offset: typeof tab.offset === "number" ? Math.min(Math.max(tab.offset, 0), 1) : 0.5,

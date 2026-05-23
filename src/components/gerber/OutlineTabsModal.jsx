@@ -42,22 +42,22 @@ const OutlineTabsModal = ({ png, outlineToolWidth, preset, onClose, onApply, onR
     const [tabWidth, setTabWidth] = useState(initialConfig.tabWidthMm);
     const [tabDepth, setTabDepth] = useState(initialConfig.tabDepthMm);
     const [tabs, setTabs] = useState(() => (
-        initialConfig.tabs?.length ? initialConfig.tabs : DEFAULT_OUTLINE_TABS
+        Array.isArray(initialConfig.tabs) ? initialConfig.tabs : DEFAULT_OUTLINE_TABS
     ));
     const [activeTabId, setActiveTabId] = useState(() => (
-        initialConfig.tabs?.[0]?.id ?? DEFAULT_OUTLINE_TABS[0].id
+        Array.isArray(initialConfig.tabs) ? (initialConfig.tabs[0]?.id ?? null) : (DEFAULT_OUTLINE_TABS[0]?.id ?? null)
     ));
     const [hoveredTabId, setHoveredTabId] = useState(null);
     const [draggingTabId, setDraggingTabId] = useState(null);
     const [placementMode, setPlacementMode] = useState(null);
 
-    // useEffect(() => {
-    //     const nextTabs = initialConfig.tabs?.length ? initialConfig.tabs : DEFAULT_OUTLINE_TABS;
-    //     setTabWidth(initialConfig.tabWidthMm);
-    //     setTabDepth(initialConfig.tabDepthMm);
-    //     setTabs(nextTabs);
-    //     setActiveTabId(nextTabs[0]?.id ?? null);
-    // }, [initialConfig]);
+    useEffect(() => {
+        const nextTabs = Array.isArray(initialConfig.tabs) ? initialConfig.tabs : DEFAULT_OUTLINE_TABS;
+        setTabWidth(initialConfig.tabWidthMm);
+        setTabDepth(initialConfig.tabDepthMm);
+        setTabs(nextTabs);
+        setActiveTabId(nextTabs[0]?.id ?? null);
+    }, [initialConfig]);
 
     useEffect(() => {
         const image = new Image();
