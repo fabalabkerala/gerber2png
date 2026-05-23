@@ -2,12 +2,14 @@ import PropTypes from "prop-types";
 import {
   ArrowDownTrayIcon,
   DocumentCheckIcon,
+  EyeIcon,
   RectangleGroupIcon,
   TrashIcon,
+  ViewfinderCircleIcon,
 } from "@heroicons/react/24/outline";
 import { motion } from "motion/react";
 
-function PngCard({ name, blobUrl, handleDelete, handleEditTabs, canAddTabs, hasTabs }) {
+function PngCard({ name, blobUrl, handleDelete, handlePreview, handleEditTabs, canAddTabs, hasTabs }) {
     return (
         <motion.div
             whileHover={{ y: -2 }}
@@ -22,20 +24,13 @@ function PngCard({ name, blobUrl, handleDelete, handleEditTabs, canAddTabs, hasT
                 />
                 <div className="absolute inset-0 bg-white/0 group-hover:bg-white/60 transition flex items-center justify-center opacity-0 group-hover:opacity-100 dark:group-hover:bg-slate-950/60">
                     <div className="flex items-center gap-2">
-                        {canAddTabs && (
-                            <motion.button
-                                whileTap={{ scale: 0.9 }}
-                                onClick={handleEditTabs}
-                                className={`flex items-center gap-1 rounded-xl border px-2 py-2 text-xs shadow-sm transition ${
-                                    hasTabs
-                                        ? "cursor-pointer border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200 dark:hover:bg-emerald-500/20"
-                                        : "cursor-pointer border-amber-200 bg-white text-amber-700 hover:bg-amber-50 dark:border-amber-500/30 dark:bg-slate-900 dark:text-amber-200 dark:hover:bg-amber-500/10"
-                                }`}
-                            >
-                                <RectangleGroupIcon width={16} />
-                                <span>{hasTabs ? "Edit Tabs" : "Tabs"}</span>
-                            </motion.button>
-                        )}
+                        <motion.button
+                            whileTap={{ scale: 0.9 }}
+                            onClick={handlePreview}
+                            className="p-2 rounded-xl bg-white border border-slate-200 shadow-sm hover:bg-slate-100 transition cursor-pointer dark:bg-slate-900 dark:border-slate-700 dark:hover:bg-slate-800"
+                        >
+                            <ViewfinderCircleIcon width={18} />
+                        </motion.button>
 
                         <motion.a
                             whileTap={{ scale: 0.9 }}
@@ -57,9 +52,23 @@ function PngCard({ name, blobUrl, handleDelete, handleEditTabs, canAddTabs, hasT
                 </div>
             </div>
 
-            <div className="flex items-center gap-2 px-3 py-2">
+            <div className="flex items-center gap-1 px-2 py-2">
                 <DocumentCheckIcon width={16} className="text-green-500 shrink-0" />
                 <p className="text-xs text-gray-600 truncate dark:text-slate-300">{name}</p>
+                {canAddTabs && (
+                    <motion.button
+                        whileTap={{ scale: 0.9 }}
+                        onClick={handleEditTabs}
+                        className={`flex items-center gap-1.5 rounded-lg font-medium border px-2 py-1 text-xs shadow-sm transition-all duration-200 text-nowrap ${
+                            hasTabs
+                                ? "cursor-pointer border-emerald-200 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-200 dark:hover:bg-emerald-500/20"
+                                : "cursor-pointer border-amber-300 bg-amber-100 text-amber-800 hover:bg-amber-100  dark:border-amber-500/30 dark:bg-amber-900/20 dark:text-amber-200 dark:hover:bg-amber-500/10"
+                        }`}
+                    >
+                        <RectangleGroupIcon width={14} />
+                        <span>{hasTabs ? "Edit Tabs" : "Add Tabs"}</span>
+                    </motion.button>
+                )}
             </div>
         </motion.div>
     );
@@ -69,6 +78,7 @@ PngCard.propTypes = {
   name: PropTypes.string.isRequired,
   blobUrl: PropTypes.string.isRequired,
   handleDelete: PropTypes.func.isRequired,
+  handlePreview: PropTypes.func.isRequired,
   handleEditTabs: PropTypes.func,
   canAddTabs: PropTypes.bool,
   hasTabs: PropTypes.bool,

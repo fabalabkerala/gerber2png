@@ -302,7 +302,7 @@ const OutlineTabsModal = ({ png, outlineToolWidth, preset, onClose, onApply, onR
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.97, opacity: 0 }}
                     transition={{ type: "spring", stiffness: 240, damping: 24 }}
-                    className="flex max-h-[92vh] w-[1420px] max-w-[96vw] flex-col overflow-hidden rounded-[20px] border border-slate-200/80 bg-slate-100 shadow-2xl shadow-slate-950/30 dark:border-slate-800 dark:bg-slate-950"
+                    className="flex max-h-[92vh] w-[1420px] max-w-[96vw] flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-100 shadow-2xl shadow-slate-950/30 dark:border-slate-800 dark:bg-slate-950"
                     onClick={(event) => event.stopPropagation()}
                 >
                     <ModalHeader title="Outline Tabs Editor" onClose={onClose} />
@@ -325,47 +325,96 @@ const OutlineTabsModal = ({ png, outlineToolWidth, preset, onClose, onApply, onR
                                             <button
                                                 key={side.id}
                                                 onClick={() => handleAddTab(side.id)}
-                                                className="group flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-3 py-3 text-left transition hover:-translate-y-0.5 hover:border-cyan-300 hover:bg-cyan-50/70 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:hover:border-cyan-500/40 dark:hover:bg-cyan-500/10"
+                                                className="group flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-3 text-left transition hover:-translate-y-0.5 hover:border-cyan-300 hover:bg-cyan-50/70 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:hover:border-cyan-500/40 dark:hover:bg-cyan-500/10"
                                             >
-                                                <span className="text-sm font-medium text-slate-700 dark:text-slate-100">
-                                                    + {side.label}
+                                                <span className="text-xs font-medium text-slate-700 dark:text-slate-100">
+                                                    {side.label}
                                                 </span>
-                                                <span className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-500 transition group-hover:bg-cyan-100 group-hover:text-cyan-700 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-cyan-500/20 dark:group-hover:text-cyan-200">
-                                                    Add
+                                                <span className="rounded-full bg-slate-100 px-2 text-[10px] font-medium text-slate-500 transition group-hover:bg-cyan-100 group-hover:text-cyan-700 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-cyan-500/20 dark:group-hover:text-cyan-200">
+                                                    + Add
                                                 </span>
                                             </button>
                                         ))}
                                     </div>
 
                                     <button
-                                        onClick={() => setPlacementMode((prev) => prev === "anywhere" ? null : "anywhere")}
-                                        className={`mt-3 w-full rounded-2xl border px-3 py-3 text-sm font-medium transition ${
+                                        onClick={() =>
+                                            setPlacementMode((prev) =>
+                                                prev === "anywhere"
+                                                    ? null
+                                                    : "anywhere"
+                                            )
+                                        }
+                                        className={`group relative mt-3 w-full rounded-2xl border p-4 text-left transition-all duration-200 ${
                                             placementMode === "anywhere"
-                                                ? "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-500/50 dark:bg-amber-500/10 dark:text-amber-200"
-                                                : "border-slate-200 bg-white text-slate-700 hover:border-cyan-300 hover:bg-cyan-50/70 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:border-cyan-500/40 dark:hover:bg-cyan-500/10"
+                                                ? "border-amber-300 bg-gradient-to-br from-amber-50 to-orange-50 shadow-sm dark:border-amber-500/50 dark:from-amber-500/10 dark:to-orange-500/10"
+                                                : "border-slate-200 bg-white hover:-translate-y-0.5 hover:border-cyan-300 hover:bg-cyan-50/50 hover:shadow-sm dark:border-slate-900 dark:bg-slate-950 dark:hover:border-cyan-500/40 dark:hover:bg-cyan-500/10"
                                         }`}
                                     >
-                                        {placementMode === "anywhere" ? "Click Preview To Place Independent Tab" : "Add Independent Tab Anywhere"}
+                                        <div className="flex items-start justify-between gap-4">
+                                            <div className="flex items-start gap-3">
+                                                <div
+                                                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition text-sm ${
+                                                        placementMode === "anywhere"
+                                                            ? "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-200"
+                                                            : "bg-slate-100 text-slate-500 group-hover:bg-cyan-100 group-hover:text-cyan-700 dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-cyan-500/20 dark:group-hover:text-cyan-200"
+                                                    }`}
+                                                >
+                                                    ✦
+                                                </div>
+
+                                                <div>
+                                                    <p
+                                                        className={`text-sm font-semibold ${
+                                                            placementMode === "anywhere"
+                                                                ? "text-amber-800 dark:text-amber-100"
+                                                                : "text-slate-700 dark:text-slate-100"
+                                                        }`}
+                                                    >
+                                                        Place Anywhere
+                                                    </p>
+
+                                                    <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                                                        Click preview to place a free tab
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {/* mini slider */}
+                                            <div
+                                                className={`relative mt-0.5 h-4 w-11 shrink-0 rounded-full transition ${
+                                                    placementMode === "anywhere"
+                                                        ? "bg-amber-400 dark:bg-amber-500"
+                                                        : "bg-slate-300 dark:bg-slate-700"
+                                                }`}
+                                            >
+                                                <motion.div
+                                                    className="absolute top-0.5 h-3 w-4 rounded-full bg-white shadow-md"
+                                                    animate={{
+                                                        x: placementMode === "anywhere" ? 26 : 2,
+                                                    }}
+                                                    transition={{
+                                                        type: "spring",
+                                                        stiffness: 500,
+                                                        damping: 30,
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
                                     </button>
                                 </section>
                             </aside>
 
-                            <section className={`flex min-h-[600px] flex-col overflow-hidden`}>
-                                <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between relative">
+                            <section className={`flex min-h-[600px] flex-col overflow-hidden bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl`}>
+                                <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between relative p-5">
                                     <div>
-                                        <p className="text-base font-semibold text-slate-900 dark:text-white">Visual Preview</p>
                                         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                             Click a tab to select. Drag it along its edge to reposition it before applying.
                                         </p>
                                     </div>
-                                    {placementMode === "anywhere" && (
-                                        <div className="rounded-full right-0 top-0 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
-                                            Placement mode active: click anywhere in the image
-                                        </div>
-                                    )}
                                 </div>
 
-                                <div className="relative mt-5 p-14 rounded-[28px] border border-slate-200 bg-slate-950 shadow-inner shadow-slate-950/50 dark:border-slate-800">
+                                <div className="relative mt-5 p-14 bg-slate-950 shadow-inner shadow-slate-950/50">
 
                                     <EdgeAddButton side="top" onClick={handleAddTab} className="left-1/2 top-3 -translate-x-1/2" />
                                     <EdgeAddButton side="bottom" onClick={handleAddTab} className="bottom-3 left-1/2 -translate-x-1/2" />
@@ -387,17 +436,9 @@ const OutlineTabsModal = ({ png, outlineToolWidth, preset, onClose, onApply, onR
 
                             <aside className="flex flex-col gap-4 xl:min-h-[600px]">
                                 <section className={`${panelClassName} flex flex-col justify-between p-0`}>
-                                    {/* <div className="flex items-start justify-between gap-3">
-                                        <div>
-                                            <p className="text-sm font-semibold text-slate-900 dark:text-white">Selected Tab</p>
-                                            <p className="text-xs leading-5 text-slate-500 dark:text-slate-400">
-                                                Fine tune the active tab.
-                                            </p>
-                                        </div>
-                                    </div> */}
 
                                     {activeTab ? (
-                                        <div className="rounded-2xl border border-amber-200/80 bg-amber-50/70 p-4 dark:border-slate-600/30 dark:bg-slate-950/50 h-full">
+                                        <div className="rounded-2xl bg-slate-100/90 p-4 dark:bg-slate-950/50 h-full">
                                             <div className="flex items-center justify-between gap-3">
                                                 <div>
                                                     <p className="text-sm font-semibold text-slate-900 dark:text-white">
@@ -406,7 +447,7 @@ const OutlineTabsModal = ({ png, outlineToolWidth, preset, onClose, onApply, onR
                                                 </div>
                                                 <button
                                                     onClick={handleRemoveSelected}
-                                                    className="rounded-lg border border-red-200 bg-white px-1 py-1 text-sm font-medium text-red-700 transition hover:bg-red-50 dark:border-red-500/30 dark:bg-red-900 dark:text-red-200 dark:hover:bg-red-500/10 dark:hover:text-red-600"
+                                                    className="rounded-lg border border-red-200 bg-red-400 px-1 py-1 text-sm font-medium text-white transition hover:bg-red-200 hover:text-red-500 dark:border-red-500/30 dark:bg-red-900 dark:text-red-200 dark:hover:bg-red-500/10 dark:hover:text-red-600"
                                                 >
                                                     <TrashIcon className="size-4"/>
                                                 </button>
@@ -418,7 +459,7 @@ const OutlineTabsModal = ({ png, outlineToolWidth, preset, onClose, onApply, onR
 
                                                         <div className="relative grid w-full grid-cols-2 rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
                                                             <motion.div
-                                                                className="absolute inset-y-0 w-1/2 rounded-2xl bg-amber-100 shadow-sm dark:bg-teal-500/20"
+                                                                className="absolute inset-y-0 w-1/2 rounded-2xl bg-teal-500 shadow-sm dark:bg-teal-500/20"
                                                                 animate={{ x: (activeTab.orientation ?? "horizontal") === "vertical" ? "100%" : "0%" }}
                                                                 transition={{ type: "spring", stiffness: 320, damping: 28 }}
                                                             />
@@ -433,7 +474,7 @@ const OutlineTabsModal = ({ png, outlineToolWidth, preset, onClose, onApply, onR
                                                                 }}
                                                                 className={`relative z-10 rounded-xl px-3 py-1 text-xs font-semibold transition ${
                                                                     (activeTab.orientation ?? "horizontal") === "horizontal"
-                                                                        ? "text-teal-700 dark:text-teal-100"
+                                                                        ? "text-white dark:text-teal-100"
                                                                         : "text-slate-500 dark:text-slate-400"
                                                                 }`}
                                                             >
@@ -450,7 +491,7 @@ const OutlineTabsModal = ({ png, outlineToolWidth, preset, onClose, onApply, onR
                                                                 }}
                                                                 className={`relative z-10 rounded-xl px-3 py-1 text-xs font-semibold transition ${
                                                                     (activeTab.orientation ?? "horizontal") === "vertical"
-                                                                        ? "text-teal-700 dark:text-teal-100"
+                                                                        ? "text-white dark:text-teal-100"
                                                                         : "text-slate-500 dark:text-slate-400"
                                                                 }`}
                                                             >
@@ -459,7 +500,7 @@ const OutlineTabsModal = ({ png, outlineToolWidth, preset, onClose, onApply, onR
                                                         </div>
                                                     </div>
 
-                                                    <label className="mt-4 block text-xs font-medium text-slate-600 dark:text-slate-300">
+                                                    <label className="mt-5 block text-xs font-medium text-slate-600 dark:text-slate-300">
                                                         <div className="flex justify-between">
                                                             <span>X Position</span>
                                                             <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
@@ -534,7 +575,7 @@ const OutlineTabsModal = ({ png, outlineToolWidth, preset, onClose, onApply, onR
                                                 <input
                                                     type="range"
                                                     min="0.8"
-                                                    max="8"
+                                                    max="16"
                                                     step="0.1"
                                                     value={activeTab.depthMm ?? tabDepth}
                                                     onChange={(event) => {
@@ -546,7 +587,7 @@ const OutlineTabsModal = ({ png, outlineToolWidth, preset, onClose, onApply, onR
                                             </label>
                                         </div>
                                     ) : (
-                                        <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-400">
+                                        <div className="rounded-2xl h-full flex items-center text-center  border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-400">
                                             Select a tab from the preview to edit its position here.
                                         </div>
                                     )}
@@ -556,7 +597,7 @@ const OutlineTabsModal = ({ png, outlineToolWidth, preset, onClose, onApply, onR
                                         <p className="text-xs text-slate-500 dark:text-slate-400">Shared width for tabs in this outline</p>
                                     </div> */}
 
-                                    <div className="mt-3 rounded-2xl border border-amber-200/80 bg-amber-50/70 p-4 dark:border-slate-600/30 dark:bg-slate-950/50">
+                                    <div className="mt-3 rounded-2xl bg-slate-100/80 p-4  dark:bg-slate-950/50">
                                         <div className="flex items-center justify-between gap-3">
                                             <div>
                                                 <p className="text-xs font-medium text-slate-700 dark:text-slate-100">Tab Width</p>
@@ -708,8 +749,8 @@ function getPreviewRect({ tab, drawWidth, drawHeight, tabWidthMm, tabDepthMm, ou
         const centerX = (tab.x ?? 0.5) * drawWidth;
         const centerY = (tab.y ?? 0.5) * drawHeight;
         const isVertical = tab.orientation === "vertical";
-        const width = isVertical ? tabDepthPx : tabWidthPx;
-        const height = isVertical ? tabWidthPx : tabDepthPx;
+        const width = isVertical ? tabWidthPx : tabDepthPx;
+        const height = isVertical ? tabDepthPx : tabWidthPx;
 
         return {
             x: Math.max(0, Math.min(centerX - width / 2, drawWidth - width)),

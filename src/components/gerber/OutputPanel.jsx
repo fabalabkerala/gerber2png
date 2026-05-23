@@ -16,6 +16,7 @@ import mods from './../../assets/favicon.ico'
 import { useGerberSettings } from "../context/GerberContext";
 import { addTabsToOutlinePng } from "../../utils/svgConverter/svg2png";
 import OutlineTabsModal from "./OutlineTabsModal";
+import PngPreviewModal from "./PngPreviewModal";
 
 const OutputPanel = () => {
   const { pngFiles, setPngFiles, outlineTabPreset, setOutlineTabPreset } = useApp();
@@ -27,6 +28,7 @@ const OutputPanel = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [tabEditorPng, setTabEditorPng] = useState(null);
+  const [previewPng, setPreviewPng] = useState(null);
 
   const hasFiles = pngFiles.length > 0;
 
@@ -302,6 +304,7 @@ const OutputPanel = () => {
                     <PngCard
                       blobUrl={item.url}
                       name={`${item.name}_1000dpi.png`}
+                      handlePreview={() => setPreviewPng(item)}
                       handleDelete={() => {
                         if (item.originalUrl) URL.revokeObjectURL(item.originalUrl);
                         setPngFiles((prev) => {
@@ -408,6 +411,13 @@ const OutputPanel = () => {
           onApply={handleApplyTabs}
           onRemove={handleRemoveTabs}
           onSavePreset={handleSaveTabPreset}
+        />
+      )}
+
+      {previewPng && (
+        <PngPreviewModal
+          png={previewPng}
+          onClose={() => setPreviewPng(null)}
         />
       )}
 

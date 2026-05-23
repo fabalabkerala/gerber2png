@@ -390,8 +390,8 @@ export const drawTabsOnOutlineCanvas = (
             const centerX = (tab.x ?? 0.5) * canvasWidth;
             const centerY = (tab.y ?? 0.5) * canvasHeight;
             const isVertical = tab.orientation === "vertical";
-            const freeWidth = isVertical ? tabDepthPxForTab : tabWidthPx;
-            const freeHeight = isVertical ? tabWidthPx : tabDepthPxForTab;
+            const freeWidth = isVertical ? tabWidthPx : tabDepthPxForTab;
+            const freeHeight = isVertical ? tabDepthPxForTab : tabWidthPx;
             const x = Math.max(0, Math.min(centerX - freeWidth / 2, canvasWidth - freeWidth));
             const y = Math.max(0, Math.min(centerY - freeHeight / 2, canvasHeight - freeHeight));
 
