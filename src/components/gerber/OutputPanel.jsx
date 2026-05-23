@@ -13,20 +13,28 @@ import BulkLayoutPanel from "./multiLayout/Panel";
 import { useApp } from "../context/AppContext";
 import ModsPanel from "./modsPanel/Panel";
 import mods from './../../assets/favicon.ico'
+import { useGerberSettings } from "../context/GerberContext";
+import { addTabsToOutlinePng } from "../../utils/svgConverter/svg2png";
+import OutlineTabsModal from "./OutlineTabsModal";
 
 const OutputPanel = () => {
-  const { pngFiles, setPngFiles } = useApp();
+  const { pngFiles, setPngFiles, outlineTabPreset, setOutlineTabPreset } = useApp();
+  const { doubleSide, outlineToolWidth } = useGerberSettings();
 
   const [showBulkModal, setShowBulkModal] = useState(false);
   const [showModsPanel, setShowModsPanel] = useState(false);
   const [selectedPng, setSelectedPng] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [tabEditorPng, setTabEditorPng] = useState(null);
 
   const hasFiles = pngFiles.length > 0;
 
   const handleDeleteAll = () => {
-    pngFiles.forEach((item) => URL.revokeObjectURL(item.url));
+    pngFiles.forEach((item) => {
+      URL.revokeObjectURL(item.url);
+      if (item.originalUrl) URL.revokeObjectURL(item.originalUrl);
+    });
     setPngFiles([]);
     setShowDeleteConfirm(false);
   };
@@ -51,6 +59,95 @@ const OutputPanel = () => {
         link.download = `gerber_files_${pngFiles.length}.zip`;
         link.click();
       });
+    });
+  };
+
+  const canAddTabsToPng = (png) => {
+    if (png.job !== "outline") return false;
+
+    if (doubleSide) {
+      return png.directory === "bottomlayer";
+    }
+
+    return png.directory === "toplayer";
+  };
+
+  const openTabsEditor = (targetUrl) => {
+    const targetPng = pngFiles.find((png) => png.url === targetUrl);
+    if (!targetPng) return;
+    setTabEditorPng(targetPng);
+  };
+
+  const handleApplyTabs = async ({ tabWidthMm, tabDepthMm, tabs }) => {
+    if (!tabEditorPng) return;
+    const targetPng = pngFiles.find((png) => png.url === tabEditorPng.url) || tabEditorPng;
+
+    if (targetPng.hasTabs && targetPng.originalUrl) {
+      URL.revokeObjectURL(targetPng.url);
+    }
+
+    try {
+      const { url } = await addTabsToOutlinePng(targetPng.originalUrl || targetPng.url, {
+        toolWidthMm: parseFloat(outlineToolWidth) || 0.8,
+        tabWidthMm,
+        tabDepthMm,
+        tabs,
+      });
+
+      setPngFiles((prev) =>
+        prev.map((png) =>
+          png.url === targetPng.url
+            ? {
+                ...png,
+                url,
+                hasTabs: true,
+                originalUrl: png.originalUrl || png.url,
+                tabConfig: {
+                  tabWidthMm,
+                  tabDepthMm,
+                  tabs,
+                },
+              }
+            : png
+        )
+      );
+      setTabEditorPng(null);
+    } catch (error) {
+      console.error("Failed to add tabs to outline PNG", error);
+    }
+  };
+
+  const handleRemoveTabs = () => {
+    if (!tabEditorPng) return;
+    const targetPng = pngFiles.find((png) => png.url === tabEditorPng.url) || tabEditorPng;
+    if (!targetPng.hasTabs || !targetPng.originalUrl) {
+      setTabEditorPng(null);
+      return;
+    }
+
+    setPngFiles((prev) =>
+      prev.map((png) =>
+        png.url === targetPng.url
+          ? {
+              ...png,
+              url: png.originalUrl,
+              hasTabs: false,
+              originalUrl: undefined,
+              tabConfig: undefined,
+            }
+          : png
+      )
+    );
+
+    URL.revokeObjectURL(targetPng.url);
+    setTabEditorPng(null);
+  };
+
+  const handleSaveTabPreset = ({ tabWidthMm, tabDepthMm, tabs }) => {
+    setOutlineTabPreset({
+      tabWidthMm,
+      tabDepthMm,
+      tabs,
     });
   };
 
@@ -206,6 +303,7 @@ const OutputPanel = () => {
                       blobUrl={item.url}
                       name={`${item.name}_1000dpi.png`}
                       handleDelete={() => {
+                        if (item.originalUrl) URL.revokeObjectURL(item.originalUrl);
                         setPngFiles((prev) => {
                           const updated = [...prev];
                           updated.splice(
@@ -216,6 +314,9 @@ const OutputPanel = () => {
                         });
                         URL.revokeObjectURL(item.url);
                       }}
+                      handleEditTabs={() => openTabsEditor(item.url)}
+                      canAddTabs={canAddTabsToPng(item)}
+                      hasTabs={Boolean(item.hasTabs)}
                       handleMods={() => {
                         setSelectedPng(item);
                         setShowModsPanel(true);
@@ -297,6 +398,18 @@ const OutputPanel = () => {
         showBulkModal={showBulkModal}
         setShowBulkModal={setShowBulkModal}
       />
+
+      {tabEditorPng && (
+        <OutlineTabsModal
+          png={tabEditorPng}
+          outlineToolWidth={outlineToolWidth}
+          preset={outlineTabPreset}
+          onClose={() => setTabEditorPng(null)}
+          onApply={handleApplyTabs}
+          onRemove={handleRemoveTabs}
+          onSavePreset={handleSaveTabPreset}
+        />
+      )}
 
       <ModsPanel
         showModsPanel={showModsPanel}

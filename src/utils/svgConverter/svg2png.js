@@ -2,7 +2,15 @@ import { changeDpiBlob } from "changedpi";
 import generateOuterSvg from "./generateOuter";
 
 export const OUTLINE_EXPORT_PADDING_MM = 0.82;
+export const DEFAULT_OUTLINE_TAB_WIDTH_MM = 0.8;
+export const DEFAULT_OUTLINE_TAB_DEPTH_MM = 1.6;
 export const CORRECTION_OFFSET_MM = 0.02;
+export const DEFAULT_OUTLINE_TABS = [
+    { id: "top", side: "top", offset: 0.5 },
+    { id: "bottom", side: "bottom", offset: 0.5 },
+    { id: "left", side: "left", offset: 0.5 },
+    { id: "right", side: "right", offset: 0.5 },
+];
 
 async function svg2png(svg, swidth, sheight, canvasBg) {
     
@@ -284,3 +292,118 @@ export const generateSingleOutlineLayout = async (
         image.src = blobUrl;
     });
 }
+
+export const addTabsToOutlinePng = async (
+    blobUrl,
+    {
+        toolWidthMm = 0.8,
+        tabWidthMm = DEFAULT_OUTLINE_TAB_WIDTH_MM,
+        tabDepthMm = DEFAULT_OUTLINE_TAB_DEPTH_MM,
+        tabs = DEFAULT_OUTLINE_TABS,
+        dpi = 1000,
+    } = {}
+) => {
+    return new Promise((resolve, reject) => {
+        const image = new Image();
+
+        image.onload = () => {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+
+            canvas.width = image.naturalWidth;
+            canvas.height = image.naturalHeight;
+
+            ctx.drawImage(image, 0, 0);
+            drawTabsOnOutlineCanvas(ctx, {
+                canvasWidth: canvas.width,
+                canvasHeight: canvas.height,
+                toolWidthMm,
+                tabWidthMm,
+                tabDepthMm,
+                tabs,
+                dpi,
+            });
+
+            canvas.toBlob((pngBlob) => {
+                if (!pngBlob) {
+                    reject(new Error("Canvas creation failed"));
+                    return;
+                }
+
+                changeDpiBlob(pngBlob, dpi).then((changeBlob) => {
+                    const finalBlob = new Blob([changeBlob], { type: "image/png" });
+                    const nextUrl = (window.URL || window.webkitURL || window).createObjectURL(finalBlob);
+
+                    resolve({
+                        url: nextUrl,
+                        blob: finalBlob,
+                    });
+                }).catch(reject);
+            }, "image/png");
+        };
+
+        image.onerror = reject;
+        image.src = blobUrl;
+    });
+};
+
+export const drawTabsOnOutlineCanvas = (
+    ctx,
+    {
+        canvasWidth,
+        canvasHeight,
+        toolWidthMm = 0.8,
+        tabWidthMm = DEFAULT_OUTLINE_TAB_WIDTH_MM,
+        tabDepthMm = DEFAULT_OUTLINE_TAB_DEPTH_MM,
+        tabs = DEFAULT_OUTLINE_TABS,
+        dpi = 1000,
+        pxPerMm,
+        color = "#ffffff",
+    }
+) => {
+    const scaleFactor = pxPerMm ?? (dpi / 25.4);
+    const safeToolWidth = Math.max(toolWidthMm, 0.2);
+    const safeTabWidth = Math.max(tabWidthMm, safeToolWidth);
+    const safeTabDepth = Math.max(tabDepthMm, safeToolWidth + 0.4);
+    const paddingPx = OUTLINE_EXPORT_PADDING_MM * scaleFactor;
+    const tabWidthPx = safeTabWidth * scaleFactor;
+    const tabDepthPx = safeTabDepth * scaleFactor;
+
+    const normalizedTabs = (tabs?.length ? tabs : DEFAULT_OUTLINE_TABS).map((tab, index) => ({
+        id: tab.id ?? `tab-${index}`,
+        side: tab.side,
+        offset: typeof tab.offset === "number" ? Math.min(Math.max(tab.offset, 0), 1) : 0.5,
+    }));
+
+    ctx.save();
+    ctx.fillStyle = color;
+
+    normalizedTabs.forEach((tab) => {
+        if (tab.side === "top" || tab.side === "bottom") {
+            const centerX = tab.offset * canvasWidth;
+            const x = Math.max(0, Math.min(centerX - tabWidthPx / 2, canvasWidth - tabWidthPx));
+            const y = tab.side === "top" ? 0 : canvasHeight - (paddingPx + tabDepthPx);
+
+            ctx.fillRect(
+                Math.round(x),
+                Math.round(y),
+                Math.round(tabWidthPx),
+                Math.round(paddingPx + tabDepthPx)
+            );
+            return;
+        }
+
+        const centerY = tab.offset * canvasHeight;
+        const x = tab.side === "left" ? 0 : canvasWidth - (paddingPx + tabDepthPx);
+        const y = Math.max(0, Math.min(centerY - tabWidthPx / 2, canvasHeight - tabWidthPx));
+
+        ctx.fillRect(
+            Math.round(x),
+            Math.round(y),
+            Math.round(paddingPx + tabDepthPx),
+            Math.round(tabWidthPx)
+        );
+    });
+
+    ctx.restore();
+};
